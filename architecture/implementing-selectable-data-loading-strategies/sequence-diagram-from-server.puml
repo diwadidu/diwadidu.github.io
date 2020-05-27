@@ -1,0 +1,27 @@
+@startuml
+
+scale 2048 width
+
+skinparam monochrome true
+hide footbox
+title Loading data from server for each page\n\n
+participant Orchestrator order 10
+participant ServiceBinding order 15
+participant Component order 20
+participant UIEvents order 25
+participant "Simple|ComplexEventHandler"  as EventHandler order 30
+
+== System initializes ==
+
+Orchestrator -> ServiceBinding: get list of bindings
+activate Orchestrator
+ServiceBinding -> Orchestrator
+Orchestrator -> Orchestrator: embeds ServiceBinding from ServiceBindingWrapper
+Orchestrator -> Orchestrator: bindServices()
+deactivate Orchestrator
+
+== Setup complete ==
+
+Component -> UIEvents: loads Event
+UIEvents -> Component
+@enduml

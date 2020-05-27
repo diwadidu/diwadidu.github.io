@@ -1,0 +1,37 @@
+<svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 612 792">
+<g id="Front">
+	<polygon style="fill:none;stroke:#333333;stroke-width:4;" points="343.91,15.631 277.754,9.793 242.731,24.387 179.494,66.221
+		47.182,237.447 18.968,289.01 23.832,471.912 65.666,541.959 326.398,787.125 536.541,545.851 593.939,424.24 589.075,263.715
+		547.242,184.912 419.794,44.818 	"/>
+	<path style="fill:none;stroke:#333333;stroke-width:4;" d="M243.5,24.5l71.224,5.724c0,0,35.997,38.916,36.969,41.833
+		c0.974,2.92,72.967,160.526,72.967,160.526l-54.481,86.586L87.07,320.143l3.891,201.386L259.27,676.217L376.015,525.42
+		l119.664-55.453l-2.918-167.336l96.314-38.916"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:4;" points="175.602,67.194 351.692,72.058 419.794,44.818 	"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="47.182" y1="237.447" x2="87.07" y2="320.143"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="370.178" y1="319.17" x2="376.015" y2="525.42"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="424.659" y1="232.583" x2="492.761" y2="302.631"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="495.679" y1="469.967" x2="536.541" y2="545.851"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="90.961" y1="521.528" x2="23.832" y2="471.912"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="259.5" y1="675.5" x2="326.398" y2="787.125"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="314.724" y1="30.224" x2="343.91" y2="15.631"/>
+</g>
+<g id="Back">
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" points="277.5,10.5 243.703,42.872
+		222.299,69.14 179.494,179.075 112.364,259.824 123.066,427.159 247.595,478.723 359.477,623.681 522.92,465.103 512.219,255.933
+		238.5,259.5 179.494,178.102 	"/>
+	<path style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" d="M182.412,185.885"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" x1="18.968" y1="288.037" x2="112.364" y2="259.824"/>
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" points="67.612,540.986 91.934,523.475
+		122.093,423.268 	"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" x1="238.839" y1="257.878" x2="247.595" y2="478.723"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" x1="326.398" y1="786.152" x2="359.477" y2="623.681"/>
+	<path style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" d="M594,425.5c0,0-69.134,38.629-71.08,39.603"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" x1="547.242" y1="186.858" x2="512.219" y2="255.933"/>
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" points="419.794,44.818 243.703,42.872
+		179.494,67.194 	"/>
+</g>
+</svg>

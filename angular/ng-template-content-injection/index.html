@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Angular ng-template to inject content into other components | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="View components sometimes need to have similar appearance but slightly different content  and functionality. In this post, we're exploring how to use the same component but change out the  link destinations of a list of links."><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Angular ng-template to inject content into other components</h1><div class="publish-date right">published Oct 5th, 2019</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/architecture" itemprop="url">#architecture
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Here’s the problem: Sometimes, you want to use mostly the same presentation, but change something 
+in it, or the functionality when a user interacts with it should be different. 
+In this case, I wanted to create a list of artists, but have the behavior of links on it be
+different for two cases:</p>
+<ol>
+<li>If it is displayed on the <em>artist</em> page, a click on an artist should display detail information </li>
+<li>If it is displayed on the <em>albums</em> list page, a click on an artist should display 
+all the albums by that artist or group.</li>
+</ol>
+<p>Duplicating the entire component code is out of the question, because then we’d be stuck with 
+making any later changes twice &mdash; If we even remember doing so. </p>
+<h2 id="The-Setup"><a href="#The-Setup" class="headerlink" title="The Setup"></a>The Setup</h2><p>We can use Angular’s 
+<code>ng-template</code> feature to define part of a template and pass that template fragment to the child 
+component for rendering. This allows us to reuse all of the child template, but change certain 
+parts of it depending on the parent’s context. An example would be to change the way a list
+of items is rendered or to determine the url of a link which should be different in each case. 
+The setup will look something like this between a <code>Parent</code> and a <code>Child</code> component:</p>
+<p><img src="parent-child-relationship.svg" alt="&quot;Relationship of component templates and template fragments&quot;"></p>
+<p>So here we see the following relationship between the parent and child components:</p>
+<ol>
+<li>The parent component defines a template fragment using the <code>&lt;ng-template /&gt;</code> tag</li>
+<li>The child component has its own template, where it embeds a <code>&lt;ng-container /&gt;</code> placeholder</li>
+<li>The parent component embeds the child component by using its Angular tag <code>&lt;child /&gt;</code> defined
+in the child’s <code>@Component()</code> annotation.</li>
+</ol>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p>Here is an example of a <code>TestWrapperComponent</code> template, which will serve as the parent:</p>
+<figcaption class="code-filename html">test-wrapper.component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span><span class="token punctuation">></span></span>Headline wrapper template <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ng-template</span> <span class="token attr-name">#customWrapperTemplate</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h4</span><span class="token punctuation">></span></span>I'm defined in the wrapper (parent) template<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h4</span><span class="token punctuation">></span></span>
+      ...
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-template</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>app-tlist</span> <span class="token attr-name">[listTemplate]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>customWrapperTemplate<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>app-tlist</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>There are three things to notice:</p>
+<ol>
+<li>In lines 3-8, it defines a <code>&lt;ng-template /&gt;</code> with a template reference variable named
+<code>#customerWrapperTemplate</code>.</li>
+<li>In line 9, it includes the child template, named <code>&lt;app-tlist /&gt;</code>, and passes the
+template reference via property binding to a variable of the child component by the name
+of <code>listTemplate</code>. So we’re passing a reference to a template to a property of the child class!</li>
+<li>This template can contain any markup you like; Here, we have a <code>&lt;div/&gt;</code> and a headline, but you
+could of course include any require markup to render your component’s intent. We will later see
+how we can pass data to dynamically render a list.</li>
+</ol>
+<p>So now that we know there is property binding involved, let’s take a look at the corresponding
+child component’s relevant TypeScript code:</p>
+<figcaption class="code-filename typescript">tlist.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token punctuation">:</span> <span class="token string">'app-tlist'</span><span class="token punctuation">,</span>
+  templateUrl<span class="token punctuation">:</span> <span class="token string">'./tlist.component.html'</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TlistComponent</span> <span class="token punctuation">{</span>
+
+  @<span class="token function">Input</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">public</span> listTemplate<span class="token punctuation">:</span> TemplateRef<span class="token operator">&lt;</span><span class="token keyword">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The interesting code here is in lines 7 and 8. It shows that we’re creating an <code>@Input()</code> property
+by the name of <code>listTemplate</code> for the property binding of a thing of type 
+<a href="https://angular.io/api/core/TemplateRef" target="_blank" rel="noopener"><code>TemplateRef</code></a>.
+As the Angular Doc says:</p>
+<blockquote>
+<p>[TemplateRef] … represents an embedded template that can be used to instantiate embedded views.</p>
+</blockquote>
+<p>So in other words, it’s describing exactly what we’re doing here by passing the reference to 
+a template fragment to another component via property binding.</p>
+<p>Let’s take a look at the child component’s template:</p>
+<figcaption class="code-filename html">tlist.component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>p</span><span class="token punctuation">></span></span>Inner child component!<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>p</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h2</span><span class="token punctuation">></span></span>A Headline<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h2</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ng-container</span> <span class="token attr-name">*ngTemplateOutlet</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>listTemplate;<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-container</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Short and sweet, we notice that it’s using normal markup with the exception of the <code>&lt;ng-container /&gt;</code>
+in line 4. It is assigning the passed-in template reference to the <code>*ngTemplateOutlet</code> directive 
+in order to render the template from the parent component in this place in the HTML. This completes
+the embedding of the template, but most of the time we want to display dynamic data in the embeded
+component, and that’s next.</p>
+<h2 id="Rendering-child-data-in-the-passed-component"><a href="#Rendering-child-data-in-the-passed-component" class="headerlink" title="Rendering child data in the passed component"></a>Rendering child data in the passed component</h2><p>In our case, we want to render a list of names in the template fragment, so we need to make sure 
+that we can get data into it. Instead of using a service, I’m going to use a hard-coded array in 
+the following format:</p>
+<figcaption class="code-filename typescript">tlist.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TlistComponent</span> <span class="token punctuation">{</span>
+
+  @<span class="token function">Input</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  listTemplate<span class="token punctuation">:</span> TemplateRef<span class="token operator">&lt;</span><span class="token keyword">any</span><span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> data <span class="token operator">=</span> <span class="token punctuation">{</span>
+    people<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{</span>testId<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'Ludwig'</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{</span>testId<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'Anastasia'</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{</span>testId<span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'Lynn'</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{</span>testId<span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'Jim'</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{</span>testId<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'Bruce'</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{</span>testId<span class="token punctuation">:</span> <span class="token number">6</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'Antje'</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>I’m using the child component to load the data. That is a sensible approach in this case, as 
+the parent components are passing different templates into the child component to display
+the same data types differently. Therefore, it makes sense that the data is loaded in the child 
+component.</p>
+<p>The first thing we need to do is assuring that the data makes it into the template fragment we’re
+passing. This happens via a <code>context</code> that can be passed to the <code>*ngTemplateOutlet</code> like this:</p>
+<pre class="line-numbers language-html"><code class="language-html">  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ng-container</span> <span class="token attr-name">*ngTemplateOutlet</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>listTemplate; context: data<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-container</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>This sets the data context for the passed template to the class property of <code>data</code>, i.e. passes 
+an object with the top-level property of <code>people</code> defined in <code>TlistComponent</code>.</p>
+<p>So now that we have the data to render in our template fragment passed via <code>&lt;ng-template /&gt;</code> 
+from the <code>TestWrapperComponent</code> (in our very first code listing), we can go and render the data
+in the passed template fragment. The entire fragment would look like this:</p>
+<figcaption class="code-filename html">test-wrapper.component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html">  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ng-template</span> <span class="token attr-name">#customWrapperTemplate</span> <span class="token attr-name">let-userList</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>people<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h4</span><span class="token punctuation">></span></span>I'm defined in the wrapper (parent) template<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h4</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ol</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let user of userList<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ user.name }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ol</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-template</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>It is a generally used scheme in Angular to use a <code>let-</code> prefix to define a variable in this
+use case. In our case, the <code>let-userList</code> creates a <code>userList</code> property in the template, which is 
+populated with the contents of the <code>people</code> property of the passed data, as shown on line 1.</p>
+<p>To summarize this part of the exercise, looking back at our data structure, we</p>
+<ol>
+<li>set the <code>context</code> for <code>&lt;ng-container /&gt;</code> in the child component to the <code>data</code> object property
+of our data set and</li>
+<li>now, in line 1, bind the <code>userList</code> property used in the <code>*ngFor</code> on line 5 to the <code>people</code> 
+property of the passed-in data from the child component.</li>
+</ol>
+<p>Looking back at the mock data in the TList component, <code>userList</code> now refers to the array of the
+objects in our mock data. The component now simply loops over this array and renders the data
+in an ordered list. </p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>With the <code>ng-template</code> feature discussed in this post, we get a page that looks like this 
+(background colors added to the various parts for clarity, to identify each component and 
+template fragment):</p>
+<p><img src="ng-template-example.png" alt="&quot;Nesting of templates and fragments in this application&quot;"></p>
+<ol>
+<li>The coral colored, central content is based on a template contained in the outermost template
+which is rendered here in light green. </li>
+<li>The red colored template is the child template, which gets the list template (coral colored)
+injected and retrieves the data to render the list.</li>
+</ol>
+<p>With this functionality, we can reuse component template fragments and populate them with varying,
+different content templates.</p>
+</article><span class="prev-post"><a href="/angular/angular-custom-form-field-reactive-form/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/angular/creating-reusable-table-component/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

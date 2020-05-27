@@ -1,0 +1,46 @@
+@startuml
+
+skinparam monochrome true
+hide footbox
+title Loading initial data and in-memory data management\n\n
+
+== Initial loading of data ==
+
+activate HostComponent
+HostComponent -> DataSourceFactory: instantiate, passing data load service
+activate DataSourceFactory
+DataSourceFactory -> ServerDataService: load initial data set
+activate ServerDataService
+ServerDataService -> DataSourceFactory: return data
+deactivate ServerDataService
+DataSourceFactory -> DataSourceFactory: decide which DataSource\n instance to create
+DataSourceFactory -> DataSource: instantiate
+activate DataSource
+DataSourceFactory -> DataSource: pass initial data and\n object reference to service
+deactivate DataSource
+return return reference to DataSource instance
+deactivate DataSourceFactory
+HostComponent -> HostComponent: store reference to DataSource
+HostComponent -> DataSourceFactory: ask for initial data
+activate DataSourceFactory
+DataSourceFactory -> DataSource: get paginated and filtered\n data loaded before
+activate DataSource
+DataSource -> DataSourceFactory: return requested data
+deactivate DataSource
+return pass returned data on
+destroy DataSourceFactory
+deactivate DataSourceFactory
+HostComponent -> HostComponent: render data
+deactivate HostComponent
+...user views data set...
+
+== User changes page ==
+
+HostComponent -> DataSource: get data after page change
+activate HostComponent
+activate DataSource
+return return requested data
+deactivate DataSource
+HostComponent -> HostComponent: update view
+deactivate HostComponent
+@enduml

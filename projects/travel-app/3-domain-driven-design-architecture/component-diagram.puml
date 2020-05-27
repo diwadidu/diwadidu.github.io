@@ -1,0 +1,15 @@
+@startuml
+
+scale 400 width
+hide footbox
+hide empty description
+hide empty members
+skinparam monochrome true
+skinparam linetype ortho
+caption \n\nBounded contexts of the travel appllication
+
+[AuthenticationContext] -up- [UserContext]
+[TravelReportContext] -right- [AuthenticationContext]
+[AuthenticationContext] -down- [TravelAppContext]
+
+@enduml

@@ -1,0 +1,333 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Implementing the Option monad in JavaScript | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="This post describes the use of monads in functional programming and provides a sample  implementation of basic functionality in JavaScript"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Implementing the Option monad in JavaScript</h1><div class="publish-date right">published Dec 23rd, 2019</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/functional-programming" itemprop="url">#functional-programming
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/javascript" itemprop="url">#javascript
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/option-type" itemprop="url">#option-type
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>In a previous post, I wrote about <a href="/architecture/angular-pagination-immutable-state/">pagination using immutable state</a>
+and praised it as the solution to corruption of the state through third parties.
+In this post I’m going to write about how to create a monad that implements the Option
+type, a functional programming paradigm that deals with the potential absence of a value in
+a variable, without the ubiquitous and unpleasant <code>null</code> checks throughout our code.</p>
+<h2 id="The-problem-addressed-here"><a href="#The-problem-addressed-here" class="headerlink" title="The problem addressed here"></a>The problem addressed here</h2><p>As every programmer knows, it’s common that a computation throws an error or returns an unexpected
+result, such as <code>Infinity</code>, with invalid or not previously considered input. So the usual, 
+object oriented solution is to check for those conditions explicitly. </p>
+<p>A <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming" target="_blank" rel="noopener">monad</a> is a 
+construct which encapsulates a value of a given type and provides a set of methods
+that can be applied to the contained value. The result of that computation is then encapsulated in
+another instance of the same monad type. A monad is thus an example of an immutable data structure.</p>
+<p>In this case, I’m going to discuss the <code>Option</code> monad, which has two subtypes, a <code>Some</code> of type 
+<code>T</code> which encapsulates a value, and a <code>None</code> which indicates that no value is present. The
+behavior of these two instance types is that a <code>None</code> always returns a None, whereas a method 
+supplied to a method on the <code>Some</code> is applied to the contained value (The name <code>Some</code> and <code>None</code>
+are influenced by the <code>Scala</code> programming language). Here is an example of how 
+an <code>Option</code> monad would be used, using TypeScript for this example:</p>
+<figcaption class="code-filename typescript">option-implementation.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token function">Some</span><span class="token punctuation">(</span><span class="token number">84</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> result<span class="token punctuation">:</span> Option<span class="token operator">&lt;</span><span class="token keyword">number</span><span class="token operator">></span> <span class="token operator">=</span> original<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>x<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> x <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> hitchhiker<span class="token punctuation">:</span> Option<span class="token operator">&lt;</span><span class="token keyword">string</span><span class="token operator">></span> <span class="token operator">=</span> 
+    result<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>x<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> x <span class="token operator">+</span> <span class="token string">' is the answer to all questions'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this basic use example, a <code>Some</code> is created in line 1, and its <code>map()</code> method is invoked in 
+line 2, to create another Option of type <code>number</code>. The last two lines generate a string in
+yet another <code>Some</code> instance from the value calculated in line 2.</p>
+<p>In this basic example, the Option is somewhat superfluous, but consider this (omitting the types
+for clarity here):</p>
+<figcaption class="code-filename typescript">option-implementation.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token function">Some</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> result <span class="token operator">=</span> original<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token keyword">throw</span> <span class="token string">'some exception'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> hitchhiker <span class="token operator">=</span> result<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span> x <span class="token operator">=</span><span class="token operator">></span> x <span class="token operator">+</span> <span class="token string">' is the answer to all questions'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>Without an Option, we’d have to check for exceptions or other errors after each step of our
+computation, but the statement in line 2 will return a <code>None</code> to indicate the absence of a valid 
+value. Since the interfaces of <code>Some</code> and <code>None</code> are identical, we can keep setting up our 
+computation and not worry about errors, until we reach the end of our computation.</p>
+<h3 id="The-Option-subtypes-None-and-Some"><a href="#The-Option-subtypes-None-and-Some" class="headerlink" title="The Option subtypes None and Some"></a>The Option subtypes <code>None</code> and <code>Some</code></h3><p>The meaning of these two objects are quickly described: The <code>None</code> monad represents the absence of
+a value, but provides the same interface as the <code>Some</code> type, which does contain a value of a 
+certain type. This allows the programmer to not 
+have to worry about whether a computation succeeded and to simply proceed as if everything worked
+swimmingly. In the end, the value can be extracted. or a default value supplied, in case of
+an error occurring somewhere.</p>
+<h2 id="The-functionality-of-our-Option-monad"><a href="#The-functionality-of-our-Option-monad" class="headerlink" title="The functionality of our Option monad"></a>The functionality of our Option monad</h2><p>In this example, I am using three JavaScript functions to represent the three monads of the
+<code>Option</code> type: <code>Option</code>, <code>None</code> and <code>Some</code>. The code for the <code>Option</code> looks like this:</p>
+<figcaption class="code-filename javascript">option.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> Option <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token punctuation">(</span>expression<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> expression <span class="token operator">==</span> <span class="token string">'function'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Some</span><span class="token punctuation">(</span><span class="token function">expression</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>expression <span class="token operator">||</span> expression <span class="token operator">===</span> <span class="token number">0</span> <span class="token operator">||</span> expression <span class="token operator">===</span> <span class="token boolean">false</span> <span class="token operator">||</span> expression <span class="token operator">===</span> <span class="token string">''</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Some</span><span class="token punctuation">(</span>expression<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The functionality of this function consists entirely of creating instances of either a <code>Some</code> or
+a <code>None</code>, depending on the parameter passed to it. If we pass a function, the constructor tries
+to execute it and return the proper Option, in the case we pass something other than a function,
+we simply instantiate and return the corresponding instance from this constructor. Since this type 
+only creates instances of other monads, it does not contain a value or methods to manipulate 
+a contained values itself.</p>
+<p>Compare this comparatively simple constructor with the one for the <code>Some</code> option:</p>
+<figcaption class="code-filename javascript">option.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">const</span> Some <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>expression<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">let</span> value<span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span> <span class="token keyword">instanceof</span> <span class="token class-name">Some</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> expression <span class="token operator">==</span> <span class="token string">'function'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        <span class="token keyword">let</span> evaluated <span class="token operator">=</span> <span class="token function">expression</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>evaluated <span class="token operator">||</span> evaluated <span class="token operator">===</span> <span class="token number">0</span> <span class="token operator">||</span> evaluated <span class="token operator">===</span> <span class="token string">''</span><span class="token punctuation">)</span> value <span class="token operator">=</span> evaluated<span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>expression <span class="token operator">||</span> expression <span class="token operator">===</span> <span class="token number">0</span> <span class="token operator">||</span> expression <span class="token operator">===</span> <span class="token boolean">false</span> <span class="token operator">||</span> expression <span class="token operator">===</span> <span class="token string">''</span><span class="token punctuation">)</span> value <span class="token operator">=</span> expression<span class="token punctuation">;</span>
+      <span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Some</span><span class="token punctuation">(</span>expression<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">this</span><span class="token punctuation">.</span>getOrElse <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>defaultValue<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> value<span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>There are a few things that stand out:</p>
+<ol>
+<li>On line 3, it defines a property which will store the value of the monad. As it is defined
+using <code>let</code>, it won’t be accessible from outside, and thus is hidden from manipulation.</li>
+<li>The <code>if</code> on line 5 serves to allow a programmer to create an instance of this object
+without using <code>new</code>, as that instantiation occurs in the <code>else</code> clause on line 19.  </li>
+<li>We can pass a function to the constructor as a parameter (line 6), which will then be 
+evaluated to generate the value stored in the monad.</li>
+<li>On line 22, the <code>getOrElse</code> method is defined, which returns the stored value, since this is 
+a <code>Some</code>. A method by the same name is defined on a <code>None</code>, but will return the passed 
+<code>defaultValue</code> instead. This method serves as an accessor to the private value for all other
+methods, which will be defined on the object’s prototype. Because of the need to access the value
+of the <code>Some</code>, it needs to be defined here to allow access to the private <code>value</code> property.</li>
+</ol>
+<p>Since we don’t have direct access to manipulate the <code>value</code> stored in our Option, we need to 
+provide a set of methods with which we can manipulate the value stored within the Option. In 
+particular, I will implement the following methods:</p>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>functionality</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>.getOrElse()</td>
+<td>Returns the value of the Option, or, for <code>None</code>, the value provided to the method</td>
+</tr>
+<tr>
+<td>.map()</td>
+<td>transform the value</td>
+</tr>
+<tr>
+<td>.filter()</td>
+<td>returns <code>Some</code> with value if filter method is true, <code>None</code> otherwise</td>
+</tr>
+<tr>
+<td>.flatMap()</td>
+<td>Will apply the provided function to the value and will unpack a returned Option type to avoid nested Options</td>
+</tr>
+<tr>
+<td>.flatten()</td>
+<td>Recursively unwraps nested Options and returns a <code>Option&lt;T&gt;</code></td>
+</tr>
+<tr>
+<td>.isEmpty()</td>
+<td>Returns a boolean indicating whether the <code>Option</code> instance contains a value</td>
+</tr>
+<tr>
+<td>.forall()</td>
+<td>Applies a provided predicate to the value and returns <code>true</code> or <code>false</code></td>
+</tr>
+</tbody></table>
+<h3 id="Modifying-the-contained-value"><a href="#Modifying-the-contained-value" class="headerlink" title="Modifying the contained value"></a>Modifying the contained value</h3><p>The methods <code>map()</code>, <code>flatMap()</code> and in the wider sense <code>flatten()</code> modify the contained value
+through application of a method that takes the stored value as input and returns a value, which
+will be wrapped in a new Option instance. Here is how they are implemented:</p>
+<figcaption class="code-filename javascript">option.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">Some<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>map <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token function">fct</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getOrElse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token function">Some</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+Some<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>flatMap <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> applied <span class="token operator">=</span> <span class="token function">fct</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getOrElse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>applied <span class="token keyword">instanceof</span> <span class="token class-name">None</span> <span class="token operator">||</span> applied <span class="token keyword">instanceof</span> <span class="token class-name">Some</span><span class="token punctuation">)</span> <span class="token keyword">return</span> applied<span class="token punctuation">;</span>
+    <span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Option</span><span class="token punctuation">(</span>applied<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The implementation for <code>.map()</code> is pretty straightforward: We call the <code>getOrElse()</code> method
+on the instance of <code>Some</code> to retrieve the current value, then apply the passed function to that
+value. We finally wrap the received value in a new <code>Option</code> instance. If we encounter an 
+exception anywhere along the way, we return a <code>None</code>.</p>
+<p>The same general functionality is used in <code>flatMap()</code>, except that the received value
+is returned directly if it is an Option type, otherwise, it is wrapped in an Option. This 
+implementation avoids nesting Option types, but takes care of only one level of nesting. If 
+we have a value that is deeply nested in Options, you can use the <code>flatten()</code> method, which
+goes through a nested set of Options and returns the innermost one. For example:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token function">Some</span><span class="token punctuation">(</span><span class="token function">Some</span><span class="token punctuation">(</span><span class="token function">Some</span><span class="token punctuation">(</span><span class="token function">Some</span><span class="token punctuation">(</span><span class="token number">9</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">flatten</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token operator">--</span><span class="token operator">></span> <span class="token function">Some</span><span class="token punctuation">(</span><span class="token number">9</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>Its implementation relies on recursion and thus can in (rare) circumstances cause
+a stack overflow, if Options are nested too deeply. Here is the implementation of the <code>flatten()</code>
+method: </p>
+<figcaption class="code-filename javascript">option.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">Some<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>flatten <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">function</span> <span class="token function">flattenOption</span><span class="token punctuation">(</span>opt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>opt<span class="token punctuation">.</span>constructor<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'None'</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>opt<span class="token punctuation">.</span>constructor<span class="token punctuation">.</span>name <span class="token operator">!==</span> <span class="token string">'Some'</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Some</span><span class="token punctuation">(</span>opt<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token function">flattenOption</span><span class="token punctuation">(</span>opt<span class="token punctuation">.</span><span class="token function">getOrElse</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> <span class="token function">flattenOption</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getOrElse</span><span class="token punctuation">(</span><span class="token string">'None'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This implementation shows that if the Option is a <code>None</code>, we simply return a new instance
+of <code>None</code>. The recursion happens in line 5, after we check whether the entity’s constructor
+indicates that it’s not a <code>Some</code> (line 4). If it not an instance of <code>Some</code>, we have arrived at the 
+contained value and return that value wrapped in a <code>Some</code>. Otherwise, we proceed to 
+recursively call <code>flattenOption()</code> by passing the contained value on line 5, which removes
+one level of nested <code>Some</code> at a time.</p>
+<p>This implementation is an example of <em>tail recursion</em>, which would allow a compiler to replace 
+successive recursions, i.e. function calls, through a <code>for</code> loop and thus avoid the danger of 
+stack overflows. Alas, JavaScript does not supply this optimization, but it’s a good habit to 
+develop for functional languages such as Scala, which do support tail recursion.</p>
+<h3 id="Filtering-or-providing-defaults-for-contained-value"><a href="#Filtering-or-providing-defaults-for-contained-value" class="headerlink" title="Filtering or providing defaults for contained value"></a>Filtering or providing defaults for contained value</h3><p>Another method that is common in functional programming is <code>filter()</code>, which is commonly used
+on <code>List</code> instances to remove list items that don’t fit the predicate function. For an <code>Option</code>,
+which contains a single value (which might be an instance of a List), we simply ascertain that
+a particular condition applies. Its implementation looks like this:</p>
+<figcaption class="code-filename javascript">option.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">Some<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>filter <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">fct</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getOrElse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>So in short, we return the <code>Some</code> instance if the predicate returns a truthy value, otherwise,
+or in the case of an exception, we return an instance of <code>None</code>. This leaves us with a few
+methods that provide state information about the instance value:</p>
+<figcaption class="code-filename javascript">option.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">Some<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>isEmpty <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+Some<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>orElse <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getOrElse</span><span class="token punctuation">(</span><span class="token function">fct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+Some<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>forall <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token operator">!</span><span class="token function">fct</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getOrElse</span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">e</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>isEmpty()</code> indicates, whether the instance contains a value. For a <code>Some</code> this is always false,
+so we can simply return the boolean value. <code>forall()</code> takes a function as argument and applies
+that function to the contained values. The function should return a boolean, but just to make sure, 
+the implementation here coerces the returned value to a boolean to match the method’s signature.
+If the method passed to <code>forall()</code> throws an exception, we return false, as the precondition does
+not apply.</p>
+<p>The implementation of the corresponding <code>None</code> type would be very simple and look like the 
+following:</p>
+<figcaption class="code-filename javascript">option.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> None <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span><span class="token keyword">this</span> <span class="token keyword">instanceof</span> <span class="token class-name">None</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">this</span><span class="token punctuation">.</span>getOrElse <span class="token operator">=</span> <span class="token punctuation">(</span>defaultValue<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> defaultValue<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+None<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>map <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">this</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+None<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>flatMap <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">this</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+None<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>filter <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">this</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+None<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>isEmpty <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+None<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>orElse <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">fct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+None<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>flatten <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">this</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+None<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>forall <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token boolean">false</span> <span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Here, we simply return a <code>None</code> from the constructor and define the <code>getOrElse()</code> method to return
+the passed parameter value. All the methods on the Object will simply return itself or the
+appropriate, hard-coded return value.</p>
+<h2 id="Usage-by-example"><a href="#Usage-by-example" class="headerlink" title="Usage by example"></a>Usage by example</h2><p>Let’s say we want to implement a method to calculate the <a href="https://en.wikipedia.org/wiki/Fibonacci_number" target="_blank" rel="noopener">Fibonacci sequence</a>,
+ignoring for the moment the extensions which also allow to calculate
+<a href="https://en.wikipedia.org/wiki/Generalizations_of_Fibonacci_numbers" target="_blank" rel="noopener">negative Fibonacci numbers</a>.</p>
+<p>In our use case, we would return a <code>None</code> for negative numbers and a <code>Some</code> with the calculated
+value. So a recursive example implementation would be: </p>
+<figcaption class="code-filename typescript">option-implementation.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> fibonacci <span class="token operator">=</span> <span class="token punctuation">(</span>num<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> Option<span class="token operator">&lt;</span><span class="token keyword">number</span><span class="token operator">></span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> calcFibonacci <span class="token operator">=</span> <span class="token punctuation">(</span>level<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">,</span> a<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">,</span> b<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>level <span class="token operator">&lt;</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> a<span class="token punctuation">;</span>
+    <span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token function">calcFibonacci</span><span class="token punctuation">(</span>level <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">,</span> b<span class="token punctuation">,</span> <span class="token punctuation">(</span>a <span class="token operator">+</span> b<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>num <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token function">None</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token function">Some</span><span class="token punctuation">(</span><span class="token function">calcFibonacci</span><span class="token punctuation">(</span>num<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token punctuation">}</span> <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The benefit of using an <code>Option</code> type here is that we can simply continue our calculations
+without worrying about the invalid case of negative numbers. See the following example
+in JavaScript:</p>
+<figcaption class="code-filename javascript">option.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">const</span> limit <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token function">fibonacci</span><span class="token punctuation">(</span>limit<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">// returns Some(55);</span>
+  <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> x <span class="token operator">&lt;</span> <span class="token number">100</span> <span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> x <span class="token operator">+</span> <span class="token number">45</span> <span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">getOrElse</span><span class="token punctuation">(</span><span class="token number">23</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The result here would be the number 100, but the thing to notice is that throughout our (trivial) 
+calculations, we didn’t do any error checking. If we started off with a <code>limit</code> of -10, the
+resulting <code>None</code> would simply be passed on, until we call <code>getOrElse()</code>, which would then return 
+the passed default of 23. This is an example how the <code>Option</code> monad can make our lives easier
+since we only have to check for the successful execution at the end.</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>I’ve described the behavior of monads in functional programming, developed the basic behavior 
+of the <code>Option</code> monad using JavaScript and showed an example of how it could be used. The
+great advantage of using a monad is that we don’t have to check at every step for an error; a
+generic check at the end of the procedure suffices, since the error is carried through. The 
+disadvantage of using an Option is that we don’t get any information of what went wrong, only
+that something along the way <em>did go</em> wrong.   </p>
+<p>There are other functional programming paradigms such as <code>Either</code> and <code>Try</code>, which behave
+similarly to the <code>Option</code> described here, but where the <code>None</code> equivalent contains an error or 
+error message, which makes analyzing errors at the end of the calculation easier. Possible 
+use cases would be a sequence of asynchronous server calls, which might return a 4xx or 5xx 
+status code, or complex calculations, where it is helpful to know the type of error.  </p>
+</article><span class="prev-post"><a href="/angular/using-viewchild-to-implement-presentation-of-data-sets/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/functional-programming/implementing-immutable-list-javascript/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Domain Storytelling | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Domain Storytelling</h1><div class="publish-date left">March 7th, 2020</div><div class="clear"></div><span class="post-meta"></span><p>So I want an app! But where do I start?</p>
+<p>One of the really helpful things we as humans do is tell stories. You see this in 
+Native American culture in the US, with life’s lessons conveyed to kids by telling
+stories (such as the Miwok story I was told about a decade ago about two young bears 
+rescued by a lowly worm from the top of El Capitan mountain — not by stronger, 
+faster or bigger animals).</p>
+<p>Since stories are so powerful, they can also be used to clarify how an online 
+application should operate, because you can invite different stake holders together 
+to develop stories — Not allegories about worms or stories in the Agile Development 
+context but about how a user of an application would interact — or expect to interact —
+with it: What needs would the user have at any point? How are different parts logically
+arranged? How would things fit together? What needs to happen when etc.</p>
+<p>Once those stories are created, you already get a pretty good overview of what needs
+to happen when, how functionality needs to be grouped. During those discussions, 
+interesting details usually surface quite naturally, which is why this is such a 
+fundamental starting point for an application.</p>
+<h2 id="Developing-the-story"><a href="#Developing-the-story" class="headerlink" title="Developing the story"></a>Developing the story</h2><p>Normally, you would invite people knowledgeable about the company’s offerings and 
+its processes to working sessions, but since I’m by myself, I need to adopt a split 
+personality: My UX self needs to interview my client 
+self and see how things would fit together, what features the app should have etc.</p>
+<p>So during the “interview phase”, my customer/client self gave my UX self the following
+summary (summarized and from memory):</p>
+<blockquote>
+<p>I want an app that lets users record their vacation travel. I’m most interested in 
+trips that are several days long and are contiguous — Examples would be bike, 
+hike or canoeing trips, where a person doesn’t jump around from city to city, but 
+explores the sights between them, enjoys nature and the act of getting from A to B 
+as much as the destination each day. </p>
+<p>By record I mean two things:</p>
+<ol>
+<li>Create a trace of the path they traveled each day, ideally in the form of 
+a line that gets displayed on a map of some sort.</li>
+<li>Upload pictures that can be displayed in the app, for each day. Pictures should 
+enable the user to add descriptions and ideally place them on the map, so people 
+can relive their experience.</li>
+</ol>
+</blockquote>
+<p>From this abbreviated description, and some further digging I didn’t summarize here,
+we can develop the following overview of a domain story:</p>
+<p><img src="./domain-story-wps.de.svg" alt="Domain Story diagram for the expected high-level behavior of the app"> </p>
+<p>From this overview graphical description we can already get a sense of what the app
+needs to do:</p>
+<ol>
+<li>We need a login and authentication system of some sort, so that every user can have
+their own online travel journals.</li>
+<li>After login, a user might see a list of his travel journals, possibly grouped
+by some criteria — but this needs to be worked out in further sessions about the 
+details.</li>
+<li>From the list of trips, the user can select one to look at, work on or create a new 
+trip in the system.</li>
+<li>After creating a new trip, the user gets to add information such as a description and 
+travel dates to the trip</li>
+<li>Once the overall information for the trip has been entered, the user gets to create 
+entries for every day, which will contain information of different kinds, as detailed
+in the next to points</li>
+<li>The traveler can enter full text a description, like a blog entry or article for the
+day and also, as mentioned in the initial statement by the customer, add a map as 
+well as</li>
+<li>add one or more pictures for each day. Where they are placed — in a slideshow 
+or as single images throughout the story or both — remains for the UX phase to
+determine. Here we simply capture that in the work flow of creating a new trip,
+the user needs to be able to add images. This could also be the topic for further
+domain stories to clear up what exactly this image functionality entails.</li>
+</ol>
+<p>During the creation of the domain story with the group, there were some comments and
+ideas that were deemed important, but were shelved to keep the work focused:</p>
+<ol>
+<li>It’s fine that a user can read her own stories, but the sharing of stories with
+friends would be an expected functionality for an app like this.</li>
+<li>Since we have the users’ images, we could in the future expand the functionality
+and offer the generation of printed photo albums, complete with maps, images, 
+captions and text.</li>
+<li>If the site takes off, a new part could be created that allows the community
+and specially selected members to recommend specific trips to the community</li>
+<li>In a similar vein as the previous point, it is possible to imagine a commenting
+feature, which might also permit the author to limit who can post by certain 
+criteria, which might include length of membership, number of trips posted,
+personal invitation etc.</li>
+<li>With the ability of users to post pictures, the app will need a section
+for copyright owners to file claims that pictures were used without permission</li>
+<li>…</li>
+</ol>
+<h2 id="Domain-Storytelling-graphic-findings"><a href="#Domain-Storytelling-graphic-findings" class="headerlink" title="Domain Storytelling graphic findings"></a>Domain Storytelling graphic findings</h2><p>This example shows the usefulness of the domain storytelling procedure. Through
+imagining how we as users would work on a problem and compare that to others’ 
+concepts, we can arrive at a well-reasoned representation of the system we’re
+going to be building and have a good chance of looking at the same problem from
+different view points if we do the process in a group.</p>
+<p>One thing also worth noting is that in this specific example, we appear to have
+nested functionality: A user can have multiple trips, which each consists of multiple 
+trip days. Each of these days has a separate entry, which very likely will have 
+its own set of images. </p>
+<p>The graphic also hints at a specific form of expression for this project — the <em>domain 
+language</em>. I called the user not “User” but “Traveler”, for example. This is an 
+important concept in complex projects: Every participant needs to understand what
+the words mean and every word needs to mean only one thing to clearly communicate.</p>
+<p>As a final point, it is worth noting that the graphic already suggests a clear
+language by following the arrows from the start to the end. For example, path (7) 
+reads (almost) like a real sentence:</p>
+<blockquote>
+<p>Traveler uploads image(s) for a descriptive article to a day entry for a travel
+report in the travel journal app</p>
+</blockquote>
+<p>I also want to stress, that having this one overview domain story is important, but
+not a complete treatment. Each of the steps in this overview has its own domain
+stories within them. Thinking about the details of image management, for example: 
+In the diagram here, we simply upload images in a “descriptive article”, but that
+step deserves its own domain story to further clarify what needs to happen, as
+in this example treatment:</p>
+<ol>
+<li>Traveler edits a day’s entry</li>
+<li>Traveler changes to the image management system</li>
+<li>Traveler uploads an image into the system</li>
+<li>The system uses defaults to resize the image for optimal display on various screen
+sizes</li>
+<li>After the upload, the traveler is able to connect his story to the image and
+also specify a caption for the image</li>
+<li>Important questions: <ul>
+<li>Does the system allow a user to assign the same image to several
+different travel days? </li>
+<li>And if so, should the system allow the user to adjust the caption
+for each story?</li>
+</ul>
+</li>
+</ol>
+<h2 id="The-road-ahead"><a href="#The-road-ahead" class="headerlink" title="The road ahead"></a>The road ahead</h2><p>In this initial step, we have gotten to know our domain somewhat, have taken a
+user-centered approach to put ourselves into the user’s shows and gotten an idea
+about what the application does and does not need to accomplish. We have gotten a 
+first glimpse of the types of data we need to manage and how the data relates to
+each other. These insights will get fleshed out further in the next steps, which
+will deal with UX design and the software architecture we want to accomplish
+our goal of an application that can grow without becoming hard to manage and performs
+well. </p>
+<p><a href="/projects/travel-app/2-ux-analysis/">Next step: UX Analysis</a></p>
+</article></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

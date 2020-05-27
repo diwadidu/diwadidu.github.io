@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="494.1038px" preserveAspectRatio="none" style="width:491px;height:494px;" version="1.1" viewBox="0 0 491 494" width="491.7453px" zoomAndPan="magnify"><defs><filter height="300%" id="f3lz2r0h5jz77" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.358490566037736"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.716981132075472" dy="4.716981132075472" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[85e1a5fc95a472d63ee44d0f5d986b48]
+entity PhotoAlbumContext--><rect fill="#9F9F9F" filter="url(#f3lz2r0h5jz77)" height="62.4724" style="stroke: #383838; stroke-width: 1.768867924528302;" width="188.6792" x="34.1981" y="349.0566"/><rect fill="#9F9F9F" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="28.3019" y="354.9528"/><rect fill="#9F9F9F" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="28.3019" y="399.7365"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="94.3396" x="81.3679" y="376.8103">«proposed»</text><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="165.0943" x="45.9906" y="396.2541">PhotoAlbumContext</text><!--MD5=[842d4820936fb5184287a995d42da3e9]
+entity AuthenticationContext--><rect fill="#F8F8F8" filter="url(#f3lz2r0h5jz77)" height="43.0286" style="stroke: #383838; stroke-width: 1.768867924528302;" width="207.5472" x="271.2264" y="122.6415"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="265.3302" y="128.5377"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="265.3302" y="153.8777"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="183.9623" x="283.0189" y="150.3952">AuthenticationContext</text><!--MD5=[6054bb5867c249720ed08c12a9f7fdcb]
+entity UserContext--><rect fill="#F8F8F8" filter="url(#f3lz2r0h5jz77)" height="43.0286" style="stroke: #383838; stroke-width: 1.768867924528302;" width="125" x="312.5" y="9.434"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="306.6038" y="15.3302"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="306.6038" y="40.6701"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="101.4151" x="324.2925" y="37.1877">UserContext</text><!--MD5=[71ea7df1e6daf348e3804d72e681215a]
+entity TravelReportContext--><rect fill="#F8F8F8" filter="url(#f3lz2r0h5jz77)" height="43.0286" style="stroke: #383838; stroke-width: 1.768867924528302;" width="192.217" x="35.967" y="122.6415"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="30.0708" y="128.5377"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="30.0708" y="153.8777"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="168.6321" x="47.7594" y="150.3952">TravelReportContext</text><!--MD5=[414b8df890d5ef14864fb7ad4441a43f]
+entity ImageManagementContext--><rect fill="#F8F8F8" filter="url(#f3lz2r0h5jz77)" height="43.0286" style="stroke: #383838; stroke-width: 1.768867924528302;" width="242.9245" x="7.0755" y="235.8491"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="1.1792" y="241.7453"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="1.1792" y="267.0852"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="219.3396" x="18.8679" y="263.6028">ImageManagementContext</text><!--MD5=[32ecfc4afc1ec8e124b9d9a22b490a19]
+entity TravelAppContext--><rect fill="#F8F8F8" filter="url(#f3lz2r0h5jz77)" height="43.0286" style="stroke: #383838; stroke-width: 1.768867924528302;" width="170.9906" x="291.8632" y="235.8491"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="285.967" y="241.7453"/><rect fill="#F8F8F8" height="5.8962" style="stroke: #383838; stroke-width: 1.768867924528302;" width="11.7925" x="285.967" y="267.0852"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="147.4057" x="303.6557" y="263.6028">TravelAppContext</text><!--MD5=[ae56a8fbc792eb03d3f263c20d707973]
+link UserContext to AuthenticationContext--><path d="M375,51.9575 C375,72.0637 375,102.0755 375,122.2877 " fill="none" id="UserContext-AuthenticationContext" style="stroke: #383838; stroke-width: 1.179245283018868;"/><!--MD5=[be69496be25014cc47a25e7ba6c78ebf]
+link TravelReportContext to AuthenticationContext--><path d="M228.4316,143.8679 C242.4764,143.8679 256.9811,143.8679 271.1675,143.8679 " fill="none" id="TravelReportContext-AuthenticationContext" style="stroke: #383838; stroke-width: 1.179245283018868;"/><!--MD5=[ebce556e0a783bf49fdc7a9873567f26]
+link TravelReportContext to ImageManagementContext--><path d="M132.0755,165.1651 C132.0755,185.2712 132.0755,215.283 132.0755,235.4953 " fill="none" id="TravelReportContext-ImageManagementContext" style="stroke: #383838; stroke-width: 1.179245283018868;"/><!--MD5=[8f405ff83a244d07545a146839ac56b7]
+link ImageManagementContext to PhotoAlbumContext--><path d="M128.5377,278.5377 C128.5377,297.9835 128.5377,326.8868 128.5377,348.9269 " fill="none" id="ImageManagementContext-PhotoAlbumContext" style="stroke: #383838; stroke-width: 1.179245283018868;"/><!--MD5=[ebefdddba77c98427d88d65e56fc06bf]
+link AuthenticationContext to TravelAppContext--><path d="M377.3585,165.1651 C377.3585,185.2712 377.3585,215.283 377.3585,235.4953 " fill="none" id="AuthenticationContext-TravelAppContext" style="stroke: #383838; stroke-width: 1.179245283018868;"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="0" x="252.3585" y="439.3103"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="0" x="252.3585" y="458.7541"/><text fill="#000000" font-family="sans-serif" font-size="16.5094" lengthAdjust="spacingAndGlyphs" textLength="346.6981" x="76.6509" y="478.1978">Bounded contexts of the travel appllication</text><!--MD5=[2c9f8500cc6913932f14acbf39cec106]
+@startuml
+
+scale 500 width
+hide footbox
+hide empty description
+hide empty members
+skinparam monochrome true
+skinparam linetype ortho
+caption \n\nBounded contexts of the travel appllication
+
+skinparam component {
+	backgroundColor<<proposed>> #a0a0a0
+	backgroundColor<<shared lib>> #e8e8e8
+}
+
+[PhotoAlbumContext]  <<proposed>>
+
+[AuthenticationContext] -up- [UserContext]
+[TravelReportContext] -right- [AuthenticationContext]
+[TravelReportContext] -down- [ImageManagementContext]
+[PhotoAlbumContext] -up- [ImageManagementContext]
+[AuthenticationContext] -down- [TravelAppContext]
+
+@enduml
+
+PlantUML version 1.2019.11(Sun Sep 22 12:02:15 CEST 2019)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 11.0.4+10-LTS
+Operating System: Mac OS X
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Creating a reusable table component in Angular | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="Here I'm introducing a reusable table component which can be reused to  render a variety of data in a consistent manner without duplicating code. It  interacts with the host component via a few property and event bindings"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Creating a reusable table component in Angular</h1><div class="publish-date right">published Oct 15th, 2019</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/architecture" itemprop="url">#architecture
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>“There has to be a better way” was all I could think about when I reviewed the 
+implementation of an application heavy with data tables and saw that with the 
+various abstractions and specific implementations, a table required the use of 
+eight or more Angular components with the accompanying passing of data through 
+all those layers via property and event bindings. So I sat down and tried to 
+tackle the problem myself. </p>
+<h2 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h2><p>I came up with a first-order architecture which will work with non-nested data structures
+and has the following properties and behaviors. It</p>
+<ol>
+<li>accepts a configuration object with<ul>
+<li>specification of the columns, their title, data attribute on the object</li>
+<li>the available filterable columns</li>
+<li>any sort options that needed to be displayed</li>
+</ul>
+</li>
+<li>would solely deal with the display of the data</li>
+<li>would not deal with the loading or management of the data, because that would destroy
+its reusability. Instead, it would emit events and let the parent component manage the
+interaction with the respective services. </li>
+<li>would provide UI elements to filter and change pages but rely on the containing component 
+to retrieve the actual data for the current table settings</li>
+<li>would maintain the state of the display of the data, which should not be handled by the 
+containing component</li>
+</ol>
+<p>On page load, the flow of data and the communication between two components <code>ParentComponent</code> 
+and <code>TableComponent</code> and a <code>DataService</code> would look like this:</p>
+<p><img src="overview-flowchart.svg" alt="Sequence diagram of TableComponent interaction with Services and ParentComponents"></p>
+<p>The benefits of this setup are that the TableComponent can be reused for the display 
+of any data type, as it receives a configuration object describing the columns with 
+name, the object property containing the data and instructions on which columns the 
+user can sort by and which ones allow filtering.</p>
+<p>Further, the loading of the data happens in the containing component, as <em>it</em> should be 
+interfaced with the service or data source retrieving the data type to be displayed. 
+That nicely separates the data structure and loading from its display and keeps the table
+display component blissfully unaware of the exact data structure &mdash; Everything comes
+in through the configuration and property binding.</p>
+<p>Leaving the setting of the sort and filtering settings to the table component
+has the benefit that all the presentation concerns are handled by the table component and
+it can inform the host component what data to load by passing events back to the host
+component in a standardized format. This nicely separates the concerns of displaying the data
+and actually interfacing with the various data services, which will be handled by the 
+specialized components and <strong>not</strong> by the generic table component.</p>
+<p>The configuration for the <code>TableComponent</code> could look like this:</p>
+<figcaption class="code-filename typescript">table.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> tableConfig<span class="token punctuation">:</span> DataTableType <span class="token operator">=</span> <span class="token punctuation">{</span>
+  columns<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>title<span class="token punctuation">:</span> <span class="token string">"First Name"</span><span class="token punctuation">,</span> dataProperty<span class="token punctuation">:</span> <span class="token string">"firstName"</span><span class="token punctuation">,</span> sortable<span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">,</span> filterable<span class="token punctuation">:</span> <span class="token keyword">false</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>title<span class="token punctuation">:</span> <span class="token string">"Last Name"</span><span class="token punctuation">,</span> dataProperty<span class="token punctuation">:</span> <span class="token string">"lastName"</span><span class="token punctuation">,</span> sortable<span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">,</span> filterable<span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>title<span class="token punctuation">:</span> <span class="token string">"Occupation"</span><span class="token punctuation">,</span> dataProperty<span class="token punctuation">:</span> <span class="token string">"occupation"</span><span class="token punctuation">,</span> sortable<span class="token punctuation">:</span> <span class="token keyword">false</span><span class="token punctuation">,</span> filterable<span class="token punctuation">:</span> <span class="token keyword">false</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>title<span class="token punctuation">:</span> <span class="token string">"Branch"</span><span class="token punctuation">,</span> dataProperty<span class="token punctuation">:</span> <span class="token string">"companyBranch"</span><span class="token punctuation">,</span> sortable<span class="token punctuation">:</span> <span class="token keyword">false</span><span class="token punctuation">,</span> filterable<span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  rowActions<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>label<span class="token punctuation">:</span> <span class="token string">"Edit"</span><span class="token punctuation">,</span> actionIdToReturn<span class="token punctuation">:</span> <span class="token string">"edit"</span><span class="token punctuation">,</span> logoImageUrl<span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> showOption<span class="token punctuation">:</span> <span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token keyword">true</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>label<span class="token punctuation">:</span> <span class="token string">"Copy"</span><span class="token punctuation">,</span> actionIdToReturn<span class="token punctuation">:</span> <span class="token string">"copy"</span><span class="token punctuation">,</span> logoImageUrl<span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> showOption<span class="token punctuation">:</span> <span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> x<span class="token punctuation">.</span>completed <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>label<span class="token punctuation">:</span> <span class="token string">"Delete"</span><span class="token punctuation">,</span> actionIdToReturn<span class="token punctuation">:</span> <span class="token string">"delete"</span><span class="token punctuation">,</span> logoImageUrl<span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> showOption<span class="token punctuation">:</span> <span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token operator">!</span>x<span class="token punctuation">.</span>isActive <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>label<span class="token punctuation">:</span> <span class="token string">"Message"</span><span class="token punctuation">,</span> actionIdToReturn<span class="token punctuation">:</span> <span class="token string">"message"</span><span class="token punctuation">,</span> logoImageUrl<span class="token punctuation">:</span> <span class="token string">"..."</span><span class="token punctuation">,</span> showOption<span class="token punctuation">:</span> <span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> x<span class="token punctuation">.</span>permitsMessaging <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  rowsPerPage<span class="token punctuation">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This configuration shows a property called <code>rowActions</code> which is another configuration 
+object, this time for the rows, indicating what a user should be able to do with the data
+on the row. To effect the change in the data set, the <code>TableComponent</code> would emit an event 
+with the <code>actionIdToReturn</code> value to the host component. It is then the HostComponent’s 
+responsibility to perform the action indicated by the <code>actionIdToReturn</code> identifier (like “edit”
+or “delete”)</p>
+<p>That last option in the above <code>rowActions</code> entry, <code>showOption</code>, is likely the most interesting: It 
+accepts a function that is passed the object for the row to be displayed in the table and 
+returns a <code>boolean</code> indicating whether to display the action for the row to the user, based on 
+the data in the row. That way, one could implement a deletion button that only shows for disabled 
+entries or a button which would initiate messaging only for users who have opted into that 
+feature, as shown in this example.</p>
+<h2 id="Component-implementation-for-generic-data-table"><a href="#Component-implementation-for-generic-data-table" class="headerlink" title="Component implementation for generic data table"></a>Component implementation for generic data table</h2><p>The following code excerpt shows the beginnings of a generic component to manage the tasks
+for a table component. It uses two <code>@Input()</code> and two <code>@Output()</code> bindings. The first 
+<code>@Input()</code> accepts the table configuration as shown in the previous listing, the second is a 
+property binding to accept the data to be rendered from its parent component. </p>
+<p>As discussed before, there is an event emitter <code>getDataForPage</code> to initiate getting the data 
+to be displayed from the containing component. There also is an event emitter called <code>startRowAction</code>
+to communicate to the containing component that the user wants to manipulate data in a row. 
+The emitted data from this method adheres to an interface <code>RowActionWithData&lt;A&gt;</code> so that events 
+containing the typed data payload can be emitted and processed by one method in the parent 
+component. The interface specifies that any event emitted should specify two things:</p>
+<ol>
+<li>the action to be performed (in the form of a string identifier) and </li>
+<li>the row data for which the action was started.</li>
+</ol>
+<p>This allows the event receiver to react to any data contained in the row.  The containing 
+component then decides how to fulfill that request &mdash; through a 
+redirect, a modal or any other action. That no longer is the responsibility of the table component,
+though.</p>
+<p>Further, there is a generic method called <code>onRowActionClicked()</code>, which will be called in the
+data table template for any button the user clicks to initiate an action on the data in a specific 
+row. As discussed previously, the data table component should not be aware of any data 
+specifics, so it delegates the processing of the request to the host component via the 
+<code>startRowAction</code> event emitter discussed in the previous paragraph.</p>
+<figcaption class="code-filename typescript">data-table-wrapper.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token punctuation">:</span> <span class="token string">'data-table-wrapper'</span><span class="token punctuation">,</span>
+  templateUrl<span class="token punctuation">:</span> <span class="token string">'./data-table-wrapper.component.html'</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DataTableWrapperComponent</span><span class="token operator">&lt;</span>A<span class="token operator">></span> <span class="token keyword">implements</span> <span class="token class-name">OnChanges</span> <span class="token punctuation">{</span>
+
+  @<span class="token function">Input</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">public</span> tableConfig<span class="token punctuation">:</span> DataTableType<span class="token punctuation">;</span>
+
+  @<span class="token function">Input</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">public</span> tableContent<span class="token punctuation">:</span> A<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  @<span class="token function">Output</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">public</span> getDataForPage <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EventEmitter</span><span class="token operator">&lt;</span>PageChangeEventType<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  @<span class="token function">Output</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">public</span> startRowAction <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EventEmitter</span><span class="token operator">&lt;</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> pageList<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token function">ngOnChanges</span><span class="token punctuation">(</span>changes<span class="token punctuation">:</span> SimpleChanges<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">onRowActionClicked</span><span class="token punctuation">(</span>actionType<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">,</span> rowData<span class="token punctuation">:</span> A<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> userAction<span class="token punctuation">:</span> RowActionWithData<span class="token operator">&lt;</span>A<span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+      actionToPerform<span class="token punctuation">:</span> actionType<span class="token punctuation">,</span>
+      rowData<span class="token punctuation">:</span> rowData
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span>startRowAction<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span>userAction<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The template of this component is fairly straightforward angular HTML:</p>
+<figcaption class="code-filename html">data-table-wrapper.component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>table</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>thead</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tr</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>th</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let columnHead of tableConfig.columns<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ columnHead.title }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>th</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tr</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>thead</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tbody</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>tr</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let columnData of tableContent<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>td</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let columnHead of tableConfig.columns<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>columnHead.dataField !<span class="token punctuation">=</span><span class="token punctuation">=</span> <span class="token punctuation">'</span>ROW_ACTIONS<span class="token punctuation">'</span>;else action_content<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ columnData[columnHead.dataField] }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ng-template</span> <span class="token attr-name">#action_content</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let action of tableConfig.rowActions<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+          <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ action.logoImageUrl }}<span class="token punctuation">"</span></span>
+               <span class="token attr-name">alt</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ action.actionDescription }}<span class="token punctuation">"</span></span>
+               <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>action.showOption(columnData)<span class="token punctuation">"</span></span>
+               <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onRowActionClicked(action.actionToPerform, columnData)<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-template</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>td</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tr</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>tbody</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>table</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In rows 3-5, the table header is created from the previously discussed <code>tableConfig</code>. 
+Each row in the data set is rendered in rows 9 and 10 in the <code>&lt;ng-template /&gt;</code> tag pair, and this 
+implementation is using an Angular 
+<a href="https://angular.io/guide/template-syntax#template-reference-variables-var" target="_blank" rel="noopener">template reference</a>,
+<code>#action_content</code>, and <code>*ngIf</code> to render the row actions in lines 11-18. Each configuration object 
+contains the
+URL to an image and the alt label. We see here how the <code>showOption()</code> method defined above gets 
+used in the <code>*ngIf</code> in row 15: It gets passed a reference to the object being displayed in the row
+and can therefore use any data on the object to make its decision. When this method returns false, 
+it suppresses the rendering of the action button.</p>
+<h2 id="Implementing-pagination"><a href="#Implementing-pagination" class="headerlink" title="Implementing pagination"></a>Implementing pagination</h2><p>The pagination implemented here works as described in this sequence diagram:</p>
+<p><img src="pagination-flowchart.svg" alt="Flow chart of the event happening when a user paginates the data in the table"></p>
+<p>Here, the pagination implementation is part of the <code>TableComponent</code>, implemented as a subcomponent 
+which manages its own pagination state. This has the benefit that we avoid code duplication for 
+the pagination in every component using a table and we can simply pass the change of a page 
+through the <code>getDataForPage</code> EventEmitter mechanism introduced earlier.</p>
+<p>The markup for the component looks like this:</p>
+<figcaption class="code-filename html">pagination.component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>pagination<span class="token punctuation">"</span></span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>listOfAvailablePages.length <span class="token punctuation">></span> 1<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ul</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>this.paginationService.currentPage <span class="token punctuation">></span> 1<span class="token punctuation">"</span></span> <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onPageSelection(1)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token entity" title="&lt;">&amp;lt;</span><span class="token entity" title="&lt;">&amp;lt;</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>this.paginationService.currentPage <span class="token punctuation">></span> 1<span class="token punctuation">"</span></span> <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onAdjacentPageSelection(-1)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token entity" title="&lt;">&amp;lt;</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let pageNum of listOfAvailablePages<span class="token punctuation">"</span></span>
+        <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onPageSelection(pageNum)<span class="token punctuation">"</span></span><span class="token style-attr language-css"><span class="token attr-name">
+        <span class="token attr-name">style</span></span><span class="token punctuation">="</span><span class="token attr-value"><span class="token property">padding</span><span class="token punctuation">:</span><span class="token number">10</span>px<span class="token punctuation">;</span><span class="token property">cursor</span><span class="token punctuation">:</span>pointer</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>span</span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>pageNum !<span class="token punctuation">=</span><span class="token punctuation">=</span> this.paginationService.currentPage; else current_page<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ pageNum }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>span</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ng-template</span> <span class="token attr-name">#current_page</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>span</span><span class="token style-attr language-css"><span class="token attr-name"> <span class="token attr-name">style</span></span><span class="token punctuation">="</span><span class="token attr-value"><span class="token property">background</span><span class="token punctuation">:</span> <span class="token hexcode">#ccc</span></span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ pageNum }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>span</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ng-template</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>this.paginationService.currentPage &lt; listOfAvailablePages.length<span class="token punctuation">"</span></span>
+        <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onAdjacentPageSelection(1)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token entity" title="&gt;">&amp;gt;</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>this.paginationService.currentPage &lt; listOfAvailablePages.length<span class="token punctuation">"</span></span>
+        <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onPageSelection(listOfAvailablePages.length)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token entity" title="&gt;">&amp;gt;</span><span class="token entity" title="&gt;">&amp;gt;</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ul</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ol>
+<li>We of course suppress the display of the navigation if we don’t have more than one page 
+for the data. This is implemented in line 5.</li>
+<li>We have links to return to the beginning and go to the end of the data set and to page through it</li>
+<li>The center list item gets repeated using <code>*ngFor()</code> and generates a list of clickable items, 
+which represent the pages of the table</li>
+<li>The <code>&lt;ng-template/&gt;</code> on line 13 gets rendered from the <code>*ngIf</code> on the previous line in case 
+the page number to render is the current page number. It therefore is rendered differently.</li>
+</ol>
+<p>The <code>listOfAvailablePages</code> property is an array with page numbers generated by the component 
+based on the last page number. The reason for this hacky work-around is that 
+<code>*ngFor</code> can, as of this writing, only <a href="https://stackoverflow.com/questions/36354325/angular-2-ngfor-using-numbers-instead-collections" target="_blank" rel="noopener">traverse collections/arrays and not increment numbers</a>
+We therefore loop through an array in line 5 and attach a click handler for each page.</p>
+<p>The corresponding TypeScript code looks like this:</p>
+<figcaption class="code-filename typescript">pagination.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token punctuation">:</span> <span class="token string">'data-table-pagination'</span><span class="token punctuation">,</span>
+  templateUrl<span class="token punctuation">:</span> <span class="token string">'./pagination.component.html'</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">PaginationComponent</span> <span class="token punctuation">{</span>
+
+  @<span class="token function">Input</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">public</span> listOfAvailablePages<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  @<span class="token function">Output</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">public</span> pageChangeRequested <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EventEmitter</span><span class="token operator">&lt;</span><span class="token keyword">number</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token keyword">public</span> paginationService<span class="token punctuation">:</span> PaginationService<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>paginationService<span class="token punctuation">.</span>currentPage <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">onPageSelection</span><span class="token punctuation">(</span>pageNumber<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>paginationService<span class="token punctuation">.</span>currentPage <span class="token operator">=</span> pageNumber<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>pageChangeRequested<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span>pageNumber<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">onAdjacentPageSelection</span><span class="token punctuation">(</span>dir<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>dir <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>paginationService<span class="token punctuation">.</span>currentPage <span class="token operator">></span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">onPageSelection</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>paginationService<span class="token punctuation">.</span>currentPage <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>dir <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>paginationService<span class="token punctuation">.</span>currentPage <span class="token operator">&lt;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>listOfAvailablePages<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">onPageSelection</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>paginationService<span class="token punctuation">.</span>currentPage <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We see in the TypeScript that we have two methods, one for changing to a specific page number 
+(via <code>onPageSelection()</code>) and one for incrementing and decrementing from the current page via the
+arrow buttons at the end of the page lists. Both methods lead to an event on the 
+<code>pageChangeRequested</code> event emitter, which the main component will listen for to request the 
+corresponding data that will later be rendered in the table.</p>
+<p>So with that component now able to keep track of the current page, we can include it in the 
+data table component as follows:</p>
+<figcaption class="code-filename html">data-table.component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>table</span><span class="token punctuation">></span></span>
+... (as shown above)
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>table</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>data-table-pagination</span> <span class="token attr-name">[listOfAvailablePages]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>pageList<span class="token punctuation">"</span></span>
+                       <span class="token attr-name">(pageChangeRequested)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>changePageTo($event)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>data-table-pagination</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The <code>changePageTo()</code> method in the parent component will receive the requested page number and
+needs to pull the data from the data source for that page. This will be accomplishes through the
+<code>getDataForPage()</code> event emitter introduced earlier, which will emit an event of type
+<code>PageChangeEventType</code>, as in the following code snippet:</p>
+<figcaption class="code-filename typescript">pagination.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> <span class="token function">changePageTo</span><span class="token punctuation">(</span>pageNumber<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> eventData<span class="token punctuation">:</span> PageChangeEventType <span class="token operator">=</span> <span class="token punctuation">{</span>
+      fromEntry<span class="token punctuation">:</span> <span class="token punctuation">(</span>pageNumber <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token keyword">this</span><span class="token punctuation">.</span>tableConfig<span class="token punctuation">.</span>entriesPerPage<span class="token punctuation">,</span>
+      toEntry<span class="token punctuation">:</span> <span class="token punctuation">(</span>pageNumber <span class="token operator">*</span> <span class="token keyword">this</span><span class="token punctuation">.</span>tableConfig<span class="token punctuation">.</span>entriesPerPage<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span>getDataForPage<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span>eventData<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>All that’s left now for the main component is to retrieve the data to be displayed for the 
+requested page and pass that data to the <code>tableContent</code> property of the <code>TableComponent</code>. And 
+that concludes my overview of how to implement a generically usable table component which can be
+used for a number of very different data sets.</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this post, I described a generic table component
+which can display and paginate a number of disparate data types. To accomplish that goal, I used
+two nested Angular components, one for the rendering of the data and the other for displaying the
+pagination and reacting to user requests for page changes. </p>
+<p>This architecture also allows to add the functionality to sort and filter data through a similar
+mechanism described here, where the table component makes its needs known and passes them to the 
+containing component to load the data via a service. </p>
+</article><span class="prev-post"><a href="/angular/ng-template-content-injection/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/architecture/implementing-selectable-data-loading-strategies/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Angular custom form field for Reactive Forms | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="We sometimes need specific form fields for special purposes. In this post, I describe how to develop a time duration field for use with Angular Responsive Forms"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Angular custom form field for Reactive Forms</h1><div class="publish-date right">published Oct 5th, 2019</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/forms" itemprop="url">#forms
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Developing my music library example app, I came across a problem with the HTML <code>time</code> input field: 
+It is limited to accept entries on a 24-hour clock schema, but some of the songs in my library are
+over 23:59 in length (some over 30 minutes, don’t ask). Re-purposing the HTML time field was
+not an option and so I took the opportunity to learn about building my own form field with the
+following properties:</p>
+<ol>
+<li>Usable with Angular <em>Reactive Forms</em> </li>
+<li>Allow time values up to 99:59 minutes</li>
+<li>As a first approximation, I will not validate entries to have fewer than 60 seconds in the 
+“seconds” field, as my foremost goal is to figure out how to write my own two-form-field 
+component.</li>
+</ol>
+<h2 id="Setting-up-a-Custom-Form-Field"><a href="#Setting-up-a-Custom-Form-Field" class="headerlink" title="Setting up a Custom Form Field"></a>Setting up a Custom Form Field</h2><p>Angular provides the <a href="https://angular.io/api/forms/ControlValueAccessor" target="_blank" rel="noopener"><code>ControlValueAccessor</code></a> 
+interface with the following properties:</p>
+<table>
+<thead>
+<tr>
+<th>Method name</th>
+<th align="right">Parameter</th>
+<th>Functionality</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>writeValue</td>
+<td align="right">any</td>
+<td>Used to prepopulate the form field(s). Takes a time value, in our case a string, and extracts the minutes and seconds values</td>
+</tr>
+<tr>
+<td>registerOnChange</td>
+<td align="right">function</td>
+<td>Gets passed a function that should be called when the value in the custom form field changes</td>
+</tr>
+<tr>
+<td>registerOnTouched</td>
+<td align="right">function</td>
+<td>Gets passed a function that should be called when the field has been touched</td>
+</tr>
+<tr>
+<td>setDisabledState</td>
+<td align="right">boolean</td>
+<td>This optional method is called by Angular when the active status of the field should change</td>
+</tr>
+</tbody></table>
+<p>From this interface definition, we can start writing our <code>FormTimeEntryComponent</code> and provide stubs
+for the required methods. We also will want to have access to the template of this component in 
+order to have access to the form fields. Therefore, we are defining a <code>@ViewChild</code> which will store
+a reference to the template of this component in the <code>durationElement</code> property. The first iteration 
+of the component class then looks like this:</p>
+<figcaption class="code-filename typescript">form-time-entry.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">FormTimeEntryComponent</span> <span class="token keyword">implements</span> <span class="token class-name">ControlValueAccessor</span> <span class="token punctuation">{</span>
+
+  @<span class="token function">ViewChild</span><span class="token punctuation">(</span><span class="token string">'durationEntry'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>read<span class="token punctuation">:</span> ElementRef<span class="token punctuation">,</span> <span class="token keyword">static</span><span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+  durationElement<span class="token punctuation">:</span> ElementRef<span class="token punctuation">;</span>
+
+  <span class="token keyword">private</span> minuteValue <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> secondValue <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token function">getLengthValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">registerOnChange</span><span class="token punctuation">(</span>fn<span class="token punctuation">:</span> <span class="token keyword">any</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">registerOnTouched</span><span class="token punctuation">(</span>fn<span class="token punctuation">:</span> <span class="token keyword">any</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">writeValue</span><span class="token punctuation">(</span>timeInMinAndSec<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The rudimentary template for our new form input will be making use of the <code>@ViewChild</code> identifier
+<code>durationEntry</code> to set up the reference and include two separate “number” input fields, one each 
+for the minutes and seconds:</p>
+<figcaption class="code-filename html">form-time-entry.component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>timeduration-input<span class="token punctuation">"</span></span> <span class="token attr-name">#durationEntry</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>timeduration-formcontainer<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>number<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>time-minutes<span class="token punctuation">"</span></span> <span class="token attr-name">maxlength</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>2<span class="token punctuation">"</span></span> <span class="token attr-name">(keyup)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>getLengthValue()<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span>:
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>number<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>time-seconds<span class="token punctuation">"</span></span> <span class="token attr-name">minlength</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>2<span class="token punctuation">"</span></span> <span class="token attr-name">maxlength</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>2<span class="token punctuation">"</span></span> <span class="token attr-name">(keyup)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>getLengthValue()<span class="token punctuation">"</span></span><span class="token punctuation">/></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="Processing-user-input"><a href="#Processing-user-input" class="headerlink" title="Processing user input"></a>Processing user input</h2><p>From the HTML markup you can tell that we’ve set up an event handler for <code>onKeyUp</code> events, which 
+will call the <code>getLengthValue()</code> method in the component and thus provides for us a way to get the
+latest value in the form field and pass it to Angular. To do that, we need to implement the 
+<code>getLengthValue()</code> method, which will look like this:</p>
+<figcaption class="code-filename typescript">form-time-entry.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> <span class="token function">getLengthValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>minuteValue <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getFormFieldVal</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>secondValue <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getFormFieldVal</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> timeValue <span class="token operator">=</span> <span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>minuteValue<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>secondValue<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">getFormFieldVal</span><span class="token punctuation">(</span>fieldNum<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> fieldVal <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>durationElement<span class="token punctuation">.</span>nativeElement<span class="token punctuation">.</span>childNodes<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>children<span class="token punctuation">[</span>fieldNum<span class="token punctuation">]</span><span class="token punctuation">.</span>value<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">forceDoubleDigits</span><span class="token punctuation">(</span>fieldVal<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">forceDoubleDigits</span><span class="token punctuation">(</span>numberValue<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token template-string"><span class="token string">`00</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span> numberValue <span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This code is all pretty straightforward. We</p>
+<ol>
+<li>use DOM traversal to retrieve a reference to the input field in the markup</li>
+<li>get the current value in both form fields</li>
+<li>pad both values with leading zeroes and return a string from <code>forceDoubleDigits()</code></li>
+<li>concatenate the padded input from both fields to a time value in the format MM:SS</li>
+</ol>
+<p>What’s still missing is the hookup to the Reactive Form instance, so that the changes 
+get propagated when they are detected and the form instance gets updated with the new value. 
+This will look like this:</p>
+<figcaption class="code-filename typescript">form-time-entry.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">private</span> propagateChange<span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token function">getLengthValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>minuteValue <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getFormFieldVal</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>secondValue <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getFormFieldVal</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> timeValue <span class="token operator">=</span> <span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>minuteValue<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>secondValue<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">propagateChange</span><span class="token punctuation">(</span>timeValue<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token operator">...</span>
+
+  <span class="token keyword">public</span> <span class="token function">registerOnChange</span><span class="token punctuation">(</span>fn<span class="token punctuation">:</span> <span class="token keyword">any</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>propagateChange <span class="token operator">=</span> fn<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This snippet contains the method <code>registerOnChange()</code>, which as mentioned earlier is part of 
+the interface and accepts as parameter a function which will update the data in the form 
+instance (and thereby also in the form fields). In this case, we’re storing a reference to the 
+function Angular provides us in the <code>propagateChange</code> property (set up in line 1, populated in 
+line 13) and call that method in the last line of <code>getLengthValue()</code> in line 7 with our time 
+value.</p>
+<p>To summarize, on every keypress, the following happens in succession:</p>
+<ol>
+<li>They <code>keyup</code> event triggers the execution of <code>getLengthValue()</code></li>
+<li><code>getLengthValue()</code> reads and formats the current value in the field and</li>
+<li>passes the value to Angular via a function provided to us by Angular, <code>registerOnChange()</code></li>
+</ol>
+<h2 id="Prepopulating-the-input-fields"><a href="#Prepopulating-the-input-fields" class="headerlink" title="Prepopulating the input fields"></a>Prepopulating the input fields</h2><p>The implementation works well, as long as you only want to add new records. For editing a 
+record, we need to accept a value from Angular and pre-populate the corresponding fields
+accordingly. For that, we need to implement the <code>writeValue()</code> method from the interface. </p>
+<p>In this method, we take the value provided as a string and extract the respective minute and
+second values from it, to set the field values in our component. Via the property binding
+on the <code>input</code> fields, we reflect the loaded value in the fields. And that is pretty much
+everything there is to it, so we get the following implementation for <code>writeValue()</code>:</p>
+<figcaption class="code-filename typescript">form-time-entry.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">public</span> <span class="token function">writeValue</span><span class="token punctuation">(</span>timeinMinAndSec<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token punctuation">[</span>minutes<span class="token punctuation">,</span> seconds<span class="token punctuation">,</span> <span class="token operator">...</span>rest<span class="token punctuation">]</span> <span class="token operator">=</span> timeinMinAndSec<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">':'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// Format mm:ss</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>minuteValue <span class="token operator">=</span> minutes<span class="token punctuation">;</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>secondValue <span class="token operator">=</span> seconds<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="Making-Angular-aware-of-the-new-form-field"><a href="#Making-Angular-aware-of-the-new-form-field" class="headerlink" title="Making Angular aware of the new form field"></a>Making Angular aware of the new form field</h2><p>We now have a functioning form element, but Angular does not yet know about it, so we need to 
+tell it. And this is where it gets a little tricky, as we need to think about the order in which 
+all the various pieces of the Angular app are created and instantiated. </p>
+<p>Without going into too much detail, object references are hoisted, but their corresponding 
+instances are not, so that we can run into issues where our form element is trying to be created, 
+but Angular doesn’t yet know about how to do that. For more information on this topic, check out
+<a href="https://blog.thoughtram.io/angular2/2015/11/23/multi-providers-in-angular-2.html" target="_blank" rel="noopener">Multi Providers in Angular by Pascal Precht</a>
+and <a href="https://angular.io/guide/dependency-injection-providers" target="_blank" rel="noopener">Dependency Injection Providers</a></p>
+<p>To get around that problem, we need to add <code>providers</code> to the <code>@Component</code> decorator in the 
+following way (lines 5-9):</p>
+<figcaption class="code-filename typescript">form-time-entry.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token punctuation">:</span> <span class="token string">'app-form-time-entry'</span><span class="token punctuation">,</span>
+  templateUrl<span class="token punctuation">:</span> <span class="token string">'./form-time-entry.component.html'</span><span class="token punctuation">,</span>
+  styleUrls<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'./form-time-entry.component.css'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  providers<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span>
+    provide<span class="token punctuation">:</span> NG_VALUE_ACCESSOR<span class="token punctuation">,</span>
+    useExisting<span class="token punctuation">:</span> <span class="token function">forwardRef</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> FormTimeEntryComponent<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    multi<span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">FormTimeEntryComponent</span> <span class="token keyword">implements</span> <span class="token class-name">ControlValueAccessor</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Finally, the following HTML snippet demonstrates how one would use this custom form element in a 
+reactive form template. You’ll notice that there is no difference in its markup from any predefined
+HTML form elements:</p>
+<figcaption class="code-filename typescript">container.component.ts</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>form-element<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>label</span> <span class="token attr-name">for</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>length<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Length<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>label</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>app-form-time-entry</span> <span class="token attr-name">formControlName</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>length<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>length<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>length<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>app-form-time-entry</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this post, we have looked at how to create a custom form element and learned how to:</p>
+<ol>
+<li>Create and manage a form field with multiple input elements</li>
+<li>Integrate the form field into Angular Reactive Forms like a regular form element</li>
+<li>Integrate it with the Angular DI system </li>
+<li>Make it behave like a normal form element by sending and receiving the data it should represent.</li>
+</ol>
+</article><span class="next-post"><a href="/angular/ng-template-content-injection/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

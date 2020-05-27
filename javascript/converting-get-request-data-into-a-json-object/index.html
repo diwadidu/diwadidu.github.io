@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Converting GET request data into a JSON object | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="Nested form data sent via a GET request gets passed as field names, where nested object  names are contained in square brackets. This post shows how to convert that structure to  a JS Object."><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Converting GET request data into a JSON object</h1><div class="publish-date right">published Feb 15th, 2020</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/javascript" itemprop="url">#javascript
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/http" itemprop="url">#http
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>On a recent project, form data was sent via a GET HTTP request to a Node backend. The same data
+was also sent from another API via a JSON object, so we needed to convert the GET data into
+JSON. This post describes two ways to accomplish that, one procedural and one using 
+recursion. This is an example of the data object we’re trying to convert to JSON:</p>
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> testObject <span class="token operator">=</span> <span class="token punctuation">{</span>
+  a<span class="token punctuation">:</span> <span class="token string">'some string'</span><span class="token punctuation">,</span>
+  <span class="token string">'b[some][label]'</span><span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
+  <span class="token string">'b[some][test]'</span><span class="token punctuation">:</span> <span class="token string">'some other string'</span><span class="token punctuation">,</span>
+  <span class="token string">'b[yet][another]'</span><span class="token punctuation">:</span> <span class="token string">'one'</span><span class="token punctuation">,</span>
+  <span class="token string">'c[do_something][or_other][and][more]'</span><span class="token punctuation">:</span> <span class="token string">'yes'</span><span class="token punctuation">,</span>
+  <span class="token string">'d[some][label]'</span><span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
+  <span class="token string">'d[some][label]'</span><span class="token punctuation">:</span> <span class="token number">26</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This object covers most of the data “problems” we’re going to encounter:</p>
+<ol>
+<li>Mixture of plain properties and nested object properties (<code>a</code> vs. <code>b[some]</code>)</li>
+<li>Deeply nested properties</li>
+<li>Objects that have multiple different subobjects/properties</li>
+<li>Two parameters with the same path</li>
+</ol>
+<h2 id="Common-code-for-both-solutions"><a href="#Common-code-for-both-solutions" class="headerlink" title="Common code for both solutions"></a>Common code for both solutions</h2><p>One of the main tasks to accomplish is to determine the parameter names in order to create 
+corresponding object properties. This can be done
+through parsing the key name using a regular expression (RegEx) such as the following:</p>
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> partsRegEx <span class="token operator">=</span> <span class="token regex">/\[?(\w+)/g</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>This RegEx starts capturing all patterns (because of the <code>g</code> flag) that contain a sequence of letters
+and is optionally preceded by an opening square bracket. So from a string representing a key 
+such as the following, we get an array containing the following matches from the expression:</p>
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> key <span class="token operator">=</span> <span class="token string">'b[some][key]'</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> parsedKeys <span class="token operator">=</span> <span class="token punctuation">[</span> <span class="token string">'b'</span><span class="token punctuation">,</span> <span class="token string">'[some'</span><span class="token punctuation">,</span> <span class="token string">'[key'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>The alternative, and probably more efficient and faster, is using the JavaScript <code>split()</code> function:</p>
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> key <span class="token operator">=</span> <span class="token string">'b[some][key]'</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> parsedKeys <span class="token operator">=</span> key<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">'['</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// Returns [ 'b', 'some]', 'key]' ];</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h2 id="Imperative-implementation"><a href="#Imperative-implementation" class="headerlink" title="Imperative implementation"></a>Imperative implementation</h2><pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> targetObj <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span>a <span class="token keyword">in</span> testObject<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>a<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token string">'['</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> targetObj<span class="token punctuation">[</span>a<span class="token punctuation">]</span> <span class="token operator">=</span> testObject<span class="token punctuation">[</span>a<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> parts <span class="token operator">=</span> a<span class="token punctuation">.</span><span class="token function">match</span><span class="token punctuation">(</span>partsRegEx<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">let</span> current <span class="token operator">=</span> targetObj<span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> c<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">;</span> c <span class="token operator">&lt;</span> parts<span class="token punctuation">.</span>length<span class="token punctuation">;</span> c<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">let</span> key <span class="token operator">=</span> <span class="token punctuation">(</span>parts<span class="token punctuation">[</span>c<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token string">'['</span><span class="token punctuation">)</span> <span class="token operator">?</span> parts<span class="token punctuation">[</span>c<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">:</span> parts<span class="token punctuation">[</span>c<span class="token punctuation">]</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>current<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">===</span> parts<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> current<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> testObject<span class="token punctuation">[</span>a<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span> current<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+      current <span class="token operator">=</span> current<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this implementation, we instantiate an empty object and then use a <code>for</code> loop to iterate
+over the <code>testObject</code> properties in the object shown in the first listing. If the parsed key 
+does not include any opening brace, we have a straight, not nested property which lets us assign 
+the corresponding property of  <code>testObject</code> to the <code>targetObject</code> (line 3).</p>
+<p>On line 5, we use the afrementioned regular expression to extract the keys and then loop over 
+them in line 7 using a <code>for</code> loop. We define another variable called <code>current</code> on line 6, which 
+will contain a reference to the current node of <code>targetObj</code> being considered. That reference is 
+updated as we traverse through the source object.</p>
+<p>Since the keys matched by the RegEx will contain the opening brace, we clip that brace off on 
+line 8, if present. On the following three lines, if the current key does not already 
+exists at that level in the object, we either create a new empty node (object), or we assign the
+value, if we finished traversing the object key list, as indicated by the condition
+<code>c === parths.length - 1</code>. </p>
+<p>As a final step, we advance one level deeper into the object we’re populating, assigning a
+reference to the current node to the variable <code>current</code>. The end result 
+of this code with the data shown at the beginning of this post looks like the following JSON
+object:</p>
+<pre class="line-numbers language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"a"</span><span class="token operator">:</span> <span class="token string">"some string"</span><span class="token punctuation">,</span>
+  <span class="token property">"b"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"some"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"label"</span><span class="token operator">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
+      <span class="token property">"test"</span><span class="token operator">:</span> <span class="token string">"some other string"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token property">"yet"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"another"</span><span class="token operator">:</span> <span class="token string">"one"</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"c"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"do_something"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"or_other"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property">"and"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+          <span class="token property">"more"</span><span class="token operator">:</span> 'yes'
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"d"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"some"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"label"</span><span class="token operator">:</span> <span class="token number">26</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="Implementation-using-Recursion"><a href="#Implementation-using-Recursion" class="headerlink" title="Implementation using Recursion"></a>Implementation using Recursion</h2><p>The same result can also be achieved using a recursive implementation using three functions that
+work together as shown in this code example: </p>
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">function</span> <span class="token function">setNestedObjectProperty</span><span class="token punctuation">(</span>targetObj<span class="token punctuation">,</span> keySegmentList<span class="token punctuation">,</span> propValue<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>keySegmentList<span class="token punctuation">.</span>length <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> propValue<span class="token punctuation">;</span>
+  <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> key <span class="token operator">=</span> <span class="token function">cleanedKey</span><span class="token punctuation">(</span>keySegmentList<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    targetObj<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">setNestedObjectProperty</span><span class="token punctuation">(</span>targetObj<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> keySegmentList<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> propValue<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> targetObj<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> cleanedKey <span class="token operator">=</span> <span class="token punctuation">(</span>rawKey<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>rawKey<span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token string">'['</span><span class="token punctuation">)</span> <span class="token operator">?</span> rawKey<span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">:</span> rawKey<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> mapStringToObjectKey <span class="token operator">=</span> <span class="token punctuation">(</span>acc<span class="token punctuation">,</span> objectKey<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">setNestedObjectProperty</span><span class="token punctuation">(</span>acc<span class="token punctuation">,</span> objectKey<span class="token punctuation">.</span><span class="token function">match</span><span class="token punctuation">(</span>partsRegEx<span class="token punctuation">)</span><span class="token punctuation">,</span> testObject<span class="token punctuation">[</span>objectKey<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">let</span> redVal <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">keys</span><span class="token punctuation">(</span>testObject<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">reduce</span><span class="token punctuation">(</span>mapStringToObjectKey <span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The processing of this implementation starts on line 18, after the definition of three functions 
+implementing the functionality: In line 18, we extract the keys of the 
+original object and run a <code>reduce</code> on the resulting array. The function passed to <code>reduce()</code> calls 
+the <code>setNestedObjectProperty()</code> method for each key found in the object with three parameters:</p>
+<ol>
+<li>The object containing the accumulated parsing result of the data (<code>acc</code>),</li>
+<li>an array with the (potentially) nested key parts and</li>
+<li>the value to be assigned once the nested property is reached.</li>
+</ol>
+<p>The <code>setNestedObjectProperty()</code> function is recursive to handle objects with deeply nested 
+structures, such as this object, already seen in the very first listing of this post:</p>
+<pre class="line-numbers language-json"><code class="language-json"><span class="token punctuation">{</span> <span class="token property">"c[do_something][or_other][and][more]"</span><span class="token operator">:</span> <span class="token string">"yes"</span> <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>The “real work” takes place in <code>setNestedObjectProperty()</code>, which either returns the passed value
+for this object path or recurses one level deeper into the passed object, creating new object 
+instances as needed.</p>
+<h2 id="Discussion"><a href="#Discussion" class="headerlink" title="Discussion"></a>Discussion</h2><p>Both solutions create the same result, and which one someone uses is largely a matter of 
+preference. With that said, let me try to make a case for the second, recursive implementation:</p>
+<ol>
+<li>The iteration over the different object keys (as strings) is separated
+from the recursive processing of each individual key. This separation could also be implemented 
+in the iterative approach, of course, but due to the recursive implementation, it follows more 
+naturally in the second implementation.</li>
+<li>The recursive implementation consists of mostly pure functions, which means writing tests
+for this implementation is going to be easy, in particular for special cases for the
+<code>setNestedObjectProperty()</code> method.    </li>
+</ol>
+<p>There is also one ambiguity in this implementation/requirements. The parameter <code>d</code> has the same
+path twice:</p>
+<pre class="line-numbers language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"d[some][label]"</span><span class="token operator">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
+  <span class="token property">"d[some][label]"</span><span class="token operator">:</span> <span class="token number">26</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In the current implementation, this construct overwrites the first value with the second 
+one (same string index on the object), so that the last value is the only one available. If we 
+wanted to create arrays of values, we’d have to specify the keys as follows: </p>
+<pre class="line-numbers language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"d[some][label][0]"</span><span class="token operator">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
+  <span class="token property">"d[some][label][1]"</span><span class="token operator">:</span> <span class="token number">26</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The numbered array indices are required in this notation, because without the numbered indices, 
+the keys of the object would be identical and thus overwrite each other, just as in the previous 
+example. This syntax is currently not considered in the implementation and not interpreted as 
+arrays. </p>
+</article><span class="prev-post"><a href="/functional-programming/implementing-immutable-list-javascript/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

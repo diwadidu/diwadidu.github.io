@@ -1,0 +1,156 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>UX and Wireframes | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">UX and Wireframes</h1><div class="publish-date left">March 7th, 2020</div><div class="clear"></div><span class="post-meta"></span><p>After we’ve looked at <a href="../1-domain-story-telling">the root domain story previously</a> we have 
+gotten a decent overview of the domain, i.e. the problem space and we have gotten some
+idea of where the app might go in the future with the possibility of a picture book 
+generation option and potentially a community based recommendation feature among others.</p>
+<p>Based on the previous stage of the process, which will have included more domain stories to
+bring light into the more detailed stories, we can start with a high-level UX phase which
+will attempt to come with a visual representation of how the elements we identified in the 
+domain story might fit together and even how they might be arranged on a page and work together.</p>
+<p>In the end, we should have an idea of how we can organize our code to avoid a 
+<a href="http://www.mamuz.de/article/from-big-ball-of-mud-to-emergent-design/0Pw682Kxk" target="_blank" rel="noopener">big ball of mud</a>
+by properly grouping and isolating our code.</p>
+<h2 id="Needed-functionality-and-screens"><a href="#Needed-functionality-and-screens" class="headerlink" title="Needed functionality and screens"></a>Needed functionality and screens</h2><p>We can use the domain story developed in the previous step to identify some functionality
+that we need to create designs for.</p>
+<p>We know there are multiple trips per application user, which each consist of multiple days, 
+which each comprise information on what happened that day and where. There is a significant 
+chunk of data we need to capture, display and the user must navigate. Before we get to the forms
+capturing all that data, let’s think about how we’re going to display a list of trips to 
+users of the application.</p>
+<h3 id="Home-screen-showing-trips"><a href="#Home-screen-showing-trips" class="headerlink" title="Home screen showing trips"></a>Home screen showing trips</h3><p>For the navigation of the available trips, several options come to mind:</p>
+<ol>
+<li>A simple table listing the title, destination, dates etc. This list could be grouped 
+by activity, geographic region or by duration (day vs. week-long trips, for example).</li>
+<li>A map showing the locations where the trips took place. One can imagine a number of separate, 
+map-based presentations:<ul>
+<li>A trace of the travel route (in cases of a bike, hiking, cross-country skiing and ski touring, 
+climbing or other active sports type trip)</li>
+<li>A “blob” of some sort indicating roughly the center point of the trip, with maybe an icon
+in it representing what type of trip it is (hiking, biking, canoeing etc.)</li>
+<li>An aggregation representation, which hides the details of trips in the same area and
+displays simply a circle in a rectangle showing the area. The circle would show a number 
+indicating how many trips are recorded in that area. When the map is zoomed in far enough, 
+the aggregation would break apart into its component trips, possibly creating new groupings
+if trips are still too close to each other to reasonably distinguish.</li>
+</ul>
+</li>
+<li>A search feature which might find travel routes based on type, key words, location etc.   </li>
+</ol>
+<p>Leaving aside the search feature for now, the following doodles can be drawn. They show<br>the evolution from separate list and map displays, with a toggle button, to a combined approach 
+with two integrated displays of both the trips on the map and as a list to its side: </p>
+<p><img src="./trip-navigation-wireframes.jpg" alt="Drawings of wireframes for displaying trips to an application user"></p>
+<p>The functionality envisioned here in the second row from the bottom is a split view with the map
+on the left and a list of the trips displayed on the map to its right. This creates a linked view,
+so if (when) we introduce a trip filter or search, these two displays will adjust with at the
+same time with the same data, but with different forms of display.</p>
+<p>Next to the box with the trips is another long vertical box with a black triangle inside. This
+triangle is intended to “open” the list display and hide the map, leading to the sketch right
+below it, where we now have three columns of lists and no map. The drawer handle element has 
+now moved to the screen’s far left and when clicked, will restore the original split view between
+map and list. Animating this open/close functionality will make it easy for the user to follow
+what happens on the screen (and fun for front-end developers to implement).</p>
+<p>The three-column display could be expanded into a horizontally scrolling more-than-three column 
+display, where every column represents a trip type, country, continent, year etc. The options here
+are limitless, and for my little trial project, I’ll leave it at that for now. But this is a good
+thing to keep in mind when implementing, that this screen might have additional functionality
+in the future, that we won’t do now, but should certainly avoid to obstruct with the way we 
+structure our code.</p>
+<p>To return briefly to the map view, we see a gaggle of flags on the map. This means that relating
+to our discussion before, that here, the designer decided on a simple symbol for a trip as a 
+starting point, ignoring for the moment the other aforementioned options of showing a trace or 
+grouping trips that are too close together.  </p>
+<p>Finally, in the bottom middle of the drawing above is a screen that shows an overview after 
+selecting a trip from the trip list. This screen displays:</p>
+<ol>
+<li>An overview of the route taken on the trip in the form of a map.</li>
+<li>The trip title with relevant information and possibly a short summary of the day’s travel</li>
+</ol>
+<p>The entry for the 2nd day seen in this sketch contains a UI element labelled “extra”. When 
+clicked, it will display “extra” or supporting information, such as descriptions of details 
+about museum visits or similar content that would bog down the reading experience/flow for 
+the casual reader, but carries some interest for the person reporting on the trip.</p>
+<h3 id="Trip-details"><a href="#Trip-details" class="headerlink" title="Trip details"></a>Trip details</h3><p>From the overview display of a trip’s stops we get to the detail view about a day, with wireframes
+looking like this, starting in the top left:</p>
+<p><img src="./trip-detail-wireframes.jpg" alt="Drawings of wireframes for displaying details about a day on the trip"></p>
+<p>Here we see that the header is split in two with a large bar for the trip title and a smaller
+bar showing the start and end locations for the stage of the trip traveled on that day.</p>
+<p>Right below is again the bifurcated display of text and the map. This time, the map is on the 
+right instead of on the left as in the all-trips overview. In a final design, this behavior 
+should be unified, and as the note in the drawing indicates, having the list on the left and the 
+map on the right is preferable, because people tend to use the 
+<a href="https://www.nngroup.com/articles/f-shaped-pattern-reading-web-content/" target="_blank" rel="noopener">F-shape pattern</a>
+when consuming content on the screen. The map in this scenario would be easily scannable and
+comprehensible on the right and users could make a note that it’s there for when they want to
+look at it. However, with the map on the left, users would have to read down the middle of the 
+screen, which is likely to go against their usual behavior and possibly cause them to miss
+content in the write-up — or upset them enough to give up on the application.</p>
+<p>This content arrangement — map on the right — 
+would allow people to stay in their usual pattern on the web and make the site possibly more 
+usable. This is an assumption, however, that should be validated using user research in a UX lab.</p>
+<p>This sketch also contains the flyout user interface, where the user can expand the copy and hide
+the map to focus on the reading. In addition, just below the indicated browser window, as a 
+late entry, are some map controls that allow to change the ratio of map to copy in 30% increments,
+so from 0% text and all map to 100% text and no map, which is reflected in the drawing in the top 
+right.</p>
+<p>On the drawn screen in the top right, there are two buttons:</p>
+<ol>
+<li>to edit that day’s information on the edit screen (shown in the bottom left) and</li>
+<li>to show a slide show of the images associated with that travel day.  </li>
+</ol>
+<p>I’ll leave it at that for the presentation, but want to expand a little bit on the form in the
+lower left.</p>
+<h3 id="Capturing-data-for-a-day-—-the-trip-day-form"><a href="#Capturing-data-for-a-day-—-the-trip-day-form" class="headerlink" title="Capturing data for a day — the trip day form"></a>Capturing data for a day — the trip day form</h3><p>To round things out (at least a little) here is a discussion of the envisioned behavior when
+editing a trip day:</p>
+<p><img src="./trip-edit-wireframes.jpg" alt="Manually sketched wireframes for the editing of a day"></p>
+<p>It’s a pretty straight-forward form with a few twists:</p>
+<ol>
+<li>After entering the trip dates in the second row, the application will automatically generate
+a list of buttons for the days seen at the bottom right of the sketched screen. These buttons are
+labelled with the date and will bring the user to the form capturing the information for that
+day’s travel. </li>
+<li>Again below the “visible” part of the screen is a file upload for a cover picture for that
+day. The annotation reads “Add cropping,” which refers to a potential feature allowing the user
+to determine the visible area of the cover image for that day, since not every user has access
+to Photoshop or Gimp or is knowledgeable about image manipulation techniques.</li>
+<li>In the bottom right is the screen capturing a day’s details. It also is pretty straightforward,
+but allows to add images using a button. The actual uploading interface is not shown here.</li>
+<li>The black triangles near the top allow a user to navigate to and edit adjacent days. From a 
+tech perspective, this would trigger the sending of the data to the server for storage.</li>
+</ol>
+<p>That should suffice for the UX part. It is incomplete and of course there is much more to discuss,
+to understand and to find out, but I hope this has provided some insight into
+how the interface and the structure of the application would come together — before even a 
+single line of code has been written.</p>
+<p>In the following post, we’re going back to the software architecture we started to elicit
+using the <a href="../1-domain-story-telling">domain storytelling technique</a>, but now wth a much better
+understanding of what the UI will look like, how the designers imagine this application would
+turn the users into happy, paying customers.</p>
+<h2 id="Still-open-questions"><a href="#Still-open-questions" class="headerlink" title="Still open questions"></a>Still open questions</h2><p>Despite this effort, there remain a number of open questions:</p>
+<ol>
+<li>We permit to provide a set of keywords for a trip. This might later lead to a keyword 
+search feature for the public to research trips in a region they are consider to travel in. 
+In case this happens, it might be worthwhile raising the issue of privacy in this phase: <em>Should
+users be able to set trips to “private” and prevent sharing?</em> If so, would this apply globally 
+for all their trips or on a trip-by-trip basis — or a mix of both? </li>
+</ol>
+<p><a href="../3-domain-driven-design-architecture">Next step: Software Architecture</a></p>
+</article></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

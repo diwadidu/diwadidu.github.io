@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="306.7669px" preserveAspectRatio="none" style="width:391px;height:306px;" version="1.1" viewBox="0 0 391 306" width="391.9799px" zoomAndPan="magnify"><defs><filter height="300%" id="f1okwsii3hmsr6" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0050125313283207"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.010025062656641" dy="4.010025062656641" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[842d4820936fb5184287a995d42da3e9]
+entity AuthenticationContext--><rect fill="#F8F8F8" filter="url(#f1okwsii3hmsr6)" height="36.5797" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="176.4411" x="205.0125" y="104.2607"/><rect fill="#F8F8F8" height="5.0125" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="10.0251" x="200" y="109.2732"/><rect fill="#F8F8F8" height="5.0125" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="10.0251" x="200" y="130.8153"/><text fill="#000000" font-family="sans-serif" font-size="14.0351" lengthAdjust="spacingAndGlyphs" textLength="156.391" x="215.0376" y="127.8548">AuthenticationContext</text><!--MD5=[6054bb5867c249720ed08c12a9f7fdcb]
+entity UserContext--><rect fill="#F8F8F8" filter="url(#f1okwsii3hmsr6)" height="36.5797" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="106.2657" x="240.1003" y="8.0201"/><rect fill="#F8F8F8" height="5.0125" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="10.0251" x="235.0877" y="13.0326"/><rect fill="#F8F8F8" height="5.0125" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="10.0251" x="235.0877" y="34.5747"/><text fill="#000000" font-family="sans-serif" font-size="14.0351" lengthAdjust="spacingAndGlyphs" textLength="86.2155" x="250.1253" y="31.6142">UserContext</text><!--MD5=[71ea7df1e6daf348e3804d72e681215a]
+entity TravelReportContext--><rect fill="#F8F8F8" filter="url(#f1okwsii3hmsr6)" height="36.5797" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="163.4085" x="6.015" y="104.2607"/><rect fill="#F8F8F8" height="5.0125" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="10.0251" x="1.0025" y="109.2732"/><rect fill="#F8F8F8" height="5.0125" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="10.0251" x="1.0025" y="130.8153"/><text fill="#000000" font-family="sans-serif" font-size="14.0351" lengthAdjust="spacingAndGlyphs" textLength="143.3584" x="16.0401" y="127.8548">TravelReportContext</text><!--MD5=[32ecfc4afc1ec8e124b9d9a22b490a19]
+entity TravelAppContext--><rect fill="#F8F8F8" filter="url(#f1okwsii3hmsr6)" height="36.5797" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="145.3634" x="220.5514" y="200.5013"/><rect fill="#F8F8F8" height="5.0125" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="10.0251" x="215.5388" y="205.5138"/><rect fill="#F8F8F8" height="5.0125" style="stroke: #383838; stroke-width: 1.5037593984962405;" width="10.0251" x="215.5388" y="227.0559"/><text fill="#000000" font-family="sans-serif" font-size="14.0351" lengthAdjust="spacingAndGlyphs" textLength="125.3133" x="230.5764" y="224.0954">TravelAppContext</text><!--MD5=[ae56a8fbc792eb03d3f263c20d707973]
+link UserContext to AuthenticationContext--><path d="M293.2331,44.1704 C293.2331,61.2632 293.2331,86.7769 293.2331,103.9599 " fill="none" id="UserContext-AuthenticationContext" style="stroke: #383838; stroke-width: 1.0025062656641603;"/><!--MD5=[be69496be25014cc47a25e7ba6c78ebf]
+link TravelReportContext to AuthenticationContext--><path d="M169.5338,122.3058 C181.1729,122.3058 193.193,122.3058 204.9524,122.3058 " fill="none" id="TravelReportContext-AuthenticationContext" style="stroke: #383838; stroke-width: 1.0025062656641603;"/><!--MD5=[ebefdddba77c98427d88d65e56fc06bf]
+link AuthenticationContext to TravelAppContext--><path d="M293.2331,140.411 C293.2331,157.5038 293.2331,183.0175 293.2331,200.2005 " fill="none" id="AuthenticationContext-TravelAppContext" style="stroke: #383838; stroke-width: 1.0025062656641603;"/><text fill="#000000" font-family="sans-serif" font-size="14.0351" lengthAdjust="spacingAndGlyphs" textLength="0" x="202.005" y="260.1856"/><text fill="#000000" font-family="sans-serif" font-size="14.0351" lengthAdjust="spacingAndGlyphs" textLength="0" x="202.005" y="276.7152"/><text fill="#000000" font-family="sans-serif" font-size="14.0351" lengthAdjust="spacingAndGlyphs" textLength="294.7368" x="52.6316" y="293.2448">Bounded contexts of the travel appllication</text><!--MD5=[bc628726861ea9f3871addf698e7e821]
+@startuml
+
+scale 400 width
+hide footbox
+hide empty description
+hide empty members
+skinparam monochrome true
+skinparam linetype ortho
+caption \n\nBounded contexts of the travel appllication
+
+[AuthenticationContext] -up- [UserContext]
+[TravelReportContext] -right- [AuthenticationContext]
+[AuthenticationContext] -down- [TravelAppContext]
+
+@enduml
+
+PlantUML version 1.2019.11(Sun Sep 22 12:02:15 CEST 2019)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 11.0.4+10-LTS
+Operating System: Mac OS X
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

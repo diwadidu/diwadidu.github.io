@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 612 792">
+<g id="Front">
+	<polygon style="fill:none;stroke:#333333;stroke-width:5;" points="301.143,9.834 162.537,102.86 144.863,127.976 117.885,235.881
+		116.956,271.229 112.305,636.811 130.91,664.719 307.654,781.001 449.979,693.557 463.933,664.719 499.285,513.093
+		497.422,143.788 	"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:5;" points="301.143,9.834 278.817,133.557 278.817,162.391
+		281.607,539.136 112.305,636.811 	"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:5;" points="473.237,126.111 436.959,263.789 459.284,282.391
+		463.933,664.719 281.607,539.136 	"/>
+	<path style="fill:none;stroke:#333333;stroke-width:5;" d="M497.422,143.788c-0.927,0.933-38.138,138.603-38.138,138.603"/>
+	<line style="fill:none;stroke:#333333;stroke-width:5;" x1="278.817" y1="133.557" x2="117.885" y2="235.881"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:5;" points="116.956,271.229 278.817,162.391 436.959,263.789 	"/>
+	<line style="fill:none;stroke:#333333;stroke-width:5;" x1="252.771" y1="556.812" x2="449.979" y2="693.557"/>
+</g>
+<g id="Back">
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:5;stroke-dasharray:11,4;" points="161.607,103.786 358.818,234.022
+		331.843,252.626 332.771,628.438 143.935,500.066 140.211,146.578 	"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:5;stroke-dasharray:11,4;" x1="111.375" y1="634.02" x2="143.935" y2="500.066"/>
+	<line style="fill:none;stroke:#aaaaaa;stroke-width:5;stroke-dasharray:11,4;" x1="129.5" y1="663" x2="167.5" y2="516.5"/>
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:5;stroke-dasharray:11,4;" points="305.795,780.068 332.771,657.278
+		332.771,628.438 497.422,514.02 	"/>
+	<line style="fill:none;stroke:#aaaaaa;stroke-width:5;stroke-dasharray:11,4;" x1="491.5" y1="546.5" x2="332.771" y2="657.278"/>
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:5;stroke-dasharray:11,4;" points="143.935,128.902 331.843,252.626
+		497.422,142.855 	"/>
+</g>
+</svg>

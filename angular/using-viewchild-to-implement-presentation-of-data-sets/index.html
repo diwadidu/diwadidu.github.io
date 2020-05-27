@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Using Angular @ViewChild to implement multiple visualizations of data sets | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="Some data sets can be presented in different formats. This post explains,  how to create an Angular structure that lets a user choose which representation of a data set to display, using the example of a music library application."><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="robots" content="noindex"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Using Angular @ViewChild to implement multiple visualizations of data sets</h1><div class="publish-date right">published Dec 21st, 2019</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/architecture" itemprop="url">#architecture
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Sometimes, a single representation of data is just not sufficient.</p>
+<p>If we take a music library app as an example, one would want to look at the music 
+collection either in list form, or as a pretty list of the albums’ cover images while
+keeping the rest of the UI unchanged. Both are using the same underlying data set, 
+and ideally, the change in presentation happens without reloading the data from 
+the server every time.</p>
+<p>In Angular, the <code>@ViewChild</code> can be used to implement that scenario, and in this
+post, we’re going to develop an example where the user can switch between multiple
+different representations of the data, like this:</p>
+<p><img src="screenshots.jpg" alt="&quot;Two representations of a list of music records&quot;"></p>
+<h2 id="Overall-Angular-architecture"><a href="#Overall-Angular-architecture" class="headerlink" title="Overall Angular architecture"></a>Overall Angular architecture</h2><p>To keep things tidy, we’re going to organize the components and views for the
+different list representations in directories under a folder <code>album-list</code> for the 
+<code>AlbumListComponent</code>. Here is an image of the final folder structure, showing all the
+files we’re going to create and use in this example:</p>
+<p><img src="folder-structure.png" alt="&quot;Folder structure of the component listing albums&quot;"></p>
+<p>The code structure is set up so that the <code>AlbumListComponent</code> is going to be responsible 
+for loading the data and providing an entry point for the page as well as the UI, with 
+the exception of the actual lists not  being rendered here.</p>
+<p>The logic for the switching of the views is going to be accomplished by the
+<code>BaseListComponent</code>, which will do the heavy lifting of rendering and switching
+between user-selected views and passing any data to them.</p>
+<p>The use of two separate components neatly separates the presentation of the page
+in the <code>AlbumListComponent</code> from the business logic of managing the rendering of
+the different, selected views, located in the <code>BaseListComponent</code>. Down the line, 
+we’re going to create the actual implementations for the rendering of the list in 
+specialized list render components, such as the <code>NumberedListComponent</code> and 
+<code>CoverListComponent</code> shown in the diagram below. </p>
+<p><img src="component-relationships.svg" alt="&quot;Graphic on how the various components fit together&quot;"></p>
+<p>Let’s start with the outermost <code>album-list.component.html</code> template.</p>
+<h3 id="Step-1-Data-retrieval-and-UI-setup"><a href="#Step-1-Data-retrieval-and-UI-setup" class="headerlink" title="Step 1: Data retrieval and UI setup"></a>Step 1: Data retrieval and UI setup</h3><p>Following is the HTML we’re using on the album list page to allow a user to switch
+between different representations of the list of albums. </p>
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumlist-container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>format-selector<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>button<span class="token punctuation">"</span></span> <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onChangeAlbumDisplayClick(<span class="token punctuation">'</span>list<span class="token punctuation">'</span>)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>List<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>button<span class="token punctuation">"</span></span> <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onChangeAlbumDisplayClick(<span class="token punctuation">'</span>covers<span class="token punctuation">'</span>)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Covers<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Here, we are using the component’s <code>onChangeAlbumDisplayClick()</code> function that
+will change the object property determining which list view will be rendered. The
+corresponding Typescript code of the component
+looks like this (excluding the <code>@Component</code> decorator):</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AlbumListComponent</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">public</span> currentStyle <span class="token operator">=</span> <span class="token string">'covers'</span><span class="token punctuation">;</span>
+  <span class="token keyword">public</span> albumList<span class="token punctuation">:</span> Album<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token function">onChangeAlbumDisplayClick</span><span class="token punctuation">(</span>$event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>currentStyle <span class="token operator">=</span> $event<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>As we can see, the component has two properties, <code>currentStyle</code> and <code>albumList</code>,
+which are used to store the list of albums and the style in which to display them. 
+Both will be passed to a child <code>BaseListComponent</code> we’re going to develop shortly. </p>
+<p>The basic UI is now ready, so we can embed the <code>BaseListComponent</code> into the
+template and pass the two data properties, so the logic can react to any changes.
+With this addition, the <code>album-list.component.html</code> looks like this:</p>
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumlist-container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>format-selector<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>button<span class="token punctuation">"</span></span> <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onChangeAlbumDisplayClick(<span class="token punctuation">'</span>list<span class="token punctuation">'</span>)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>List<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>button<span class="token punctuation">"</span></span> <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onChangeAlbumDisplayClick(<span class="token punctuation">'</span>covers<span class="token punctuation">'</span>)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Covers<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>base-list</span> <span class="token attr-name">[showContentStyle]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>currentStyle<span class="token punctuation">"</span></span> <span class="token attr-name">[albumList]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumList<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>base-list</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We see that in the template, we’re including a tag <code>&lt;base-list/&gt;</code>, for the
+ <code>BaseListComponent</code>. That component will be 
+orchestrating the rendering of the actual display components for the lists and 
+contain the code to swap the view components for the data dynamically. </p>
+<p>Here’s the code for the <code>AlbumListComponent</code> class (again without <code>@Component</code> 
+decorator)</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AlbumListComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span> <span class="token punctuation">{</span>
+
+  <span class="token comment" spellcheck="true">// The two properties, which are passed to BaseListComponent via property binding </span>
+  <span class="token keyword">public</span> currentStyle <span class="token operator">=</span> <span class="token string">'covers'</span><span class="token punctuation">;</span>
+  <span class="token keyword">public</span> albumList<span class="token punctuation">:</span> Album<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> albumService<span class="token punctuation">:</span> AlbumService<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+
+  <span class="token comment" spellcheck="true">// Loading the album data from the server</span>
+  <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>albumService<span class="token punctuation">.</span><span class="token function">getAllAlbums</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>
+        <span class="token punctuation">(</span>albumList<span class="token punctuation">:</span> Album<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token keyword">this</span><span class="token punctuation">.</span>albumList <span class="token operator">=</span> albumList<span class="token punctuation">;</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">onChangeAlbumDisplayClick</span><span class="token punctuation">(</span>$event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>currentStyle <span class="token operator">=</span> $event<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>All that has been added is the call to the server via the <code>AlbumService</code> and the 
+storing of the retrieved data in the <code>albumList</code> property. For the purposes of 
+this example, I’m going to skip the handling of errors in the API call. </p>
+<h3 id="Step-2-List-Component-and-view-switching"><a href="#Step-2-List-Component-and-view-switching" class="headerlink" title="Step 2: List Component and view switching"></a>Step 2: List Component and view switching</h3><p>All the work we’ve done so far was to create a UI which allows the user to load
+and choose how to display the data. Before we get to the creation of the components
+rendering the data in different ways, we will look at the <code>BaseListComponent</code> which
+will make the dynamic rendering of the selected view component happen.</p>
+<p>To start out, let’s create the component and hook it up with the inputs it will
+receive from the <code>AlbumListComponent</code>:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token punctuation">:</span> <span class="token string">'base-list'</span><span class="token punctuation">,</span>
+  templateUrl<span class="token punctuation">:</span> <span class="token string">'./base-list.component.html'</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BaseListComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span> <span class="token punctuation">{</span>
+
+  @<span class="token function">Input</span><span class="token punctuation">(</span><span class="token punctuation">)</span> showContentStyle<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
+  @<span class="token function">Input</span><span class="token punctuation">(</span><span class="token punctuation">)</span> albumList<span class="token punctuation">:</span> Album<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">private</span> contentStyles <span class="token operator">=</span> <span class="token punctuation">{</span>
+    list<span class="token punctuation">:</span> NumberedListComponent<span class="token punctuation">,</span>
+    covers<span class="token punctuation">:</span> CoverListComponent<span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+  <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>showContentStyle <span class="token operator">=</span> <span class="token string">'covers'</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">instantiateViewComponent</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>showContentStyle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">instantiateViewComponent</span><span class="token punctuation">(</span>componentName<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We see the two <code>@Input()</code> lines at the beginning to allow the component to accept
+the property bindings of the <code>AlbumListComponent</code>. After the <code>@Input()</code> we define
+<code>contentStyles</code>, a mapping from the string identifying the component (“list” or 
+“covers”) to the corresponding component class being rendered later.</p>
+<p>This setup is followed by the <code>ngOnInit()</code> function, which sets the default view and 
+calls a method, which will render and insert the selected component 
+into the template of the <code>BaseListComponent</code>. The template for this component is really
+short and simple and consists only of a <code>&lt;div /&gt;</code> element with an identifier we’re going
+to use later to insert the rendered component (<code>#albumListStyle</code>) at that location
+of the template:</p>
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">#albumListStyle</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>With this basic setup, we’re ready to tackle the heart of the implementation, the
+<code>instantiateViewComponent()</code> method receiving the string identifying the component 
+to instantiate. This method needs to accomplish the following tasks:</p>
+<ol>
+<li>Identify the correct component class corresponding to a given string identifier.</li>
+<li>Create an instance of that component.</li>
+<li>Pass any data needed for rendering into the newly instantiated component.</li>
+<li>Place the rendered component into the parent template. </li>
+</ol>
+<p>The following code accomplishes these tasks:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">  @<span class="token function">ViewChild</span><span class="token punctuation">(</span><span class="token string">'albumListStyle'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>read<span class="token punctuation">:</span> ViewContainerRef<span class="token punctuation">,</span> <span class="token keyword">static</span><span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+  albumListContainer<span class="token punctuation">:</span> ViewContainerRef<span class="token punctuation">;</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>
+    <span class="token keyword">private</span> componentFactoryResolver<span class="token punctuation">:</span> ComponentFactoryResolver<span class="token punctuation">,</span>
+  <span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> componentReference<span class="token punctuation">:</span> ComponentRef<span class="token operator">&lt;</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token keyword">private</span> <span class="token function">instantiateViewComponent</span><span class="token punctuation">(</span>componentName<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> componentType <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">provideListComponent</span><span class="token punctuation">(</span>componentName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> factoryInstance <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>componentFactoryResolver<span class="token punctuation">.</span><span class="token function">resolveComponentFactory</span><span class="token punctuation">(</span>componentType<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>componentReference <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>albumListContainer<span class="token punctuation">.</span><span class="token function">createComponent</span><span class="token punctuation">(</span>factoryInstance<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> instance <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>componentReference<span class="token punctuation">.</span>instance as AbstractList<span class="token punctuation">;</span>
+    instance<span class="token punctuation">.</span>albumListToRender <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>albumList<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">provideListComponent</span><span class="token punctuation">(</span>componentStyle<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>contentStyles<span class="token punctuation">[</span>componentStyle<span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token keyword">this</span><span class="token punctuation">.</span>contentStyles<span class="token punctuation">.</span>list<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In the first two lines, the <code>@ViewChild</code> decorator creates a reference to the HTML 
+element in this component’s template with the <code>#albumListStyle</code> annotation and stores 
+the reference in the <code>albumListContainer</code> property. </p>
+<p>In line 11, the <code>provideListComponent()</code> method is used to identify and return a 
+reference to the component class associated with the provided string identifier 
+<code>componentName</code> &mdash; or to otherwise return a default. Lines 12 and 13 retrieve
+the selected component’s factory and instantiate the component from it. Notice also 
+in line 9, how we’re referring to the ViewChild via the <code>albumListContainer</code> property 
+to create and inject the component. A reference to the newly instantiated component 
+is kept in the <code>componentReference</code> object property, so that we can do two things:</p>
+<ol>
+<li>Pass data into the component for rendering</li>
+<li>Destroy the component later, when the user selects another view of the data for 
+display. If we don’t destroy the component instance, we would add a new object 
+instance on each “switch” of the view.  </li>
+</ol>
+<p>To pass any data into the child component, we get a reference to the class instance 
+and provide the loaded data to the rendering component, which is shown in lines 11 
+and 12. We have not yet seen the components doing the actual rendering, but we 
+can take an educated guess from this code that they possess an <code>albumListToRender</code> 
+property. Before we go into the components doing the actual rendering, let’s look
+again at our overview graphic and see what we’ve accomplished so far:</p>
+<ol>
+<li>We have set up a component which forms the base for our implementation, the 
+<code>AlbumListComponent</code>. Its main task is to set up the page, load the data from 
+the server and provide the UI to change the data view and the styling for the 
+entire page.</li>
+<li>As its child, we implemented the <code>BaseListComponent</code>, which handles the switching
+of the selected view of the information by instantiating child components and passing
+the data to the child components.</li>
+</ol>
+<h3 id="Step-3-Implementing-the-list-views"><a href="#Step-3-Implementing-the-list-views" class="headerlink" title="Step 3: Implementing the list views"></a>Step 3: Implementing the list views</h3><p>We saw in the previous section that we’re passing data to the components taking care
+of the rendering of the list. In line 15 of the last listing, you may have noticed a 
+reference to an <code>AbstractList</code>. That (abstract) class is the basis for all 
+components tasked with rendering lists. It provides a common data reference and 
+looks as follows:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> abstract <span class="token keyword">class</span> <span class="token class-name">AbstractList</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span> albumListToRender<span class="token punctuation">:</span> Album<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>For a real implementation of a list we look at the component rendering the albums in
+form of a grid of cards with the album covers, artist and album name. The Typescript
+class is very straight forward:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token punctuation">:</span> <span class="token string">'app-cover-list'</span><span class="token punctuation">,</span>
+  templateUrl<span class="token punctuation">:</span> <span class="token string">'./cover-list.component.html'</span><span class="token punctuation">,</span>
+  styleUrls<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'./cover-list.component.css'</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CoverListComponent</span> <span class="token keyword">extends</span> <span class="token class-name">AbstractList</span> <span class="token punctuation">{</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>It extends and instantiates the <code>AbstractList</code> class in its constructor method, 
+thereby gaining access to the <code>albumListToRender</code> property. The corresponding 
+template is straight forward Angular templating:</p>
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let album of albumListToRender<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumcard-container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumcard-cover<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token comment" spellcheck="true">&lt;!-- image tag here--></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumcard-data<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h3</span><span class="token punctuation">></span></span>{{ album.albumName }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h3</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h4</span><span class="token punctuation">></span></span>{{ album.artist }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h4</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Each of the components rendering a view have a very similar setup:</p>
+<ol>
+<li>The actual component code consists of only a constructor which calls the <code>super()</code> 
+method to gain access to the <code>AbstractList</code> variable <code>albumListToRender</code></li>
+<li>The view template uses that <code>albumToRender</code> property to display the same data in
+a different format. </li>
+</ol>
+<p>With this knowledge, setting up new views merely involves creating a new component and 
+implementing the HTML to render the album data in the required output format. That, and 
+adding the new component to the <code>contentStyles</code> property in the <code>BaseListComponent</code>.  </p>
+<h3 id="Step-4-Cleaning-up-and-dealing-with-view-changes"><a href="#Step-4-Cleaning-up-and-dealing-with-view-changes" class="headerlink" title="Step 4: Cleaning up and dealing with view changes"></a>Step 4: Cleaning up and dealing with view changes</h3><p>The implementation so far almost works. There is still a problem with the 
+rendering of the components displaying the list and a problem that an existing
+component is not removed when the view should be changed. To solve these two problems,
+we’re going to use the <code>ngOnChange</code> and <code>ngOnDestroy</code> methods in the <code>BaseListComponent</code>:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BaseListComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span><span class="token punctuation">,</span> OnDestroy<span class="token punctuation">,</span> OnChanges <span class="token punctuation">{</span>
+
+  <span class="token operator">...</span>
+
+  <span class="token function">ngOnDestroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">destroyChildComponent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">ngOnChanges</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">destroyChildComponent</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">instantiateViewComponent</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>showContentStyle<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">destroyChildComponent</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>componentReference<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>componentReference<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>componentReference <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The <code>ngOnDestroy()</code> method unloads (destroys) the dynamically rendered component to
+avoid memory leaks through this implementation. The <code>ngOnChanges()</code> method will get
+called at each change of the <code>showContentStyle</code> property, indicating that the user
+requested a different view. This method is responsible for destroying the already
+existing view component and render the new view.</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this article, we explored how to change the visual presentation of data sets in Angular
+without reloading the data for each change in display style. This implementation
+is made possible through Angular’s <code>@ViewChild</code> feature, which allows the TypeScript host 
+component instance to replace the rendered template dynamically and pass its data to the 
+child component.</p>
+<p>The principle behind this functionality can be used in many other ways, such as rendering an 
+entity that has common attributes but different details depending on the type of the
+data. As an example, a page showing the details of library items would need to display common 
+data such as title, author/artist and dewey index but would have different detail information 
+depending on whether the item is a book, magazine, music recording or DVD (e.g. number of 
+pages, edition for books vs. playing time and track list for CDs). In this case, it would not be
+the user clicking a button to change the display, but the system itself would select and 
+instantiate the correct child template based on a parameter value in the data object to be
+rendered. </p>
+</article><span class="prev-post"><a href="/angular/angular-form-multiple-possible-subform-types/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/functional-programming/implementing-the-option-monad-in-javascript/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

@@ -1,0 +1,12 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 612 728">
+<polygon style="fill:none;stroke:#333333;stroke-width:5;" points="340.549,6.857 260.614,19.069 6.375,132.311 11.926,240.001
+	86.31,485.357 159.584,598.6 310.573,702.96 362.754,721.834 518.184,700.74 584.795,510.894 605.889,185.601 595.897,22.399 "/>
+<polyline style="fill:none;stroke:#333333;stroke-width:5;" points="607,190.042 362.754,66.809 279.487,76.801 137.38,276.638
+	359.423,559.742 332.777,668.544 291.7,662.993 86.31,485.357 "/>
+<line style="fill:none;stroke:#333333;stroke-width:5;" x1="6.375" y1="132.311" x2="137.38" y2="276.638"/>
+<line style="fill:none;stroke:#333333;stroke-width:5;" x1="359.423" y1="559.742" x2="518.184" y2="700.74"/>
+<line style="fill:none;stroke:#333333;stroke-width:5;" x1="362.754" y1="721.834" x2="332.777" y2="668.544"/>
+<line style="fill:none;stroke:#333333;stroke-width:5;" x1="292.333" y1="663.334" x2="311.124" y2="704.288"/>
+<line style="fill:none;stroke:#333333;stroke-width:5;" x1="260.614" y1="19.069" x2="279.487" y2="76.801"/>
+<line style="fill:none;stroke:#333333;stroke-width:5;" x1="340.549" y1="6.857" x2="362.754" y2="66.809"/>
+</svg>

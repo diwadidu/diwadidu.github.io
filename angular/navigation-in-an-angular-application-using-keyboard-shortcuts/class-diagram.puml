@@ -1,0 +1,30 @@
+@startuml
+
+scale 500 width
+'scale 2048 width
+skinparam monochrome true
+skinparam linetype ortho
+'hide footbox
+hide empty members
+
+class KeyService
+class AppComponent
+class ComponentA
+class ComponentB
+class ComponentC
+abstract AbstractKeypress <<abstract>> {
+  reactToKeypress()
+  keyActions: {string: Function}
+}
+
+ComponentA --|> AbstractKeypress
+ComponentB --|> AbstractKeypress
+ComponentC --|> AbstractKeypress
+
+AppComponent ..> ComponentA
+AppComponent ..> ComponentB
+AppComponent ..> ComponentC
+
+AppComponent ..> KeyService
+AbstractKeypress ..> KeyService
+@enduml

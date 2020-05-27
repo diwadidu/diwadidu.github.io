@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Constructing a rudimentary money transfer architecture | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="This post takes a look at the obvious things a money transfer implementation would need to account for - it's more of a brain teaser &quot;what if&quot;, if solutions  wouldn't be readily available."><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Constructing a rudimentary money transfer architecture</h1><div class="publish-date right">published Oct 24th, 2019</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/architecture" itemprop="url">#architecture
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/domain-driven-design" itemprop="url">#domain-driven-design
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Always looking for something “fun” to think about in my free time, I ended up thinking 
+about how I would implement a money wiring solution. This post looks at a few architectural
+decisions and patterns that are helpful for a possible solution. I’m going to touch on domain 
+driven design (DDD), compensation strategies and a bunch of other things. </p>
+<h2 id="From-naive-beginnings-to-further-insight"><a href="#From-naive-beginnings-to-further-insight" class="headerlink" title="From naïve beginnings to further insight"></a>From naïve beginnings to further insight</h2><p>It all started with a thought on how I would implement the transfer of money between 
+bank accounts. I then realized, that it would make more sense to think about money transfers 
+in general and came up with the following class diagram:</p>
+<p><img src="class-diagram.svg" alt="The class diagram showing the classes for implementing the payment system"></p>
+<p>In this fairly trivial example, we have an interface, which requires a transaction ID
+and methods to debit one account and credit another. That of course is assuming that 
+there are some kind of web interfaces we can use to initiate the respective
+transactions. Again, this is just a thought-experiment.</p>
+<p>That interface can be realized by a number of different transfer types: credit card to bank
+account (<em>credit card transfer</em>), bank account to bank account (<em>wire transfer</em>) among 
+others. The actual logic for how to accomplish that transfer is therefore located in the
+specific classes, which all implement the interface. </p>
+<p>An interesting edge case would be how to deal with cash payments, in case this system would
+be used as a backend service in a grocery store, for example. In this case, we “only” 
+receive money from the other party, but don’t have any information about a bank account.
+I don’t know enough about accounting practices, so this would be a case to talk to the 
+domain experts and find out about the bookkeeping procedures. I could imagine that
+the register’s internal payment log is compared to the actual content and the moment
+the cash is brought to the bank, there would be some sort of transaction recorded. I
+don’t know, so I won’t follow this line of thought further for the imaginary scenario in
+this post.</p>
+<p>A question that remains is where to place this money transfer logic in our code base. 
+According to domain-driven design (DDD) principles, the functionality discussed in this 
+post would be a prime example of a domain service:</p>
+<ol>
+<li>Stateless functionality that</li>
+<li>represents a well-defined, self-contained principle/concept of the <strong>business domain</strong> which</li>
+<li>doesn’t conceptually fit into a domain object such as an <strong>entity</strong> or <strong>aggregate</strong> and </li>
+<li>models a transaction bracket in a single class.</li>
+</ol>
+<p>So that’s what I would go with here; To create services that are self-contained 
+pieces of functionality, but are all implementing a common interface, as shown in the 
+UML diagram above.</p>
+<h3 id="To-parallelize-or-not-to-parallelize-…"><a href="#To-parallelize-or-not-to-parallelize-…" class="headerlink" title="To parallelize or not to parallelize …"></a>To parallelize or not to parallelize …</h3><p>One interesting question that comes up is whether we proceed with both transactions, the 
+crediting and debiting of the accounts, at the same time or if we do those sequentially. 
+Even though I’m a big fan of asynchronous programming, I would decide on the two step 
+sequence, for the following reason:</p>
+<p>If we run both transactions in parallel, the handling of error cases becomes much more
+complicated. For example, let’s assume the depositing of money has succeeded, but the debit
+transaction failed &mdash; repeatedly, maybe because of an overdrawn, invalid or closed account. 
+Now we’re in the awkward situation of having created money out of nothing in the target 
+account, and are at the mercy of the cleanup process to work. That, plus it feels funny 
+to yank money out of an account after just having made the deposit &mdash; if a withdrawal by
+a third party is even allowed for a bank account. Again, this is probably a question for the 
+domain experts, but I will 
+proceed with the two-step solution by running the transactions in sequence, as laid out in 
+the following state diagram:</p>
+<p><img src="state-diagram.svg" alt="Diagram listing the states and transitions for the money transfer class"></p>
+<p>Here, we start out by initializing the service with the requisite data like information 
+of the involved accounts (bank or credit card account)
+as well as the amount to the transferred. At that time, we’ll also generate a 
+unique transaction ID by which we can trace the steps and status of this transaction and
+which will be used to assign to log entries so we can follow every step of this transaction.</p>
+<p>In the first step, we debit the source account by the specified amount. If we do get
+a failure during the transaction, we try again using an <em>exponential backoff</em> algorithm.
+After a certain amount of attempts, we declare the transaction as failed, write the occurrence
+into a log and finish the process. On a software product or web site, we would display 
+an error message here, including a generic reason and any next steps the user can take.</p>
+<img src="https://www.plantuml.com/plantuml/svg/NSyx3i8m44NHVbOnoW9G4hbmQI5GH8kyWI6U91R-17y4ooS53IxVrMcUoeLIgTu1fFYekM2dhRTXnOkbDP7la3Bg2V9CZd7iXSItDMM3ZSbmmkjdZu53iUJmJFCpBWk0wa5FQ3FUZ6DGms_T-LKvboES1lmJOol6LeXMY5R8LiX6WE9WZgjV">
+
+
+<p>Once, or if, the debit transaction succeeds, we’re starting to credit the target account with 
+the specified amount. We again see here an exponential backoff algorithm being employed in 
+case of failure. If all goes well, we log the successful transaction in the activity log
+for later reference, and call the process done.</p>
+<p>If the debit action succeeded, and the crediting failed, we have to compensate for the 
+withdrawn money, i.e. we have to give it back before calling it quits. In that case, we
+try run another transaction on the debit account, this time with the negative value of 
+the transaction that already succeeded - in effect giving back the money we had already 
+withdrawn. Hopefully, this transaction works (using retries here as well), but if 
+all else fails, we’re going to write an entry into a monitored log, so that a human can
+take a look and resolve the issue by whichever means necessary. This log should 
+be separate from the ActivityLog in order to not overwhelm the users of this log. </p>
+<p>One word about logs: Since we’re dealing with financial transactions in this example, 
+and also because the system admins might want finer-grained information, we should 
+probably also write log entries after each step and failed retry. That way, we have 
+all the information to reconstruct why a transaction, or a series of different 
+transactions, failed. In case of server outages or longer term failures, these logs 
+might prove crucial to finding the problem fast.    </p>
+<h3 id="Details-of-the-DebitAccount-and-CreditAccount-steps"><a href="#Details-of-the-DebitAccount-and-CreditAccount-steps" class="headerlink" title="Details of the DebitAccount and CreditAccount steps"></a>Details of the <em>DebitAccount</em> and <em>CreditAccount</em> steps</h3><p>Let’s take one last, quick, look at the DebitAccount and CreditAccount state in the 
+previous diagram. I already mentioned what they do, but here is a graphic explaining
+their functionality:</p>
+<p><img src="activity-diagram.svg" alt="Detail of the processing of a financial transaction"></p>
+<p>Here’s what’s happening:</p>
+<ol>
+<li>Each type of transaction starts out by making an attempt to transfer the money, since 
+the number of attempts is 0.</li>
+<li>If that attempt succeeds, we’re making a note in a log and call it a day.</li>
+<li>If the attempt fails, we’ll log that failure and try again, thereby increasing the
+attempt count by one.</li>
+<li>We’re also, as mentioned in this diagram, using an <a href="https:setwww.computerhope.com/jargon/e/exponential-backoff.htm" target="_blank" rel="noopener"><em>exponential backoff</em> machanism</a><br>so we don’t blast the server with our requests, which have just failed anyway. The other 
+benefit of the backoff is that we’re giving the target system more time to get back in working 
+condition and don’t just forge ahead. However, after a predefined number of retries, we’re 
+failing (<em>aborting</em>) the process.</li>
+</ol>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this post, I have looked from a fairly high level, and with limited domain knowledge, at 
+the logic of making money transfers between bank accounts. Despite that coarse treatment, 
+a few insights were gained regarding the structuring of the code and potential difficulties
+in the business logic. Some questions were raised, which require the cooperation of a 
+subject matter expert. </p>
+</article><span class="prev-post"><a href="/architecture/angular-pagination-immutable-state/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/angular/angular-form-multiple-possible-subform-types/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

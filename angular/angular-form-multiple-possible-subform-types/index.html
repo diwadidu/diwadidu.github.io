@@ -1,0 +1,433 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Polymorphic Angular Forms: How to create forms with different detail data | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="Some web forms require the use of different detail sub-forms to collect the data. In this post, I'll be looking at a form for library items which has different detail data for three library items: books, CDs and DVDs."><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Polymorphic Angular Forms: How to create forms with different detail data</h1><div class="publish-date right">published Nov 30th, 2019</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/architecture" itemprop="url">#architecture
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/typescript" itemprop="url">#typescript
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Data can be a messy thing: We sometimes have to manage data where a large part is the same
+between different items, but differ in some details according to the type of thing we’re 
+collecting data for. </p>
+<p>In this post, I’m going to
+look at a form for a hypothetical library application, which needs to capture library 
+inventory consisting of multiple types: books, CDs, DVDs. Each of these library items has 
+different requirements for data.</p>
+<p>Common among them is the author/artist, title, dewey number, release date etc. But whereas
+a book has a page count and edition number, a CD has a play time and a list of songs/tracks.
+It seems natural to design a form which shares the common fields and loads the item’s details
+on selection. This means that we need to be able to adjust the form fields collected
+based on the value of a “library item type” field. </p>
+<p>The solution to this problem employs similar techniques to the post on
+<a href="/angular/using-viewchild-to-implement-presentation-of-data-sets/">displaying the same data multiple different ways</a>,
+but is a bit more involved since we’re manipulating Angular’s form feature.</p>
+<p>A form for the two different types might look like the one in the following two
+screenshots, where we have a common part (up to the “Dewey Index” field) and then
+have different forms for a book or a CD.</p>
+<p><img src="two-different-subforms.jpg" alt="Two screenshots for the different item types to collect data for."></p>
+<p>In this post, I’m going to explain the approach I took for a sample Angular implementation, 
+which consists of the following steps:</p>
+<ol>
+<li>Looking at the types required for the architecture.</li>
+<li>Structuring and developing the form components.</li>
+<li>Programming the form for editing common fields.</li>
+<li>Implementing the subform mechanism to dynamically load the sub forms and have them update on 
+changes in the displayed form.</li>
+<li>Modification of the form to allow adding new items in addition to editing existing ones.</li>
+</ol>
+<h2 id="Defining-the-types-for-the-application"><a href="#Defining-the-types-for-the-application" class="headerlink" title="Defining the types for the application"></a>Defining the types for the application</h2><p>Let’s start with looking at the types we need, which will lead the way for the rest of 
+the implementation.</p>
+<p>The main type/class will be called <code>LibraryItem</code> and will manage all the data common among
+the various library types. Its class is defined as follows:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LibraryItem</span><span class="token operator">&lt;</span>T<span class="token operator">></span> <span class="token punctuation">{</span>
+  id<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
+  type<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
+  artistOrAuthor<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
+  title<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
+  yearReleased<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
+  deweyIdx<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
+  details<span class="token punctuation">:</span> T<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We have the usual suspects such as an <code>id</code> field, <code>artistsOrAuthor</code>, <code>title</code>, <code>yearReleased</code>
+and the <code>deweyIdx</code> for the Dewey Decimal Classification. There also is a field called <code>type</code>,
+which will indicate what type an instance of this class represents. Finally, there is a
+field called <code>details</code> of generic type <code>T</code>, which is the field that will hold the data specific to 
+the various different library items such as books, CDs, DVDs, magazines etc.</p>
+<p>Looking at the task at hand, we still need to define the classes that will be used to house 
+the data for the various item types managed in a library by our application. Here are 
+sample implementations for rudimentary <code>BookItem</code> and <code>CdItem</code> classes, defining the detail 
+data to collect for their respective library items:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BookItem</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span> numPages<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
+  <span class="token keyword">public</span> edition<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CdItem</span> <span class="token punctuation">{</span>
+  lengthInSeconds<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
+  songs<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>With the detail types of <code>BookItem</code> or <code>CdItem</code>, we will therefore have 
+library items of type <code>LibraryItem&lt;BookItem&gt;</code> and <code>LibraryItem&lt;CdItem&gt;</code> and so on. To get the
+types correct for the form, we can already anticipate a separate type, which will be the union
+of the various types for the library item details. This type, <code>LibraryTypeUnion</code>, will be used 
+whenever a variable or return type in our application can be any library item, for example on the
+list page, which should be able to list any and all library items, regardless of the detail type.</p>
+<p>So with that requirement, we get:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> type LibraryTypeUnion <span class="token operator">=</span> LibraryItem<span class="token operator">&lt;</span>BookItem<span class="token operator">></span> <span class="token operator">|</span> 
+                               LibraryItem<span class="token operator">&lt;</span>CdItem<span class="token operator">></span> <span class="token operator">|</span> 
+                               LibraryItem<span class="token operator">&lt;</span>DvdItem<span class="token operator">></span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="Form-component-structures-for-collecting-the-data-types’-details"><a href="#Form-component-structures-for-collecting-the-data-types’-details" class="headerlink" title="Form component structures for collecting the data types’ details"></a>Form component structures for collecting the data types’ details</h2><p>Now that we have a system of types for our implementation, we can look at</p>
+<ol>
+<li>what components we need for the implementation.</li>
+<li>what role those components play in our system.</li>
+</ol>
+<p>As a first step, it seems prudent to abstract out the part of the components which will contain 
+the data for the details of a <code>LibraryItem</code> into a common, abstract class, so we can more easily 
+assure that the classes behave the same. This abstract class, which will be extended by all 
+components managing the detailed type information, contains only the object
+variable that should be uniform across all classes:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> abstract <span class="token keyword">class</span> <span class="token class-name">AbstractLibItemDetail</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span> childForm<span class="token punctuation">:</span> FormGroup<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>With that out of the way, we can now turn our attention to the implementation of the components
+managing the forms for the different data types. The detail components’ role will be </p>
+<ol>
+<li>to define a form group, which can be inserted into the parent form’s markup to collect 
+the details</li>
+<li>to provide the template markup for the form.</li>
+</ol>
+<p>As an example, the following listing shows what the component class for <code>BookDetailComponent</code> 
+will look like using the abstract class. It would consist solely of a constructor accepting
+Angular’s <code>FormBuilder</code>, which is used to define the detail form to be injected into the main 
+form as an Angular <code>FormGroup</code>. Notice how the structure of that <code>FormGroup</code> matches the 
+structure of the <code>BookItem</code> class shown earlier. Also in the constructor, in line 8, we 
+instantiate the extended abstract class through a call to <code>super()</code>.</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  selector<span class="token punctuation">:</span> <span class="token string">'app-book-detail'</span><span class="token punctuation">,</span>
+  templateUrl<span class="token punctuation">:</span> <span class="token string">'./book-detail.component.html'</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BookDetailComponent</span> <span class="token keyword">extends</span> <span class="token class-name">AbstractLibItemDetail</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token keyword">public</span> fb<span class="token punctuation">:</span> FormBuilder<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>childForm <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>fb<span class="token punctuation">.</span><span class="token function">group</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      numPages<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      edition<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The form definition of the component class already lets us know what the template will look like,
+which will be form elements with the usual (for Angular) <code>formControlName</code> property bindings, but
+since we’re defining a nested form, there won’t be any <code>&lt;form /&gt;</code> elements. The template might
+look like this:</p>
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h3</span><span class="token punctuation">></span></span>Book Detail<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h3</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>book-detail-form<span class="token punctuation">"</span></span> <span class="token attr-name">[formGroup]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>childForm<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>label</span> <span class="token attr-name">for</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>number-of-pages<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Year Released<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>label</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>numPages<span class="token punctuation">"</span></span> 
+           <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>number<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>number-of-pages<span class="token punctuation">"</span></span> 
+           <span class="token attr-name">formControlName</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>numPages<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>label</span> <span class="token attr-name">for</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>edition<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Edition<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>label</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>text<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>edition<span class="token punctuation">"</span></span> <span class="token attr-name">formControlName</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>edition<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>There should be nothing surprising about this:</p>
+<ol>
+<li>We’re defining elements which contain the label and corresponding input field</li>
+<li>Using <code>formControlName</code>, we bind the input field to the appropriate property 
+in the <code>childForm</code> group </li>
+</ol>
+<p>One thing I want to point out is the <code>[formGroup]</code> binding on the host <code>&lt;div&gt;</code> element (line 2), 
+which will create the connection between this sub-form and its data to the parent component we’re 
+going to look at next.</p>
+<h2 id="The-host-component"><a href="#The-host-component" class="headerlink" title="The host component"></a>The host component</h2><p>Now that we have all the “details” squared away, we can take a look at how we’re going to pull
+the implementation together using a parent component for the display and management of the 
+form. The parent should exhibit the following behavior:</p>
+<ol>
+<li>On creation of a new item, its form should allow to select the detail type of the item, which 
+will then be rendered into the form at the designated location.</li>
+<li>When editing an existing entry, the change of item type should not be allowed, i.e. the 
+field to select the type of item should be hidden.</li>
+<li>When an existing entry is edited the form should be pre-populated and display the correct
+form type. </li>
+</ol>
+<p>I’m going to start off with editing since it simplifies the implementation because we don’t 
+need to implement the dynamic changing of the detail form right away — since we won’t allow 
+editing the item type. Typically, the editing and creation of items will take place in the 
+same template, so we can simply extend our initial implementation with the creation in a 
+second step.</p>
+<h4 id="Editing-existing-entries-using-LibraryItemDetailComponent"><a href="#Editing-existing-entries-using-LibraryItemDetailComponent" class="headerlink" title="Editing existing entries using LibraryItemDetailComponent"></a>Editing existing entries using LibraryItemDetailComponent</h4><p>Let’s start off with the template for the library items. An abbreviated version of a 
+<code>LibraryItemDetailComponent</code> template, omitting a few form fields, looks like this:</p>
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">[formGroup]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>formDefinition<span class="token punctuation">"</span></span> <span class="token attr-name">(ngSubmit)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onFormSubmit()<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>label</span> <span class="token attr-name">for</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>artist-or-author<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Artist or Author<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>label</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>artistOrAuthor<span class="token punctuation">"</span></span> 
+             <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>text<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>artist-or-author<span class="token punctuation">"</span></span> 
+             <span class="token attr-name">formControlName</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>artistOrAuthor<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>label</span> <span class="token attr-name">for</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>title<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Title<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>label</span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>text<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>title<span class="token punctuation">"</span></span> <span class="token attr-name">formControlName</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>title<span class="token punctuation">"</span></span> <span class="token punctuation">/></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+    ...
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>item-detail-container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+      <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">#itemDetail</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Submit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We can already tell a few implementation details of our component from the template:</p>
+<ul>
+<li>The component code defines the <code>formDefinition</code> property which will contain the form’s
+definition (go figure).</li>
+<li>There will be a <code>@ViewChild</code> property named <code>itemDetail</code> based on line 15. This view child
+will be the place we’re going to place our detail templates we defined earlier.</li>
+<li>On form submission, we’re going to call a method named <code>onFormSubmit</code>.</li>
+</ul>
+<p>Correspondingly, our component class is going to start out like this:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LibraryItemDetailComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">public</span> formDefinition<span class="token punctuation">:</span> FormGroup<span class="token punctuation">;</span>
+
+  <span class="token comment" spellcheck="true">/**
+   * The sequence in this object determines the default setting in the UI,
+   * as the first item is the default for an empty form
+   */</span>
+  <span class="token keyword">private</span> detailContentStyles <span class="token operator">=</span> <span class="token punctuation">{</span>
+    book<span class="token punctuation">:</span> <span class="token punctuation">{</span>label<span class="token punctuation">:</span> <span class="token string">'Book'</span><span class="token punctuation">,</span> component<span class="token punctuation">:</span> BookDetailComponent<span class="token punctuation">}</span><span class="token punctuation">,</span>
+    cd<span class="token punctuation">:</span> <span class="token punctuation">{</span>label<span class="token punctuation">:</span> <span class="token string">'CD'</span><span class="token punctuation">,</span> component<span class="token punctuation">:</span> CdDetailComponent<span class="token punctuation">}</span><span class="token punctuation">,</span>
+    dvd<span class="token punctuation">:</span> <span class="token punctuation">{</span>label<span class="token punctuation">:</span> <span class="token string">'DVD'</span><span class="token punctuation">,</span> component<span class="token punctuation">:</span> DvdDetailComponent<span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+  @<span class="token function">ViewChild</span><span class="token punctuation">(</span><span class="token string">'itemDetail'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>read<span class="token punctuation">:</span> ViewContainerRef<span class="token punctuation">,</span> <span class="token keyword">static</span><span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+  itemDetailContainer<span class="token punctuation">:</span> ViewContainerRef<span class="token punctuation">;</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>
+    <span class="token keyword">public</span> fb<span class="token punctuation">:</span> FormBuilder<span class="token punctuation">,</span>
+    <span class="token keyword">public</span> route<span class="token punctuation">:</span> ActivatedRoute<span class="token punctuation">,</span>
+  <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>fb<span class="token punctuation">.</span><span class="token function">group</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      id<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      type<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      artistOrAuthor<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      title<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      yearReleased<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      deweyIdx<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">''</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In the constructor, we inject the Angular <code>FormBilder</code> and an instance of <code>ActivatedRoute</code>, 
+which we will use later to extract the <code>id</code> of a requested item from the URL this component
+was called with. In the constructor we define our base form, which will contain the common
+attributes every library item will contain. </p>
+<p>Of special note here is the <code>type</code> field on line 25, which will be used to specify which detail 
+form needs to be rendered with this library item, i.e. it determines whether we look at a book, 
+CD or DVD item. This property will be used to instantiate the correct detail template later
+in this implementation.</p>
+<p>We then have the definition of the <code>itemDetailContainer</code> property as a <code>ViewChild</code> with the 
+template identifier <code>itemDetail</code>, which we already saw in the component’s HTML listing on line 15. 
+Instances of our detail components will be assigned to this ViewChild to get them rendered into 
+the template. Finally, we have a mapping of identifiers (‘book’, ‘cd’ and ‘dvd’) to their 
+respective components and to human-readable labels, stored in the <code>detailContentStyles</code> property.</p>
+<h6 id="Setting-up-the-composed-form"><a href="#Setting-up-the-composed-form" class="headerlink" title="Setting up the composed form"></a>Setting up the composed form</h6><p>In the previous section, we have seen how we can create the common part of the form. Now,
+it’s time to look at how we can inject one of the detail forms into that base form. In the
+<code>ngOnInit</code> method shown in the listing of the component below, we extract the ID of the 
+item to load from the URL in line 4, then load the data belonging to that ID (not shown) 
+and then pass the loaded data to a method <code>instantiateDetailForm</code> which performs the 
+instantiation of the component of the corresponding type.</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">private</span> childComponent<span class="token punctuation">:</span> <span class="token keyword">any</span><span class="token punctuation">;</span>
+
+  <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> itemId <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>route<span class="token punctuation">.</span>snapshot<span class="token punctuation">.</span>paramMap<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'id'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">let</span> formData<span class="token punctuation">:</span> LibraryTypeUnion <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// ... load the library item with ID itemId and store in formData;</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">instantiateDetailForm</span><span class="token punctuation">(</span>formData<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">instantiateDetailForm</span><span class="token punctuation">(</span>formData<span class="token punctuation">:</span> LibraryTypeUnion<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> childComponentRef <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>detailContentStyles<span class="token punctuation">[</span>formData<span class="token punctuation">.</span>type<span class="token punctuation">]</span><span class="token punctuation">.</span>component<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> factoryInstance <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>componentFactoryResolver<span class="token punctuation">.</span><span class="token function">resolveComponentFactory</span><span class="token punctuation">(</span>childComponentRef<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>childComponent <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>itemDetailContainer<span class="token punctuation">.</span><span class="token function">createComponent</span><span class="token punctuation">(</span>factoryInstance<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">rebuildFormAndPopulateWith</span><span class="token punctuation">(</span>formData<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">rebuildFormAndPopulateWith</span><span class="token punctuation">(</span>formData<span class="token punctuation">:</span> LibraryTypeUnion<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> childForm <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>childComponent<span class="token punctuation">.</span>instance<span class="token punctuation">.</span>childForm<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span><span class="token function">addControl</span><span class="token punctuation">(</span><span class="token string">'details'</span><span class="token punctuation">,</span> childForm as FormGroup<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span><span class="token function">patchValue</span><span class="token punctuation">(</span>formData<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The first three lines of the <code>instantiateDetailForm</code> method extract a reference to the 
+component needing to be instantiated from the previously explained <code>detailsContentStyles</code>
+map, then extract its factory method and invokes the latter to instantiate 
+the child component (i.e. child form) to be placed into the form. A reference to that 
+component is stored in the <code>childComponent</code> object property shown in line 1. We also need 
+to add the <code>componentFactoryResolver</code> to our constructor to make it available to this method:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">constructor</span><span class="token punctuation">(</span>
+    <span class="token keyword">public</span> fb<span class="token punctuation">:</span> FormBuilder<span class="token punctuation">,</span>
+    <span class="token keyword">public</span> route<span class="token punctuation">:</span> ActivatedRoute<span class="token punctuation">,</span>
+    <span class="token keyword">private</span> componentFactoryResolver<span class="token punctuation">:</span> ComponentFactoryResolver<span class="token punctuation">,</span>
+  <span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Now we have an instance of the component containing the detail form of the type specified by
+the loaded object’s <code>type</code> property. All that’s left is to add the instantiated component’s form
+to the base form defined earlier and fill the entire form with the loaded data.</p>
+<p>That functionality is contained in the <code>rebuildFormAndPopulateWith</code> method, which retrieves the
+instance of the child component instantiated just now and then references its <code>childForm</code> property,
+which we defined earlier in the <code>AbstractLibItemDetail</code> class. That <code>childForm</code> references the
+form instance, which gets added as a new <code>FormControl</code> by the name of <code>details</code> in line 22.
+Finally, the form is populated with the data from the passed in <code>formData</code>. </p>
+<p>With the implementation at this stage, we can click on a list page showing all item types and 
+are shown the form for the correct library item, pre-populated with the record’s data. We
+can’t yet change the type of the library item by changing its <code>type</code> property dynamically.
+The important take-aways from this implementation so far are:</p>
+<ol>
+<li>The record belonging to the specified ID contains an identifier as to the object’s type</li>
+<li>That <code>type</code> is mapped to the corresponding component, which is consequently instantiated</li>
+<li>The instantiated component is then inserted as a sub-form into the base form as the 
+<code>details</code> property, thus creating nested forms.</li>
+<li>The entire form is then populated with the data of the entry being edited.</li>
+</ol>
+<h4 id="Adding-new-item-details-of-selectable-type"><a href="#Adding-new-item-details-of-selectable-type" class="headerlink" title="Adding new item details of selectable type"></a>Adding new item details of selectable type</h4><p>So far, we have implemented the capability to edit an existing record. Now, we’re going 
+to expand that functionality by adding the creation of a new entry and add a field 
+to the base form which lets the user select what type of library item to create. For this, we need
+the following additions:</p>
+<ol>
+<li>Add a selector to the form so the user can select the type of the item to create.</li>
+<li>That selector should only be shown when adding a new <code>LibraryItem</code>, not when editing one.</li>
+<li>A method to dynamically change the detail section depending on the user’s selection of the
+item’s type.</li>
+</ol>
+<p>Let’s start with the second point: Showing the type selector only when adding a new item. For this,
+we can use the router’s <code>data</code> attribute and the template’s <code>*ngIf</code> directive. First, we
+create two separate routes in the applications routing module, <code>list/:id</code> and <code>list/new</code>. 
+For this to work, it is important that the <code>list/new</code> route come first, since the Angular
+router operates by the “first man wins” principle, and if the order is reversed, we would 
+always load the <code>list/:id</code> route, only that sometimes the value of <code>:id</code> would be “new”. </p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> routes<span class="token punctuation">:</span> Routes <span class="token operator">=</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span> path<span class="token punctuation">:</span> <span class="token string">'list'</span><span class="token punctuation">,</span> component<span class="token punctuation">:</span> LibraryItemListComponent <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> 
+    path<span class="token punctuation">:</span> <span class="token string">'list/new'</span><span class="token punctuation">,</span> 
+    component<span class="token punctuation">:</span> LibraryItemDetailComponent<span class="token punctuation">,</span> 
+    data<span class="token punctuation">:</span> <span class="token punctuation">{</span>createNew<span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> 
+    path<span class="token punctuation">:</span> <span class="token string">'list/:id'</span><span class="token punctuation">,</span> 
+    component<span class="token punctuation">:</span> LibraryItemDetailComponent<span class="token punctuation">,</span> 
+    data<span class="token punctuation">:</span> <span class="token punctuation">{</span>createNew<span class="token punctuation">:</span> <span class="token keyword">false</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this snippet, we tell Angular to use the same <code>LibraryItemDetailComponent</code> for the two routes, 
+but pass a different <code>data</code> value for the <code>createNew</code> property, depending on whether we want 
+to edit or add. To read that value, we need to extend our <code>ngOnInit()</code> method to store
+the value of the passed <code>createNew</code> value in a local property. Thus, we need to add something
+like the following to the component:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> createNewLibraryItem<span class="token punctuation">:</span> <span class="token keyword">boolean</span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> iterableContentTypes <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">makeItemOptionIterable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>createNewLibraryItem <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>route<span class="token punctuation">.</span>snapshot<span class="token punctuation">.</span>data<span class="token punctuation">.</span>createNew<span class="token punctuation">;</span>
+
+    <span class="token comment" spellcheck="true">// ... implementation as before</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">makeItemOptionIterable</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> option <span class="token keyword">in</span> <span class="token keyword">this</span><span class="token punctuation">.</span>detailContentStyles<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>detailContentStyles<span class="token punctuation">.</span><span class="token function">hasOwnProperty</span><span class="token punctuation">(</span>option<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>iterableContentTypes<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            id<span class="token punctuation">:</span> option<span class="token punctuation">,</span> 
+            label<span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>detailContentStyles<span class="token punctuation">[</span>option<span class="token punctuation">]</span><span class="token punctuation">.</span>label
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We added two properties to the class. One, <code>createNewLibraryItem</code>, is set in <code>ngOnInit</code> on 
+line 6 based on the value we specified in the router’s <code>data</code> property from the previous 
+listing. The other, <code>iterableContentTypes</code> is needed to populate a drop down with available
+library item types, which we defined earlier in a property called <code>detailContentStyles</code>.</p>
+<p>The <code>iterableContentTypes</code> is populated by the <code>makeItemOptionIterable</code> method invoked in 
+<code>ngOnInit()</code>. That method creates an array with available library item types from the 
+<code>detailContentStyles</code> to get around a limitation of Angular’s <code>*ngFor</code>, which cannot 
+iterate over objects.</p>
+<p>The corresponding template is extended with the following markup:</p>
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>createNewLibraryItem<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>label</span> <span class="token attr-name">for</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>type<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Type<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>label</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>type<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>type<span class="token punctuation">"</span></span> 
+          <span class="token attr-name">formControlName</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>type<span class="token punctuation">"</span></span> 
+          <span class="token attr-name">(change)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onMediaTypeSelectionChanged($event)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>option</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let option of iterableContentTypes<span class="token punctuation">"</span></span> 
+            <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>{{ option.id }}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>{{ option.label }}<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>option</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>select</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This implementation only shows the item type selector if the <code>data.createNew</code> property set in
+the route is “truthy” (line 1). It then builds a select element with an <code>&lt;option /&gt;</code> for
+each entry in the <code>iterableContentTypes</code> array we populated in the previous step.</p>
+<p>Finally, we see that whenever the user changes the selection, the <code>onMediaTyeSelectionChanged()</code>
+method is invoked, which will change the detail part of the form we generated earlier. This 
+method is defined like this:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> <span class="token function">onMediaTypeSelectionChanged</span><span class="token punctuation">(</span>$event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>itemDetailContainer<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">instantiateDetailForm</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>As previously discussed, the <code>itemDetailContainer</code> property contains a <code>@ViewChild</code> component 
+for the selected library item type details rendered as the “detail” of the library item. In 
+line 2, we clear the currently rendered component from 
+the parent template and follow that with a call to the <code>instantiateDetailForm()</code> method 
+discussed earlier, which appends the selected <code>FormGroup</code> to the <code>details</code> property of the form. 
+It passes the current form definition, including the detail form type, which will lead to the 
+generation and repopulating of the form fields.</p>
+<p>The implementation of the <code>onMediaTypeSelectionChanged</code> method only clears the child form from the 
+template. We still need to remove the old control from the form instance, which we do by adding to
+the <code>rebuildFormAndPopulateWith(formData)</code> method to remove the reference to the <code>FormGroup</code>. 
+This is shown on line 3 of the following listing, which shows the method in its final state:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">private</span> <span class="token function">rebuildFormAndPopulateWith</span><span class="token punctuation">(</span>formData<span class="token punctuation">:</span> LibraryTypeUnion<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> childForm <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>childComponent<span class="token punctuation">.</span>instance<span class="token punctuation">.</span>childForm<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span><span class="token function">removeControl</span><span class="token punctuation">(</span><span class="token string">'details'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span><span class="token function">addControl</span><span class="token punctuation">(</span><span class="token string">'details'</span><span class="token punctuation">,</span> childForm as FormGroup<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span><span class="token function">patchValue</span><span class="token punctuation">(</span>formData<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>One final detail remains: The presetting of the library item type <code>&lt;select /&gt;</code> element when
+we are adding a new entry to the library. We need to set the default item type, because if it
+is left <code>undefined</code>, Angular will throw an error:</p>
+<p><img src="angular-error.png" alt="&quot;Error thrown by Angular when the type is undefined for new library items&quot;"></p>
+<p>Therefore, we need to check in our <code>ngOnInit()</code> method whether we received an <code>id</code> or not 
+(recall that we’re determining which form field set to display through a <code>data</code> attribute on 
+the route). If we don’t receive an <code>:id</code>, we use the empty form and then populate the <code>type</code>
+field with the first entry in our detail type list: </p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> itemId <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>route<span class="token punctuation">.</span>snapshot<span class="token punctuation">.</span>paramMap<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'id'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> formData<span class="token punctuation">:</span> LibraryTypeUnion <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
+
+<span class="token keyword">if</span> <span class="token punctuation">(</span>itemId<span class="token punctuation">)</span> <span class="token function">loadDataFromServer</span><span class="token punctuation">(</span>itemId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">else</span> formData<span class="token punctuation">.</span>type <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>iterableContentTypes<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>id<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="Summary-and-brief-discussion"><a href="#Summary-and-brief-discussion" class="headerlink" title="Summary and (brief) discussion"></a>Summary and (brief) discussion</h2><p>In this post, I’ve looked at how to create forms for entities which have some common attributes
+but differ in their detail. In this example, I used a library catalog to illustrate how such a
+system could be implemented on the front end using the Angular framework. A question remains 
+about the backend, which would also have to deal with the variances in the <code>details</code> field. 
+Using a SQL database, we would have to create new tables for the details of each library item 
+type and then pull the data using joins.</p>
+<p>A more efficient, flexible and clearer way would be to use a document-based database, which can 
+directly store the data structure in one document, while allowing to create indices on the 
+common attributes to speed up retrieval of documents. This would also support a Domain Driven 
+Design approach to store all the data for one entity in one database record.</p>
+<p>The Angular implementation for this example, using dummy data, can be found in my 
+<a href="https://bitbucket.org/tmuller/split-form/src/master/" target="_blank" rel="noopener">“split-form” repository</a> on Bitbucket.
+I want to thank my colleague David Nguyen for the original problem of the library
+implementation, which served as the example here. </p>
+</article><span class="prev-post"><a href="/architecture/constructing-money-transfer-architecture/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/angular/using-viewchild-to-implement-presentation-of-data-sets/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

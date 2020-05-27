@@ -1,0 +1,19 @@
+@startuml
+
+skinparam monochrome true
+
+start
+partition "Account  Transaction" {
+  while (Transfer attempts < 10) is (true)
+    if (Attempt money transfer) then (success)
+      :log success;
+      stop
+    else (failure)
+      :log failure;
+      :exponential backoff;
+    endif
+  endwhile (false)
+  :abort;
+  end
+}
+@enduml

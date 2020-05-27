@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>The purpose of this project | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">The purpose of this project</h1><div class="publish-date left">March 2nd, 2020</div><div class="clear"></div><span class="post-meta"></span><p>I had the idea for this project a while ago to give myself an opportunity to explore and learn 
+new technologies as well as to have a project to do from start to finish: Including UX research,
+wireframing, architecture, technology selection and learning about new technologies.</p>
+<p>Of course, I also had a few technologies and methods in mind for this project, namely:</p>
+<ol>
+<li>Go through an abbreviated UX Design phase with wireframes and component interactions but not 
+do user profiles and genuine usability research.</li>
+<li>Use <em>Domain Driven Design</em> to identify building blocks of the application, separate concerns
+and keep the code structured and single-purpose. I desperately want to avoid code spaghetti
+and code that doesn’t communicate — like I have seen on some projects in my past.</li>
+<li>Building the app using a monorepository to integrate the various pieces while keeping the 
+code itself segregated: Domains, front- and backend implementations and libraries</li>
+<li>Get familiar implementing web sockets as a means of communicating between browser and server</li>
+<li>Brush up on my node.js skills to implement a server-side app and get to know and evaluate
+some other frameworks than the <em>express</em> framework I have been using in the past.</li>
+<li>Speaking of node: It occurred to me to use node to implement a facade to enable web socket 
+communication and later on extend the backend by implementing a “proper” application built in a 
+compiled, ideally functional language such as Kotlin or Scala.</li>
+<li>For the Frontend, I decided to extend my Angular knowledge and explore the new features 
+and behavior of Angular 9, which at the time of this writing has been out only for a few weeks.</li>
+<li>The database paradigm and technology selection I would decide on after the architecture 
+phase has determined the domains and to some extend the data to collect and how it 
+should/can be structured.</li>
+</ol>
+<p>So that’s the plan for the foreseeable future, and I look forward to do something from start
+to finish and explore new ways of thinking and technologies. As you can tell, this will be a 
+little bit of a longer endeavour, but I will create articles for each step I’m going through 
+and putting down my thoughts and insights. I hope it will be fun.</p>
+<p><em>A word of caution: The application I’m using as an example has the potential to be very complex
+and large and take months or years to implement on my own, in my free time. I make no attempt 
+to figure everything out in detail and code, just to get a somewhat high-level working prototype 
+going — to practice and document my approach to a problem like this.</em></p>
+<p>Here is a table of content of the pieces I have (planned or ready) so far:</p>
+<ul>
+<li>Step 0: The why and how</li>
+<li><a href="../1-domain-story-telling">Step 1: Domain Storytelling</a></li>
+<li><a href="../2-ux-analysis">Step 2: UX and wireframes</a></li>
+<li><a href="../3-domain-driven-design-architecture">Step 3: Architecture and domain driven design</a></li>
+<li>Step 4: Frontend Software Architecture<!-- * [Step 4: Frontend Software Architecture](../4-software-architecture-and-components-frontend) -->
+
+
+
+
+</li>
+</ul>
+<p><a href="../1-domain-story-telling">Next step: Domain Story Telling</a></p>
+</article></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

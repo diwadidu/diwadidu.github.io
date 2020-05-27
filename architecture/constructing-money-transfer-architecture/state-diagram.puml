@@ -1,0 +1,38 @@
+@startuml
+
+hide empty description
+skinparam monochrome true
+scale 2048 width
+
+[*] --> Init
+Init: Transfer Service initialized with
+Init: amount and two account references
+Init: ---
+Init: Generate a transaction ID
+
+Init --> DebitAccount
+DebitAccount: Debit the amount from the
+DebitAccount: source account.
+
+DebitAccount --> DebitAccount: On failure, retry \nup to //n// times
+DebitAccount --> ActivityLog: failure
+
+DebitAccount -down-> CreditAccount: successful charge
+CreditAccount: Credit target account\nwith same amount
+CreditAccount --> CreditAccount: On failure, retry\nup to //n// times
+
+CreditAccount --> Compensation: failed //n// times
+Compensation: Roll back the original\ncharge on source account
+Compensation --> Compensation: On failure, retry \nup to //n// times
+
+Compensation --> MonitoredLog: compensation failed
+MonitoredLog: Error log for transactions that\nneed human intervention
+
+ActivityLog: Event Log for transactions\nin the system
+
+CreditAccount --> ActivityLog: success
+Compensation --> ActivityLog: success
+ActivityLog --> [*]
+MonitoredLog --> [*]
+
+@enduml

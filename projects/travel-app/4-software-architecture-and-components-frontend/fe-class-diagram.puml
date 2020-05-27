@@ -1,0 +1,61 @@
+@startuml
+
+allowmixing
+scale 800 width
+'scale 2048 width
+skinparam monochrome true
+skinparam linetype ortho
+'hide footbox
+hide empty members
+
+class Trip
+class Login
+class Auth
+class Album
+class AlbumPage
+class Users
+class Roles
+class TripSegment {
+  travelDate: Date
+  travelMode: string
+}
+class TravelPath
+class TripCatalogMapView
+class TripCatalogListView
+class TripsOverview
+class TripImage {
+  isBanner: boolean
+  caption: string
+  order: number
+}
+class Image {
+  url: string
+  description: string
+  keywords: string[]
+}
+
+class ImageSelector
+
+TripsOverview *-- TripCatalogMapView
+TripsOverview *-- TripCatalogListView
+TripsOverview "1" -- "*" Trip
+'Trip "*" -- "1" TripsOverview
+Trip "1" *-- "*" TripSegment : ""
+TripSegment "1" *-- "1" TravelPath
+TripSegment "1" *-- "*" TripImage
+Image "1" --o "1" Trip
+TripImage o-- Image
+'TripsOverview -- Auth
+
+Users -- Roles
+Login -- Auth
+Auth -- Users
+Auth -- Album
+TripsOverview -- Auth
+
+ImageSelector "1" -- "*" Image
+Auth --ImageSelector
+Album -- AlbumPage
+AlbumPage "*" o-- "*" Image
+
+@enduml

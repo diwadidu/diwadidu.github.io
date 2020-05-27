@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 429 500">
+<path style="fill:none;stroke:#555555;stroke-width:3;" d="M347.932,28.975l-31.457-15.909L192.448,3.107L80.295,28.45L63.92,33.064L47.679,45.472
+	l21.618-2.108L97.5,71.453L86.473,84.636L58.141,98.99l-22.467,2.99L23.328,89.205l5.636-24.351l-11.971,8.871l-5.728,19.151
+	L7.988,401.271l8.17,21.506l15.918,18.777l12.867-7.15l-0.125-304.869l22.48-2.123l21.007,12.625l-0.741,304.879l-24.181,3.887
+	l-11.972,8.871l38.507,22.715l7.671-7.068l23.33-3.004l84.961,4.582l32.599-17.891l-2.709-303.955l-35.965-26.224l-74.586-5.625
+	l-19.257-11.792l-2.976-21.597l14.477-14.112l124.893,9.944l2.854,14.677l-16.15,17.603l32.475,24.548l32.205,8.968l0.943,302.251
+	l-31.852,10.949l-31.705,19.609l13.975,6.682l0.982,6.916l27.68-2.217l-1.959-7.604l16.391-9.102l30.105-11.787l61.283-12.33
+	l3.611,8.6l27.211-29.057c0,0-9.209-4.443-9.938-4.912c-0.328-0.213,1.9-306.746,1.9-306.746l-27.924-11.637l-50.916,10.414
+	l-30.439-7.263l-24.531-16.03l0.609-14.733l87.131-19.708l19.246,10.925l8.156,20.644l25.305,10.814L398.07,73.133l7.762-1.866
+	l-10.676-16.271l-24.562-17.759L347.932,28.975z"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="27.24" y1="65.326" x2="46.823" y2="45.922"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="97.5" y1="71.453" x2="117.462" y2="73.703"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="102.986" y1="87.814" x2="86.473" y2="84.636"/>
+<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="105.961,109.412 67.298,127.412 58.141,98.99 "/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="44.818" y1="129.535" x2="35.674" y2="101.98"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="23.328" y1="89.205" x2="11.266" y2="92.876"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="88.305" y1="140.037" x2="125.218" y2="121.204"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="199.804" y1="126.83" x2="229.059" y2="115.926"/>
+<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="293.088,112.21 261.533,140.474 235.77,153.053 "/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="242.355" y1="83.646" x2="269.166" y2="81.447"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="245.209" y1="98.323" x2="268.557" y2="96.181"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="293.738" y1="149.442" x2="323.527" y2="119.473"/>
+<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="353.609,31.916 363.939,52.943 381.467,64.766 398.07,73.133 "/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="356.297" y1="61.739" x2="363.939" y2="52.943"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="375.543" y1="72.664" x2="381.467" y2="64.766"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="374.443" y1="109.059" x2="383.699" y2="93.308"/>
+<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="405.832,71.267 420.291,105.671 409.025,105.431 402.367,120.696 "/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="32.076" y1="441.555" x2="51.411" y2="457.674"/>
+<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="44.943,434.404 63.383,448.803 97.588,473.32 "/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="87.564" y1="444.916" x2="120.918" y2="470.316"/>
+<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="89.917,480.389 102.127,485.371 246.082,495.85 "/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="238.479" y1="457.008" x2="259.393" y2="464.438"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="231.125" y1="482.252" x2="205.879" y2="474.898"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="245.963" y1="488.92" x2="271.803" y2="486.029"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="262.83" y1="462.643" x2="288.193" y2="476.928"/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="294.682" y1="451.693" x2="318.299" y2="465.141"/>
+<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="273.762,493.633 362.547,469.564 383.717,461.072 "/>
+<line style="fill:none;stroke:#555555;stroke-width:3;" x1="379.582" y1="452.811" x2="400.344" y2="426.684"/>
+<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="410.404,432.354 421.371,415.703 420.246,103.063 "/>
+</svg>

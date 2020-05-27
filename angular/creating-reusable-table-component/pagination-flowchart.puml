@@ -1,0 +1,29 @@
+@startuml
+
+scale 2048 width
+
+actor user
+participant ParentComponent as PC
+participant TableComponent as TC
+participant DataService as DS
+
+skinparam monochrome true
+hide footbox
+
+user -> TC: Page change requested
+
+TC -> PC: Emits event specifying page information
+activate PC
+PC -> DS: Load the corresponding data
+activate DS
+DS -> PC
+deactivate DS
+PC -> TC: Provide the data set
+deactivate PC
+activate TC
+TC -> TC: Clear current data from memory
+TC -> TC: Render the received data
+TC -> TC: Upddate the pagination controls
+TC --> user: done
+deactivate TC
+@enduml

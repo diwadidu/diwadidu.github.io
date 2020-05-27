@@ -1,0 +1,21 @@
+<svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 331 792">
+<g id="Front">
+	<polygon style="fill:none;stroke:#333333;stroke-width:4;" points="170.81,5.501 27.917,131.167 6.636,159.542 7.648,469.648
+		172.837,785.835 324.85,491.945 322,188 312.689,155.49 	"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:4;" points="170.81,5.501 120.137,169.675 114.057,202.105
+		117.097,505.116 171.821,781.779 	"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:4;" points="23.865,135.22 120.137,169.675 312.689,155.49 	"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:4;" points="7.648,163.595 114.057,202.105 322,187.5 	"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:4;" points="7.648,469.648 117.097,505.116 324.85,491.945 	"/>
+</g>
+<g id="Back">
+	<path style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" d="M171.821,5.501l45.604,115.53
+		l5.065,24.322c0,0,5.071,308.079,4.055,311.119c-1.015,3.04-51.684,324.299-51.684,324.299"/>
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" points="326.875,491.945
+		226.546,456.472 11.704,468.633 	"/>
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" points="322,187.5 221.5,149
+		9.676,161.57 	"/>
+	<path style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" d="M29.946,132.18
+		c0,0,191.536-9.125,187.48-11.149c-4.056-2.025,92.223,33.443,92.223,33.443"/>
+</g>
+</svg>

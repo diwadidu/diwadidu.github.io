@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="730.5171px" preserveAspectRatio="none" style="width:1923px;height:730px;" version="1.1" viewBox="0 0 1923 730" width="1923.5888px" zoomAndPan="magnify"><defs><filter height="300%" id="f11ln0xwtj4fyi" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="6.38006230529595"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="12.7601246105919" dy="12.7601246105919" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[d667daef10ad7ea4341a3d688861110a]
+class DataSourceFactory--><rect fill="#F8F8F8" filter="url(#f11ln0xwtj4fyi)" height="251.5826" id="DataSourceFactory" style="stroke: #383838; stroke-width: 4.785046728971962;" width="695.4268" x="1193.0717" y="446.6044"/><ellipse cx="1358.1558" cy="497.6449" fill="#C2C2C2" rx="35.0903" ry="35.0903" style="stroke: #383838; stroke-width: 3.190031152647975;"/><path d="M1366.0452,517.2414 Q1364.1916,518.1947 1362.1526,518.6713 Q1360.1137,519.148 1357.8629,519.148 Q1349.866,519.148 1345.6558,513.8785 Q1341.4455,508.609 1341.4455,498.6526 Q1341.4455,488.6698 1345.6558,483.4003 Q1349.866,478.1308 1357.8629,478.1308 Q1360.1137,478.1308 1362.1791,478.6075 Q1364.2445,479.0841 1366.0452,480.0374 L1366.0452,488.7227 Q1364.0327,486.8692 1362.1394,486.0086 Q1360.2461,485.148 1358.2336,485.148 Q1353.9439,485.148 1351.7593,488.5506 Q1349.5748,491.9533 1349.5748,498.6526 Q1349.5748,505.3255 1351.7593,508.7282 Q1353.9439,512.1308 1358.2336,512.1308 Q1360.2461,512.1308 1362.1394,511.2702 Q1364.0327,510.4097 1366.0452,508.5561 Z "/><text fill="#000000" font-family="sans-serif" font-size="38.2804" lengthAdjust="spacingAndGlyphs" textLength="338.1433" x="1423.5514" y="512.1121">DataSourceFactory</text><line style="stroke: #383838; stroke-width: 4.785046728971962;" x1="1196.2617" x2="1885.3084" y1="548.6854" y2="548.6854"/><ellipse cx="1228.162" cy="583.7757" fill="#A6A6A6" rx="9.5701" ry="9.5701" style="stroke: #545454; stroke-width: 3.190031152647975;"/><text fill="#000000" font-family="sans-serif" font-size="35.0903" lengthAdjust="spacingAndGlyphs" textLength="440.2243" x="1256.8723" y="595.3707">initializeDataSource&lt;T&gt;()</text><ellipse cx="1228.162" cy="625.1028" fill="#A6A6A6" rx="9.5701" ry="9.5701" style="stroke: #545454; stroke-width: 3.190031152647975;"/><text fill="#000000" font-family="sans-serif" font-size="35.0903" lengthAdjust="spacingAndGlyphs" textLength="612.486" x="1256.8723" y="636.6978">getInitialDataFromDataSource&lt;T&gt;()</text><rect fill="#808080" height="19.1402" style="stroke: #595959; stroke-width: 3.190031152647975;" width="19.1402" x="1218.5919" y="656.8598"/><text fill="#000000" font-family="sans-serif" font-size="35.0903" lengthAdjust="spacingAndGlyphs" textLength="395.5639" x="1256.8723" y="678.0249">instantiateObject&lt;T&gt;()</text><!--MD5=[bd4123b4b90ff3029b1201c63010b28e]
+class CacheDataSource--><rect fill="#F8F8F8" filter="url(#f11ln0xwtj4fyi)" height="102.081" id="CacheDataSource" style="stroke: #383838; stroke-width: 4.785046728971962;" width="421.0841" x="121.2212" y="521.5701"/><ellipse cx="169.0717" cy="572.6106" fill="#C2C2C2" rx="35.0903" ry="35.0903" style="stroke: #383838; stroke-width: 3.190031152647975;"/><path d="M176.9611,592.2072 Q175.1075,593.1604 173.0685,593.6371 Q171.0296,594.1137 168.7788,594.1137 Q160.7819,594.1137 156.5717,588.8442 Q152.3614,583.5748 152.3614,573.6184 Q152.3614,563.6355 156.5717,558.366 Q160.7819,553.0966 168.7788,553.0966 Q171.0296,553.0966 173.095,553.5732 Q175.1604,554.0498 176.9611,555.0031 L176.9611,563.6885 Q174.9486,561.8349 173.0553,560.9743 Q171.162,560.1137 169.1495,560.1137 Q164.8598,560.1137 162.6752,563.5164 Q160.4907,566.919 160.4907,573.6184 Q160.4907,580.2913 162.6752,583.6939 Q164.8598,587.0966 169.1495,587.0966 Q171.162,587.0966 173.0553,586.236 Q174.9486,585.3754 176.9611,583.5218 Z "/><text fill="#000000" font-family="sans-serif" font-size="38.2804" lengthAdjust="spacingAndGlyphs" textLength="319.0031" x="213.7321" y="587.0779">CacheDataSource</text><!--MD5=[e3d3c47a583009b263c74f2184921e62]
+class ServerDataSource--><rect fill="#F8F8F8" filter="url(#f11ln0xwtj4fyi)" height="102.081" id="ServerDataSource" style="stroke: #383838; stroke-width: 4.785046728971962;" width="424.2741" x="655.5514" y="521.5701"/><ellipse cx="703.4019" cy="572.6106" fill="#C2C2C2" rx="35.0903" ry="35.0903" style="stroke: #383838; stroke-width: 3.190031152647975;"/><path d="M711.2913,592.2072 Q709.4377,593.1604 707.3988,593.6371 Q705.3598,594.1137 703.109,594.1137 Q695.1121,594.1137 690.9019,588.8442 Q686.6916,583.5748 686.6916,573.6184 Q686.6916,563.6355 690.9019,558.366 Q695.1121,553.0966 703.109,553.0966 Q705.3598,553.0966 707.4252,553.5732 Q709.4907,554.0498 711.2913,555.0031 L711.2913,563.6885 Q709.2788,561.8349 707.3855,560.9743 Q705.4922,560.1137 703.4798,560.1137 Q699.19,560.1137 697.0055,563.5164 Q694.8209,566.919 694.8209,573.6184 Q694.8209,580.2913 697.0055,583.6939 Q699.19,587.0966 703.4798,587.0966 Q705.4922,587.0966 707.3855,586.236 Q709.2788,585.3754 711.2913,583.5218 Z "/><text fill="#000000" font-family="sans-serif" font-size="38.2804" lengthAdjust="spacingAndGlyphs" textLength="322.1931" x="748.0623" y="587.0779">ServerDataSource</text><!--MD5=[81c1678f3b146417d42d9549aee5a5c0]
+class DataSource--><rect fill="#F8F8F8" filter="url(#f11ln0xwtj4fyi)" height="168.9283" id="DataSource" style="stroke: #383838; stroke-width: 4.785046728971962;" width="539.1153" x="598.1308" y="25.5202"/><ellipse cx="750.4548" cy="76.5607" fill="#B1B1B1" rx="35.0903" ry="35.0903" style="stroke: #383838; stroke-width: 3.190031152647975;"/><path d="M739.0592,64.6464 L739.0592,57.7617 L762.5997,57.7617 L762.5997,64.6464 L754.7352,64.6464 L754.7352,90.4112 L762.5997,90.4112 L762.5997,97.296 L739.0592,97.296 L739.0592,90.4112 L746.9237,90.4112 L746.9237,64.6464 Z "/><text fill="#000000" font-family="sans-serif" font-size="38.2804" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="207.352" x="815.8505" y="91.028">DataSource</text><line style="stroke: #383838; stroke-width: 4.785046728971962;" x1="601.3209" x2="1134.0561" y1="127.6012" y2="127.6012"/><text fill="#000000" font-family="sans-serif" font-size="35.0903" lengthAdjust="spacingAndGlyphs" textLength="500.8349" x="617.271" y="174.2866">getWithFilterSortParameters()</text><!--MD5=[43419b2db6aedd72c0393ba29d14913d]
+class DataListComponent--><rect fill="#F8F8F8" filter="url(#f11ln0xwtj4fyi)" height="102.081" id="DataListComponent" style="stroke: #383838; stroke-width: 4.785046728971962;" width="459.3645" x="1311.1028" y="59.0156"/><ellipse cx="1358.9533" cy="110.0561" fill="#C2C2C2" rx="35.0903" ry="35.0903" style="stroke: #383838; stroke-width: 3.190031152647975;"/><path d="M1366.8427,129.6526 Q1364.9891,130.6059 1362.9502,131.0826 Q1360.9112,131.5592 1358.6604,131.5592 Q1350.6636,131.5592 1346.4533,126.2897 Q1342.243,121.0202 1342.243,111.0639 Q1342.243,101.081 1346.4533,95.8115 Q1350.6636,90.5421 1358.6604,90.5421 Q1360.9112,90.5421 1362.9766,91.0187 Q1365.0421,91.4953 1366.8427,92.4486 L1366.8427,101.134 Q1364.8302,99.2804 1362.9369,98.4198 Q1361.0436,97.5592 1359.0312,97.5592 Q1354.7414,97.5592 1352.5569,100.9618 Q1350.3723,104.3645 1350.3723,111.0639 Q1350.3723,117.7368 1352.5569,121.1394 Q1354.7414,124.5421 1359.0312,124.5421 Q1361.0436,124.5421 1362.9369,123.6815 Q1364.8302,122.8209 1366.8427,120.9673 Z "/><text fill="#000000" font-family="sans-serif" font-size="38.2804" lengthAdjust="spacingAndGlyphs" textLength="357.2835" x="1403.6137" y="124.5234">DataListComponent</text><!--MD5=[32ba4d25eb95c3b04eff345ae7d7fda2]
+link DataListComponent to DataSourceFactory--><path d="M1540.785,161.1923 C1540.785,224.2911 1540.785,337.8881 1540.785,429.2506 " fill="none" id="DataListComponent-&gt;DataSourceFactory" style="stroke: #383838; stroke-width: 3.190031152647975;"/><polygon fill="#383838" points="1540.785,446.0302,1553.5452,417.3199,1540.785,430.08,1528.0249,417.3199,1540.785,446.0302" style="stroke: #383838; stroke-width: 3.190031152647975;"/><text fill="#000000" font-family="sans-serif" font-size="41.4704" lengthAdjust="spacingAndGlyphs" textLength="92.5109" x="1543.9751" y="333.5763">uses</text><!--MD5=[0f503849d0c67399df7fa2b485dd3f4c]
+link DataSourceFactory to DataSource--><path d="M1359.368,446.4768 C1246.6323,370.0436 1104.1017,273.4814 1001.5741,204.0025 " fill="none" id="DataSourceFactory-&gt;DataSource" style="stroke: #383838; stroke-width: 3.190031152647975;"/><polygon fill="#383838" points="988.0164,194.8152,1004.6582,221.4639,1001.2314,203.7467,1018.9486,200.3199,988.0164,194.8152" style="stroke: #383838; stroke-width: 3.190031152647975;"/><text fill="#000000" font-family="sans-serif" font-size="41.4704" lengthAdjust="spacingAndGlyphs" textLength="236.0623" x="1205.8318" y="333.5763">instantiates</text><!--MD5=[83e92691b8a8949fecc86a7da82536b4]
+reverse link DataSource to CacheDataSource--><path d="M722.7335,236.6365 C612.8688,330.1682 467.7543,453.6862 388.8329,520.8364 " fill="none" id="DataSource&lt;-CacheDataSource" style="stroke: #383838; stroke-width: 3.190031152647975; stroke-dasharray: 7.0,7.0;"/><polygon fill="none" points="708.8249,219.1551,771.8599,194.8152,737.7585,253.1609,708.8249,219.1551" style="stroke: #383838; stroke-width: 3.190031152647975;"/><!--MD5=[d6e5278af3a1cffd566f20b3abee0d1d]
+reverse link DataSource to ServerDataSource--><path d="M867.6885,258.7115 C867.6885,348.8299 867.6885,458.8541 867.6885,520.8364 " fill="none" id="DataSource&lt;-ServerDataSource" style="stroke: #383838; stroke-width: 3.190031152647975; stroke-dasharray: 7.0,7.0;"/><polygon fill="none" points="845.3583,258.6158,867.6885,194.8152,890.0187,258.6158,845.3583,258.6158" style="stroke: #383838; stroke-width: 3.190031152647975;"/><!--MD5=[5845694022e5a423e3754ddfedb42e87]
+@startuml
+
+scale 2048 width
+skinparam monochrome true
+
+interface DataSource
+
+together {
+  class DataSourceFactory
+  interface DataSource
+  class CacheDataSource
+  class ServerDataSource
+}
+
+DataListComponent - -> DataSourceFactory : uses
+DataSourceFactory - -> DataSource : instantiates
+DataSource <|.. CacheDataSource
+DataSource <|.. ServerDataSource
+
+interface DataSource {
+  getWithFilterSortParameters()
+}
+
+class DataSourceFactory {
+  +initializeDataSource<T>()
+  +getInitialDataFromDataSource<T>()
+  -instantiateObject<T>()
+}
+
+hide DataSource fields
+hide DataSourceFactory fields
+hide CacheDataSource fields
+hide ServerDataSource fields
+hide CacheDataSource methods
+hide ServerDataSource methods
+hide DataListComponent fields
+hide DataListComponent methods
+
+@enduml
+
+PlantUML version 1.2019.11(Sun Sep 22 12:02:15 CEST 2019)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 11.0.4+10-LTS
+Operating System: Mac OS X
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

@@ -1,0 +1,95 @@
+@startuml
+
+scale 1224 width
+hide footbox
+hide empty description
+hide empty members
+skinparam monochrome true
+skinparam linetype ortho
+
+class Trip {
+   id
+   title: String
+   startDate: Date
+   endDate: Date
+   type: Set<TripType>
+   abstract: String
+   cover: TitlePicture
+   addReport(TravelDayReport)
+   updateReport(TravelDayReport)
+}
+
+class TravelDayReport {
+   id
+   tripId
+   day: Int
+   date: Date
+   type: Set<TripType>
+   abstract: String
+   keywords: Set<String>
+   content: String
+   imageSets: List<TravelDayImageSet>
+   travelPath: List<TravelDayTrace>
+}
+
+class TravelDayTrace {
+   trace: String
+   format: Enum
+   imageLocation: TravelDayImageLocation
+   traceColor: String
+   toKml()
+   toKmz()
+}
+
+class TripType {
+   type: Enum
+   logo: LogoImage
+   label: String
+}
+
+enum LogoImage {
+   id
+   url: Url
+   alt: String
+}
+
+class RepoImage {
+   id
+   title: String
+   keywords: Set<String>
+   url: Url
+   description: String
+   location: GeoLocation
+}
+
+class TripImage {
+   url: Url
+   caption: String
+}
+
+class TravelDayImageSet {
+   id
+   images: List<TripImage>
+   caption: String
+   geoLocation: GeoLocation
+   displayStyle: Enum
+   addImage(TripImage)
+}
+
+enum ImageCategory {
+   key: String
+   label: String
+}
+
+TripType "1 " -- "1..n " LogoImage
+Trip "1" *-- "n  " TravelDayReport
+Trip "1  " *-- "1..n" TripType
+
+TravelDayReport "1  " *-left- "0..n  " TravelDayImageSet
+TravelDayImageSet "1" *-- "1..n  " TripImage
+TripImage "n" o-right- "1" RepoImage
+TravelDayReport "0..1  " *-- "n " TravelDayTrace
+
+RepoImage "0..n " o-- "0..n " ImageCategory
+@enduml
+

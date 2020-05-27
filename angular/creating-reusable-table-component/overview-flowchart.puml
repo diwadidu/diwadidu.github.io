@@ -1,0 +1,32 @@
+@startuml
+
+actor user
+
+scale 2048 width
+skinparam monochrome true
+hide footbox
+
+user -> ParentComponent: Loads page
+activate ParentComponent
+
+ParentComponent -> TableComponent: Passes configuration
+activate TableComponent
+TableComponent -> TableComponent: Renders table with configured columns
+TableComponent -> ParentComponent: Asks for data of first page
+deactivate TableComponent
+
+ParentComponent -> DataService: Loads data for the specified page
+activate DataService
+DataService -> ParentComponent: Provides requested data
+deactivate DataService
+
+ParentComponent -> TableComponent: Passes loaded data on
+deactivate ParentComponent
+activate TableComponent
+TableComponent -> TableComponent: Uses provided data to render table rows
+
+TableComponent --> user: done
+
+deactivate TableComponent
+
+@enduml

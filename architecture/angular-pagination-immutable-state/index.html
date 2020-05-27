@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>A TypeScript pagination component with immutable state | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="This post presents a way to implement immutable data objects in TypeScript/JavaScript. It relies on standard JavaScript methods to achieve its goal."><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">A TypeScript pagination component with immutable state</h1><div class="publish-date right">published Oct 22nd, 2019</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/architecture" itemprop="url">#architecture
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/typescript" itemprop="url">#typescript
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/functional-programming" itemprop="url">#functional-programming
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>For a recent project, I had to implement a mechanism which would allow to filter, sort and 
+paginate data sets. Having had problems in the past where parameters were changed from 
+the outside by someone else’s code, I decided to apply a bit of functional programming 
+magic and implement the class handling the data processing settings as an immutable object. </p>
+<h2 id="Why-immutable-data-What-is-it-What-are-its-advantages"><a href="#Why-immutable-data-What-is-it-What-are-its-advantages" class="headerlink" title="Why immutable data? What is it? What are its advantages?"></a>Why immutable data? What is it? What are its advantages?</h2><p>When I started out with functional programming, I thought “what is the use of immutable objects,
+when you can’t modify data in them?” I didn’t understand back then that instead of mutating
+state, immutable objects create a new instance of the same class with the mutated data.</p>
+<p>In JavaScript, <code>string</code> and <code>integer</code> are always passed as values, whereas objects and arrays
+are passed by reference. That means that any change to any object reference modifies the
+properties for all references. The following code demonstrates that behavior:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> a <span class="token operator">=</span> <span class="token punctuation">{</span>test<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> b <span class="token operator">=</span> a<span class="token punctuation">;</span> 
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'a='</span><span class="token punctuation">,</span> a<span class="token punctuation">,</span> <span class="token string">'b='</span><span class="token punctuation">,</span> b<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// prints "a= {test: 1}, b= {test: 1}"</span>
+a<span class="token punctuation">.</span>test <span class="token operator">=</span> <span class="token number">42</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'b='</span><span class="token punctuation">,</span> b<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// prints "b= {test: 42}"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Here, we have two references to the same object instance, <code>a</code> and <code>b</code>. Since they are 
+references, when I change a property on <code>a</code>, I also change <code>b</code> at the same time. If I 
+look at more complex code, I might not be aware that the object in <code>b</code> is also pointed 
+to by another variable and will be surprised by the change in value.</p>
+<p>Immutable objects, as the name suggests, behave differently, since none of their properties can 
+be changed &mdash; not from the outside nor from a method of the class. In order to be able to
+use them and “change” the values of properties, we have to create a whole new instance of an
+immutable class, with the required properties set to the new values. </p>
+<p>For immutable objects there is usually a method that allows to create a new instance with the 
+changed state, in Scala it is the <code>copy()</code> method. So if we pass a modification to that method, 
+we receive a new, different instance of the class, containing the mutated data.</p>
+<p>In the following section I will develop an immutable data class with the same behavior 
+outlined here, namely a <code>copy()</code> method to return an object of the same class but with 
+different data.  </p>
+<h2 id="Implementation-of-an-immutable-class-in-TypeScript"><a href="#Implementation-of-an-immutable-class-in-TypeScript" class="headerlink" title="Implementation of an immutable class in TypeScript"></a>Implementation of an immutable class in TypeScript</h2><p>The following example shows an immutable <code>DataDisplaySettings</code> class. It is using various data 
+types (<code>FilterValues</code>, <code>SortOption</code> and <code>PagingParams</code>), whose details are irrelevant for this 
+discussion and are not further explored in this post.</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript">type DataModifier <span class="token operator">=</span> FilterValues <span class="token operator">|</span> SortOption <span class="token operator">|</span> PagingParams<span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> defaultParams <span class="token operator">=</span> <span class="token punctuation">{</span>
+  filterSettings<span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+  sortSettings<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    sortType<span class="token punctuation">:</span> SortType<span class="token punctuation">.</span>String<span class="token punctuation">,</span>
+    sortBy<span class="token punctuation">:</span> <span class="token string">''</span><span class="token punctuation">,</span>
+    sortOrder<span class="token punctuation">:</span> SortOrders<span class="token punctuation">.</span>NONE
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  paginationSettings<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    totalCount<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+    pageSize<span class="token punctuation">:</span> environment<span class="token punctuation">.</span>rowsPerPage<span class="token punctuation">,</span>
+    currentPage<span class="token punctuation">:</span> <span class="token number">1</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+type DataProcessingParams <span class="token operator">=</span> <span class="token punctuation">{</span>
+  filters<span class="token punctuation">:</span> FilterValues<span class="token punctuation">,</span>
+  sorting<span class="token punctuation">:</span> SortOption<span class="token punctuation">,</span>
+  paging<span class="token punctuation">:</span> PagingParams
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DataDisplaySettings</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">private</span> readonly filterSettings<span class="token punctuation">:</span> FilterValues<span class="token punctuation">;</span>
+  <span class="token keyword">private</span> readonly sortSettings<span class="token punctuation">:</span> SortOption<span class="token punctuation">;</span>
+  <span class="token keyword">private</span> readonly paginationSettings<span class="token punctuation">:</span> PagingParams<span class="token punctuation">;</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>pageOpts<span class="token operator">?</span><span class="token punctuation">:</span> DataProcessingParams<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">initField</span><span class="token punctuation">(</span>pageOpts<span class="token punctuation">,</span> <span class="token string">'filters'</span><span class="token punctuation">,</span> <span class="token string">'filterSettings'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">initField</span><span class="token punctuation">(</span>pageOpts<span class="token punctuation">,</span> <span class="token string">'sorting'</span><span class="token punctuation">,</span> <span class="token string">'sortSettings'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">initField</span><span class="token punctuation">(</span>pageOpts<span class="token punctuation">,</span> <span class="token string">'paging'</span><span class="token punctuation">,</span> <span class="token string">'paginationSettings'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">initField</span><span class="token punctuation">(</span>dataObj<span class="token punctuation">:</span> DataProcessingParams<span class="token punctuation">,</span> field<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">,</span> propertyName<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>dataObj <span class="token operator">&amp;&amp;</span> dataObj<span class="token punctuation">[</span>field<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">this</span><span class="token punctuation">[</span>propertyName<span class="token punctuation">]</span> <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">freeze</span><span class="token punctuation">(</span>dataObj<span class="token punctuation">[</span>field<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      <span class="token keyword">this</span><span class="token punctuation">[</span>propertyName<span class="token punctuation">]</span> <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">freeze</span><span class="token punctuation">(</span>defaultParams<span class="token punctuation">[</span>propertyName<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">get</span> <span class="token function">filters</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> FilterValues <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>filterSettings <span class="token punctuation">}</span>
+  <span class="token keyword">get</span> <span class="token function">sorting</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> SortOption <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>sortSettings <span class="token punctuation">}</span>
+  <span class="token keyword">get</span> <span class="token function">paging</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> PagingParams <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>paginationSettings <span class="token punctuation">}</span>
+
+  <span class="token comment" spellcheck="true">/**
+   * Method to return a new instance of this class containing the modified data
+   */</span>
+  <span class="token keyword">public</span> <span class="token function">copy</span><span class="token punctuation">(</span>updateSettings<span class="token punctuation">:</span> DataProcessingParams<span class="token punctuation">)</span><span class="token punctuation">:</span> DataDisplaySettings <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> newObjectParams<span class="token punctuation">:</span> DataProcessingParams <span class="token operator">=</span> <span class="token punctuation">{</span>
+      filters<span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>cloneAndUpdateSettings<span class="token operator">&lt;</span>FilterValues<span class="token operator">></span><span class="token punctuation">(</span>updateSettings<span class="token punctuation">.</span>filters<span class="token punctuation">,</span> <span class="token string">'filterSettings'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      sorting<span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>cloneAndUpdateSettings<span class="token operator">&lt;</span>SortOption<span class="token operator">></span><span class="token punctuation">(</span>updateSettings<span class="token punctuation">.</span>sorting<span class="token punctuation">,</span> <span class="token string">'sortSettings'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      paging<span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>cloneAndUpdateSettings<span class="token operator">&lt;</span>PagingParams<span class="token operator">></span><span class="token punctuation">(</span>updateSettings<span class="token punctuation">.</span>paging<span class="token punctuation">,</span> <span class="token string">'paginationSettings'</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">DataDisplaySettings</span><span class="token punctuation">(</span>newObjectParams<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> cloneAndUpdateSettings<span class="token operator">&lt;</span>T <span class="token keyword">extends</span> <span class="token class-name">DataModifier</span><span class="token operator">></span><span class="token punctuation">(</span>newSettingsObj<span class="token punctuation">:</span> T<span class="token punctuation">,</span> property<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> T <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> newSettingsObj <span class="token operator">?</span> Object<span class="token punctuation">.</span><span class="token function">freeze</span><span class="token punctuation">(</span>Object<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> newSettingsObj<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">[</span>property<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We see a number of readonly properties in lines 24-26. These properties are set in the 
+constructor by the <code>initField()</code> method, which takes either</p>
+<ol>
+<li>a passed configuration object as <code>dataObj: DataProcessingParams</code> or </li>
+<li>uses the default parameters listed before the class definition in lines 3-15</li>
+</ol>
+<p>To populate the respective properties. In the <code>initField()</code> method, you notice that we’re 
+using the JavaScript <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze" target="_blank" rel="noopener"><code>Object.freeze()</code></a> 
+method to prohibit the changing of the contained data. This works in our case, because the 
+objects are constituted of simple types. If we had assigned an array or another object to one 
+of the nested properties, that nested object would not be frozen and still allow mutation.</p>
+<p>We then define some getters in lines 42-44 and then get into the heart of the class, the 
+<code>copy()</code> method starting in line 49. That method accepts an object which reflects the 
+desired new state of the system and therefore the value of the properties of this class. </p>
+<p>The first thing the method does is create a new instance of an object of type 
+<code>DataProcessingParams</code> and then proceeds to populate the properties using the 
+<code>cloneAndUpdateSettings()</code> method. To that latter method, it passes</p>
+<ol>
+<li>the data object for the desired property as the first parameter and </li>
+<li>the key name to populate in the object as the second parameter.</li>
+</ol>
+<p>After the generation of that configuration object, we instantiate a new instance of the
+<code>DataDisplaySettings</code> class with the modified data on line 55.</p>
+<p>The <code>cloneAndUpdateSettings()</code> method used in <code>copy()</code> either returns the currently
+set object if no settings object for that parameter is passed or, if an object of type 
+<code>DataModifier</code> is passed as the second argument, it clones the object into an empty 
+object literal and then calls <code>Object.freeze()</code> to prevent further modification of 
+the object. This effectively “updates” the values for that setting.</p>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>So, how do you use that thing we just created? Here is an example for changing the page
+of data displayed in a table:</p>
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">let</span> display <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DataDisplaySettings</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> valueChanges <span class="token operator">=</span> <span class="token punctuation">{</span>
+  paging<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    totalCount<span class="token punctuation">:</span> display<span class="token punctuation">.</span>paging<span class="token punctuation">.</span>totalCount<span class="token punctuation">,</span>
+    pageSize<span class="token punctuation">:</span> display<span class="token punctuation">.</span>paging<span class="token punctuation">.</span>pageSize<span class="token punctuation">,</span>
+    currentPage<span class="token punctuation">:</span> <span class="token number">4</span> 
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+display <span class="token operator">=</span> display<span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span>valueChanges<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In line 1, we create a new <code>DataDislaySettings</code> instance with the default values, which can be 
+seen in the previous listing in lines 3-15. This line is a mandatory step when setting up a 
+view to get the pagination functionality initialized.</p>
+<p>So now, when a user clicks on the “page 4” button
+of the table’s pagination feature, we need to update our setting. Since we’re not changing the
+sorting or filtering settings, we leave those out of our change object. The 
+<code>cloneAndUpdateSettings()</code> method is smart enough to check for missing parameters and assume
+we don’t want to change them. We do need to provide a new instance of type <code>PagingParams</code> though, 
+which is created on lines 3-7, where we set the current page to page 4.</p>
+<h2 id="Immutability-and-its-benefits"><a href="#Immutability-and-its-benefits" class="headerlink" title="Immutability and its benefits"></a>Immutability and its benefits</h2><p>In the last line, line 9 we use the <code>copy()</code> method of the original pagination object to 
+generate a new pagination object. As seen before, <code>copy()</code> invokes the 
+<code>cloneAndUpdateSettings()</code> method once for each setting, 
+which creates a new immutable object for each provided parameter object and reuses the current 
+parameter objects for settings we didn’t specify (<code>filters</code> and <code>sorting</code>). It does, however, 
+copy and <code>freeze()</code> our submitted <code>paging</code> object literal before assigning it to the <code>paging</code>
+setting in the new object.</p>
+<p>A word of caution about the <code>Object.freeze()</code> method: While it freezes the immediate properties
+of an object and thereby prevent mutation, the case isn’t as clear-cut for objects and arrays. 
+These data types are kept by reference, so a freeze has no effect on mutation of any contained 
+properties which are themselves arrays or objects. These nested entities will remain 
+mutable.</p>
+<p>So now, we have a new instance of the page display configuration stored in the <code>display</code> 
+variable. If we’re using a framework which features change detection, like Angular, our 
+immutable implementation would automatically trigger a page update and rerender of the 
+pagination display, since the object reference has changed &mdash; even as we’d have to use 
+<code>ngOnChanges()</code> to react to the change and load new data from the server.</p>
+<p>That last paragraph sounds esoteric, but it’s not. Angular by default only compares properties 
+that are used in its templates: </p>
+<blockquote>
+<p>By default, Angular Change Detection works by checking if the value of template 
+expressions have changed. This is done for all components.</p>
+</blockquote>
+<p>and</p>
+<blockquote>
+<p>By default, Angular does not do deep object comparison to detect changes, it only takes 
+into account properties used by the template</p>
+</blockquote>
+<p>These quotes from <a href="https://blog.angular-university.io/how-does-angular-2-change-detection-really-work/" target="_blank" rel="noopener">Angular University</a>
+demonstrate the usefulness of the immutable object paradigm. If we change an object property that 
+affects our business logic but is not directly displayed in the template, the standard
+Angular change detection will not kick off a change event.</p>
+<p>Through our immutable implementation, we solve that problem, since we’re substituting the 
+referenced object in the class in its entirety, and so, since the entire object has changed, 
+the change detection will be triggered.</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this post, I have demonstrated how to implement immutable data objects in JavaScript, 
+relying only on standard methods of JavaScript’s <code>Object</code>. I briefly explained the benefit of
+immutable data in the Angular framework as well as the short-coming of the 
+<code>freeze()</code> method when it comes to nested objects.</p>
+</article><span class="prev-post"><a href="/architecture/implementing-selectable-data-loading-strategies/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/architecture/constructing-money-transfer-architecture/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

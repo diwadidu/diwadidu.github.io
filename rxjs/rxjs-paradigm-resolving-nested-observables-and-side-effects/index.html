@@ -1,0 +1,336 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Rx.Js paradigm: resolving nested observables and side effects | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Rx.Js paradigm: resolving nested observables and side effects</h1><div class="publish-date right">published Apr 12th, 2020</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/functional-programming" itemprop="url">#functional-programming
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/rxjs" itemprop="url">#rxjs
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Working with other people is great: You get to learn how other people think about problems and 
+their solutions, learn new approaches and sometimes get to provide some insight into the way
+<em>you</em> think about certain things. That’s what happened to me a few times recently when it came
+to Rx.js, a technology near and dear to my heart.</p>
+<p>In this post, I’m going to write about and discuss two approaches I saw that I consider to be 
+problematic. I’ll describe the original code, why I see problems with it and how I would refactor
+it.</p>
+<h2 id="Nested-Rx-chains"><a href="#Nested-Rx-chains" class="headerlink" title="Nested Rx chains"></a>Nested Rx chains</h2><p>In a recent class on web development, someone asked about an Rx.js implementation that they
+created in their company and how he thought that Rx.js is leading to unreadable and intertwined 
+code. The example he showed me went something like this (abbreviated for clarity and topic 
+changed to not identify the company):</p>
+<figcaption class="code-filename typescript">v1-nested-observables.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">let</span> activeUser<span class="token punctuation">:</span> User<span class="token punctuation">;</span>
+<span class="token keyword">let</span> activeBankList<span class="token punctuation">:</span> Bank<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> activeAccountInformation<span class="token punctuation">:</span> Account<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> userService <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">UserService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> bankService <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">BankService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> accountService <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AccountInformationService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+userService<span class="token punctuation">.</span><span class="token function">getUserByEmail</span><span class="token punctuation">(</span>userEmail<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>user<span class="token punctuation">:</span> User<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    activeUser <span class="token operator">=</span> user<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>activeUser<span class="token punctuation">.</span>disabled<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      bankService<span class="token punctuation">.</span><span class="token function">getBanksForUser</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>bankInfo<span class="token punctuation">:</span> Bank<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+          activeBankList <span class="token operator">=</span> bankInfo<span class="token punctuation">;</span>
+          accountService<span class="token punctuation">.</span><span class="token function">getAccountsForUserBanks</span><span class="token punctuation">(</span>activeUser<span class="token punctuation">,</span> bankInfo<span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span>allAccounts<span class="token punctuation">:</span> Account<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+              activeAccountInformation <span class="token operator">=</span> allAccounts<span class="token punctuation">;</span>
+              <span class="token comment" spellcheck="true">// logic based on user here</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>To summarize this implementation in words:</p>
+<ol>
+<li>We have a <code>UserService</code>, which retrieves the user’s information based on an email address</li>
+<li>If the returned user has access (is not “disabled”), another API call retrieves the banking 
+information for that user</li>
+<li>Once the banking information is retrieved, we load all the active accounts for that user.</li>
+<li>Intermittently, we store any information we retrieve throughout this chain of API calls in
+variables as we get the data. In this example case, it’s the global scope, but it could, of
+course, also be class properties.</li>
+</ol>
+<p>It’s the Rx.js equivalent of <em>callback hell</em> we used to have before Promises and Rx, where the 
+result of one call was used to perform another — all in a long, nested structure. For many 
+reasons, which include code clarity, unit testing and dependency of all nested calls, this is
+less than optimal. So in a first step, let’s get rid of the nesting in the aforementioned code 
+using Rx paradigms.</p>
+<p>Not addressing the variable declarations for now, which stay the same, we arrive at the following 
+implementation:</p>
+<figcaption class="code-filename typescript">v2-flatMaps.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">userService<span class="token punctuation">.</span><span class="token function">getUserByEmail</span><span class="token punctuation">(</span>userEmail<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+    <span class="token function">flatMap</span><span class="token punctuation">(</span><span class="token punctuation">(</span>user<span class="token punctuation">:</span> User<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>user<span class="token punctuation">.</span>disabled<span class="token punctuation">)</span> <span class="token keyword">throw</span><span class="token punctuation">(</span> <span class="token keyword">new</span> <span class="token class-name">DisabledUserException</span><span class="token punctuation">(</span>activeUser<span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        activeUser <span class="token operator">=</span> user<span class="token punctuation">;</span>
+        <span class="token keyword">return</span> bankService<span class="token punctuation">.</span><span class="token function">getBanksForUser</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">flatMap</span><span class="token punctuation">(</span><span class="token punctuation">(</span>bankInfo<span class="token punctuation">:</span> Bank<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      activeBankList <span class="token operator">=</span> bankInfo<span class="token punctuation">;</span>
+      <span class="token keyword">return</span> accountService<span class="token punctuation">.</span><span class="token function">getAccountsForUserBanks</span><span class="token punctuation">(</span>activeUser<span class="token punctuation">,</span> bankInfo<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">catchError</span><span class="token punctuation">(</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token comment" spellcheck="true">// Handle errors, such as unauthorized users or non-existing records</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span>accountInfo<span class="token punctuation">:</span> Account<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">// Processing goes here</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Here, I’ve flattened the Rx chain and gotten rid of the nesting by using the Rx.js 
+<code>flatMap</code> operator. I could have used the <code>switchMap</code> operator here as well with the 
+same result since the chain only ever processes one result. If you want to learn more
+about the difference between the two <code>xxMap()</code> operators, you may want to read 
+<a href="https://stackoverflow.com/questions/49698640/flatmap-mergemap-switchmap-and-concatmap-in-rxjs" target="_blank" rel="noopener">a thread about flatMap vs. switchMap on stackoverflow.com</a></p>
+<p>In this first step, I’ve flattened the nested implementation to a sequence of calls within
+the same <code>.pipe()</code> operator. What stays thus far is the side effect of storing the data retrieved 
+by the various service calls in global variables.</p>
+<p>The other enhancement in this code is the addition of error handling. I introduced a <code>catchError</code>
+operator to which we provide a method that will handle any error we might receive from any of the 
+APIs, such as <code>401 Unauthorized</code> or <code>404 Not found</code> errors.</p>
+<p>Doing pretty well here, so now let’s get rid of the side effects. The lack of side-effects is 
+one of the hallmarks of clean, reusable functional code, enabling us to pass functions/methods
+to solve the same problems in multiple locations. </p>
+<p>With side effects, i.e. accessing variables outside the function’s scope for reading or writing 
+purposes, we strongly tie the function to its environment and thus prevent easy reuse of our code. 
+Side-effect free code also helps with reasoning about a function’s action and allows us to reuse 
+the same method in various situations, without having to set up each environment with the expected 
+properties and then having to pass the context using JavaScript’s <code>.bind()</code> object method. Here 
+is the re-worked example, getting rid of the side effects:</p>
+<figcaption class="code-filename typescript">v3-populate-object.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">UserAccountInfo</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">public</span> user<span class="token punctuation">:</span> User<span class="token punctuation">;</span>
+  <span class="token keyword">public</span> bankList<span class="token punctuation">:</span> Bank<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">public</span> accountInfo<span class="token punctuation">:</span> Account<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>user<span class="token punctuation">:</span> User<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>user <span class="token operator">=</span> user<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+userService<span class="token punctuation">.</span><span class="token function">getUserByEmail</span><span class="token punctuation">(</span>userEmail<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+    <span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>user<span class="token punctuation">:</span> User<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>user<span class="token punctuation">.</span>disabled<span class="token punctuation">)</span> <span class="token keyword">throw</span><span class="token punctuation">(</span> <span class="token keyword">new</span> <span class="token class-name">DisabledUserException</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">else</span> <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">UserAccountInfo</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">flatMap</span><span class="token punctuation">(</span><span class="token punctuation">(</span>userAcct<span class="token punctuation">:</span> UserAccountInfo<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> bankService<span class="token punctuation">.</span><span class="token function">getBanksForUser</span><span class="token punctuation">(</span>userAcct<span class="token punctuation">.</span>user<span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+          <span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>bankInfo<span class="token punctuation">:</span> Bank<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+            userAcct<span class="token punctuation">.</span>bankList <span class="token operator">=</span> bankInfo<span class="token punctuation">;</span>
+            <span class="token keyword">return</span> userAcct<span class="token punctuation">;</span>
+          <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">flatMap</span><span class="token punctuation">(</span><span class="token punctuation">(</span>userAcct<span class="token punctuation">:</span> UserAccountInfo<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> accountService<span class="token punctuation">.</span><span class="token function">getAccountsForUserBanks</span><span class="token punctuation">(</span>userAcct<span class="token punctuation">.</span>user<span class="token punctuation">,</span> userAcct<span class="token punctuation">.</span>bankList<span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>acct<span class="token punctuation">:</span> Account<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span> 
+          userAcct<span class="token punctuation">.</span>accountInfo <span class="token operator">=</span> acct<span class="token punctuation">;</span> 
+          <span class="token keyword">return</span> acct
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">catchError</span><span class="token punctuation">(</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token comment" spellcheck="true">// Processing of any error, or mapping, occurs here</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span>userAccountInfo<span class="token punctuation">:</span> UserAccountInfo<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token comment" spellcheck="true">// Final state changes here</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this segment, a few things happen:</p>
+<ol>
+<li>I introduced a new “data container” called <code>UserAccountInfo</code>, which is essentially a container
+for the data retrieved in this example. It contains properties for the user, the corresponding
+list of banks as well as all the accounts.</li>
+<li>The initial call to <code>getUserByEmail()</code> is not changed an returns the same data, but</li>
+<li>the following <code>map()</code> operator takes the information from the API call, the <code>User</code> object, 
+and converts it into an object of type <code>UserAccountInfo</code>. If the user is <code>disabled</code>, it throws
+an error and thus bypass all the other operators except the <code>catchAll()</code>.</li>
+<li>The following <code>flatMap</code> executes a method that returns another Observable, passing the 
+<code>user</code> attribute of our just generated <code>UserAccountInfo</code> object. The method then takes the 
+passed <code>UserAccountInfo</code> object and augments it with the banking information for the user. </li>
+<li>The previous mechanism repeats, this time loading and storing the account information in the
+<code>UserAccountInfo</code> class.</li>
+<li>This far, we have had no side-effects from anywhere, only building up an object with the 
+results of the various API calls.</li>
+<li>That object now gets passed to the method specified for the <code>onNext</code> event handler in the 
+subscription. This is the place where we implement all the side-effects that we need in response
+to the various API calls.</li>
+</ol>
+<p>One thing you probably will object to is the use of a side-effect when calling methods on the
+various services. We can get around that short-coming using <em>currying</em> of 
+methods, turning something like this:</p>
+<figcaption class="code-filename typescript">acct-side-effect.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> aua <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>userAcct<span class="token punctuation">:</span> UserAccountInfo<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> accountService<span class="token punctuation">.</span><span class="token function">getAccountsForUserBanks</span><span class="token punctuation">(</span>userAcct<span class="token punctuation">.</span>user<span class="token punctuation">,</span> userAcct<span class="token punctuation">.</span>bankList<span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>acct<span class="token punctuation">:</span> Account<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      userAcct<span class="token punctuation">.</span>accountInfo <span class="token operator">=</span> acct<span class="token punctuation">;</span>
+      <span class="token keyword">return</span> userAcct<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>into something like this (variable names shortened to keep lines short for readability):</p>
+<figcaption class="code-filename typescript">acct-side-effect-free.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> aua <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>service<span class="token punctuation">:</span> AccountService<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token punctuation">(</span>user<span class="token punctuation">:</span> UserAccountInfo<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> Observable<span class="token operator">&lt;</span>UserAccountInfo<span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>userAcct<span class="token punctuation">:</span> UserAccountInfo<span class="token punctuation">)</span><span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>UserAccountInfo<span class="token operator">></span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> service<span class="token punctuation">.</span><span class="token function">getAccountsForUserBanks</span><span class="token punctuation">(</span>userAcct<span class="token punctuation">.</span>user<span class="token punctuation">,</span> userAcct<span class="token punctuation">.</span>bankList<span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>acct<span class="token punctuation">:</span> Account<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+        userAcct<span class="token punctuation">.</span>accountInfo <span class="token operator">=</span> acct<span class="token punctuation">;</span>
+        <span class="token keyword">return</span> userAcct<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This curried function accepts an instance of the API service to retrieve accounts on line 1. It
+then returns a new function that accepts our <code>UserAccountInfo</code> class and performs an API call 
+on the service passed as the first parameter in line 1. This way, the function does not rely on 
+its environment at all and thus becomes more universally usable. </p>
+<p>Getting there! There is just one eye-sore that I have with this code: It’s that the code is 
+not as self-explanatory as it could be: You’d need to read the code to understand what the 
+functions passed to the <code>flatMap()</code> operators are doing. In addition, the code structure 
+mixes various functionality in one Rx chain. Wouldn’t it be nice to have the code be more 
+expressive in what it does?</p>
+<p>Then take a look at this:</p>
+<figcaption class="code-filename typescript">final.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">userService<span class="token punctuation">.</span><span class="token function">getUserByEmail</span><span class="token punctuation">(</span>userEmail<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+    <span class="token function">map</span><span class="token punctuation">(</span>Ops<span class="token punctuation">.</span>instantiateUserAccountInfo<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">flatMap</span><span class="token punctuation">(</span>Ops<span class="token punctuation">.</span><span class="token function">getBanksForUser</span><span class="token punctuation">(</span>bankService<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">flatMap</span><span class="token punctuation">(</span>Ops<span class="token punctuation">.</span><span class="token function">getAccountsForUser</span><span class="token punctuation">(</span>accountService<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">catchError</span><span class="token punctuation">(</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token comment" spellcheck="true">// Intermittent error handling and mapping</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>
+    <span class="token punctuation">(</span>userAccountInfo<span class="token punctuation">:</span> UserAccountInfo<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">/* Process result, state change */</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span> <span class="token comment" spellcheck="true">/* Error handling for the entire chain happens here */</span><span class="token punctuation">}</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Here, <code>Ops</code> is an object (with a short name to fit this space) which now houses the 
+side-effect free methods we’ve developed in the previous step. So this implementation changes
+the following characteristics of the original code:</p>
+<ol>
+<li>The population of “global” variables during the processing has been replaced by passing a
+result object from operator to operator</li>
+<li>The result object <code>UserAccountInfo</code> gets passed to the subscription, where all the processing
+happens, including side effects on the state of the system.</li>
+<li>The passing of a results object allows us to have side-effect free and thus easily testable 
+methods (I will return to this <em>side-effect free</em> point shortly)</li>
+<li>A universal error handling (or mapping) was introduced through the <code>catchAll()</code> operator, 
+which is intended to map raw HTTP errors to standard errors we define in hopes that these 
+are more explanatory and can be interpreted better and follow project standards.</li>
+<li>We are able to group the functionality the operators provide in a nicely organized class, 
+which will help with code organization and other people understanding what is going on. This 
+should go a long way towards writing cleaner, more understandable and less error prone code 
+(Certainly will make code reviews easier).</li>
+<li>The descriptive method names communicate even to the casual reader, or a newly onboarded 
+developer, what is happening in this Rx chain by reading it from top to bottom — in contrast 
+to the first version, where the user had to read every line to even get a rough idea of what’s 
+going on.</li>
+</ol>
+<h2 id="Side-effects-in-Rx-chain"><a href="#Side-effects-in-Rx-chain" class="headerlink" title="Side effects in Rx chain"></a>Side effects in Rx chain</h2><p>We’ve already seen the use of side effects in Rx chains, and one way to avoid them, but here is 
+another one I recently read about in a blog post as a recommendation on how to avoid using 
+array indices in Rx’s <code>forkJoin()</code> operator:</p>
+<figcaption class="code-filename typescript">forkJoin-with-side-effects.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token function">forkJoin</span><span class="token punctuation">(</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>http<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'api/some-data'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  language<span class="token punctuation">,</span>
+  dateRange<span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">[</span>startDate<span class="token punctuation">,</span> endDate<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span> 
+      <span class="token keyword">this</span><span class="token punctuation">.</span>startDate <span class="token operator">=</span> startDate<span class="token punctuation">;</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>endDate <span class="token operator">=</span> endDate<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  users<span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">tap</span><span class="token punctuation">(</span>users <span class="token operator">=</span><span class="token operator">></span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">setUsers</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>http<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'api/chart-data'</span><span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span><span class="token function">tap</span><span class="token punctuation">(</span>chart <span class="token operator">=</span><span class="token operator">></span> <span class="token keyword">this</span><span class="token punctuation">.</span>chartData <span class="token operator">=</span> chart<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">[</span>someData<span class="token punctuation">,</span> lang<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">setWelcomeMessage</span><span class="token punctuation">(</span>someData<span class="token punctuation">,</span> lang<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment" spellcheck="true">// all data acquired, wire-up everything</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">launch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>forkJoin</code> executes all Observables passed to it, waits for all of them to complete
+before emitting an event itself containing the content of the last events of each observable, 
+passed to it. The marble diagram for <code>forkJoin</code> looks like this:</p>
+<p><img src="./join-marbles.svg" alt="Marble diagram for the Rx join operator"></p>
+<p>The long and short of it is that we organize the various Observables in the <code>forkJoin()</code> in the
+correct order so that we can use array destructuring in our subscription to get the values we 
+want into properly named variable names. </p>
+<p>We order the Observables such that the ones we want to 
+use in our subscription come first. All other calls use the <code>tap()</code> operator to store the
+different values in object properties as a side effect, thereby modifying class state at the time
+a HTTPRequest completes but that the programmer has no control over — see line 4 onwards and 
+the use of the <code>tap()</code> operator.</p>
+<p>This modification of class state is indicated in the following marble diagram by events that are
+displayed as squares:</p>
+<p><img src="./join-marbles-sideeffect.svg" alt="forkJoin with side effects"></p>
+<p>I agree with the desire to not access results by numeric array index, but for that reason, 
+<code>forkJoin</code> <a href="https://rxjs-dev.firebaseapp.com/api/index/function/forkJoin#use-forkjoin-with-a-dictionary-of-observable-inputs" target="_blank" rel="noopener">accepts an object literal</a>,
+where the results of the various calls can be accessed through properties on an object emitted 
+as its result instead of numeric indices. Here’s an example:</p>
+<figcaption class="code-filename typescript">forkJoin-object-parameter.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> observableTasks <span class="token operator">=</span> <span class="token punctuation">{</span>
+  foo<span class="token punctuation">:</span> <span class="token function">of</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  bar<span class="token punctuation">:</span> Promise<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  baz<span class="token punctuation">:</span> <span class="token function">timer</span><span class="token punctuation">(</span><span class="token number">4000</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> observable <span class="token operator">=</span> <span class="token function">forkJoin</span><span class="token punctuation">(</span>observableTasks<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>
+    value <span class="token operator">=</span><span class="token operator">></span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment" spellcheck="true">// After 4 seconds delay, it logs:</span>
+<span class="token comment" spellcheck="true">// { foo: 4, bar: 8, baz: 0 }</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Not only is this version more readable, it also avoids hard-to-track run-time errors which occur
+in the previous implementation: Let’s say, for argument’s sake, the API call to fetch the chart 
+data is slow due to an overloaded server, but the call for the <code>dateRange</code> executes much faster, 
+we now have an unexpected state, since our date range has already been changed whereas we have 
+not finished loading the correct data set.</p>
+<p>The fact that <code>forkJoin</code> only emits an event once all observables have completed does not help 
+here, because the observables will only notify the subscription that they are completed <em>after</em> 
+the <code>tap()</code> commands with the state modification will have executed.</p>
+<p>What’s more, let’s consider the case where one of the Observables throws an <code>onError</code> event. In
+that case, forkJoin will not emit the data of any of the observables passed to it but instead 
+emit an <code>onError</code> event as well: </p>
+<p><img src="./join-marbles-sideeffect-error.svg" alt="forkJoin with side effects when encountering an error"></p>
+<p>We see that in this constellation, there already will have been state modifications by 
+the third and fourth observable stream passed to <code>forkJoin</code> — before it emits its 
+<code>onError</code> event. Translated, this means that we already effected a state change, even 
+if the observable eventually failed — the status of the system is now undefined and 
+possibly invalid and what’s more: This behavior is really hard to reproduce, 
+trouble-shoot and fix. The original, valid, state is irrevocably lost because parts of it
+have been overwritten by the side effects. </p>
+<p>This is, admittedly, a contrived example, but it shows the benefit of not populating 
+variables in the environment out of a running Rx chain — in particular for 
+asynchronous methods with unknown run times such as HTTP requests. In those cases, 
+the browser could access the already changed values for some other reason — for 
+example in Angular, a change in the data for a property binding would cause an update 
+of the date range in the UI, but not the data for the graph, which comes later — Not 
+to speak of the final state change in the subscription, which might happen at a much 
+later time as well and might be disconnected from the other changes entirely.</p>
+<p>That’s why the avoidance of side effects in a functional programming context is so 
+critical, because it allows to better reason about our code, to improve re-usability 
+of your existing methods and avoid hard-to-track errors.</p>
+</article><span class="prev-post"><a href="/angular/angular-injection-token-dependency-injection/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/typescript/typescript-decorator-principles-use-cases/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Torsten Müller</title>
+    <link>https://torsten-muller.dev/</link>
+    
+    <image>
+      <url>https://torsten-muller.dev/icon.png</url>
+      <title>Torsten Müller</title>
+      <link>https://torsten-muller.dev/</link>
+    </image>
+    
+    <atom:link href="/rss2.xml" rel="self" type="application/rss+xml"/>
+    
+    <description></description>
+    <pubDate>Wed, 27 May 2020 04:17:23 GMT</pubDate>
+    <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>Angular Decorators to Create Mixable, Self-contained Functionality</title>
+      <link>https://torsten-muller.dev/typescript/angular-decorators-to-create-mixable-self-contained-functionality/</link>
+      <guid>https://torsten-muller.dev/typescript/angular-decorators-to-create-mixable-self-contained-functionality/</guid>
+      <pubDate>Sun, 17 May 2020 10:44:51 GMT</pubDate>
+      <description>
+      
+        In this post, I&#39;m going to build on a previous post introducing TypeScript Decorators by building a mixable implementation to have two form communicate with each other and an embedding component.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/typescript/angular-decorators-to-create-mixable-self-contained-functionality/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>TypeScript Decorator: Types, Principles and Use Cases</title>
+      <link>https://torsten-muller.dev/typescript/typescript-decorator-principles-use-cases/</link>
+      <guid>https://torsten-muller.dev/typescript/typescript-decorator-principles-use-cases/</guid>
+      <pubDate>Sat, 09 May 2020 15:59:45 GMT</pubDate>
+      <description>
+      
+        TypeScript Decorators seem to be the hidden, ugly step children of the family. Here, I&#39;ll describe what they are, what they are used for and how they can be implemented.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/typescript/typescript-decorator-principles-use-cases/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Rx.Js paradigm: resolving nested observables and side effects</title>
+      <link>https://torsten-muller.dev/rxjs/rxjs-paradigm-resolving-nested-observables-and-side-effects/</link>
+      <guid>https://torsten-muller.dev/rxjs/rxjs-paradigm-resolving-nested-observables-and-side-effects/</guid>
+      <pubDate>Sun, 12 Apr 2020 09:18:24 GMT</pubDate>
+      <description>
+      
+        
+        
+          
+          
+            &lt;p&gt;Working with other people is great: You get to learn how other people think about problems and 
+their solutions, learn new approaches
+          
+        
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/rxjs/rxjs-paradigm-resolving-nested-observables-and-side-effects/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Angular dependency injection: Use case for downloading assets</title>
+      <link>https://torsten-muller.dev/angular/angular-injection-token-dependency-injection/</link>
+      <guid>https://torsten-muller.dev/angular/angular-injection-token-dependency-injection/</guid>
+      <pubDate>Fri, 10 Apr 2020 08:39:35 GMT</pubDate>
+      <description>
+      
+        
+        
+          
+          
+            &lt;p&gt;Angular is a great framework, but you sometimes just need to do things outside the 
+framework. In this case, it was to download a file
+          
+        
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/angular-injection-token-dependency-injection/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Creating an npm library from existing code</title>
+      <link>https://torsten-muller.dev/angular/creating-an-npm-library-from-existing-code/</link>
+      <guid>https://torsten-muller.dev/angular/creating-an-npm-library-from-existing-code/</guid>
+      <pubDate>Sun, 05 Apr 2020 07:03:16 GMT</pubDate>
+      <description>
+      
+        In this post I&#39;m going to look into how we can create a npm library from an existing Angular project to reuse and share functionality.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/creating-an-npm-library-from-existing-code/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Using Angular interceptors to ensure authenticated user state</title>
+      <link>https://torsten-muller.dev/angular/using-http-interceptors/</link>
+      <guid>https://torsten-muller.dev/angular/using-http-interceptors/</guid>
+      <pubDate>Sat, 04 Apr 2020 07:03:16 GMT</pubDate>
+      <description>
+      
+        This post introduces the concept of Angular Interceptors and shows an example of their use for managing authentication in an Angular app.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/using-http-interceptors/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Create custom Rx.js operator: Aggregating events for a length of time</title>
+      <link>https://torsten-muller.dev/rxjs/create-new-rx-js-operator-aggregating-events-for-a-length-of-time/</link>
+      <guid>https://torsten-muller.dev/rxjs/create-new-rx-js-operator-aggregating-events-for-a-length-of-time/</guid>
+      <pubDate>Sat, 29 Feb 2020 07:40:29 GMT</pubDate>
+      <description>
+      
+        In this post, I&#39;m developing a custom Rx.js operator that aggregates events in the chain with a timeout the developer can specify
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/rxjs/create-new-rx-js-operator-aggregating-events-for-a-length-of-time/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Navigation in an Angular application using keyboard shortcuts</title>
+      <link>https://torsten-muller.dev/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/</link>
+      <guid>https://torsten-muller.dev/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/</guid>
+      <pubDate>Thu, 27 Feb 2020 11:07:14 GMT</pubDate>
+      <description>
+      
+        This is the first of two posts about how to implement navigation via keyboard shortcuts in an Angular application, using services, Rx.js and event propagation
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Converting GET request data into a JSON object</title>
+      <link>https://torsten-muller.dev/javascript/converting-get-request-data-into-a-json-object/</link>
+      <guid>https://torsten-muller.dev/javascript/converting-get-request-data-into-a-json-object/</guid>
+      <pubDate>Sat, 15 Feb 2020 12:57:59 GMT</pubDate>
+      <description>
+      
+        Nested form data sent via a GET request gets passed as field names, where nested object  names are contained in square brackets. This post shows how to convert that structure to  a JS Object.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/javascript/converting-get-request-data-into-a-json-object/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Implementing an immutable List in JavaScript</title>
+      <link>https://torsten-muller.dev/functional-programming/implementing-immutable-list-javascript/</link>
+      <guid>https://torsten-muller.dev/functional-programming/implementing-immutable-list-javascript/</guid>
+      <pubDate>Sat, 11 Jan 2020 19:26:20 GMT</pubDate>
+      <description>
+      
+        JavaScript offers objects and arrays. Here, I&#39;m implementing a List type,  which uses paradigms from functional programming such as recursion and immutability.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/functional-programming/implementing-immutable-list-javascript/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Implementing the Option monad in JavaScript</title>
+      <link>https://torsten-muller.dev/functional-programming/implementing-the-option-monad-in-javascript/</link>
+      <guid>https://torsten-muller.dev/functional-programming/implementing-the-option-monad-in-javascript/</guid>
+      <pubDate>Mon, 23 Dec 2019 11:45:08 GMT</pubDate>
+      <description>
+      
+        This post describes the use of monads in functional programming and provides a sample  implementation of basic functionality in JavaScript
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/functional-programming/implementing-the-option-monad-in-javascript/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Using Angular @ViewChild to implement multiple visualizations of data sets</title>
+      <link>https://torsten-muller.dev/angular/using-viewchild-to-implement-presentation-of-data-sets/</link>
+      <guid>https://torsten-muller.dev/angular/using-viewchild-to-implement-presentation-of-data-sets/</guid>
+      <pubDate>Sat, 21 Dec 2019 10:36:55 GMT</pubDate>
+      <description>
+      
+        Some data sets can be presented in different formats. This post explains,  how to create an Angular structure that lets a user choose which representation of a data set to display, using the example of a music library application.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/using-viewchild-to-implement-presentation-of-data-sets/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Polymorphic Angular Forms: How to create forms with different detail data</title>
+      <link>https://torsten-muller.dev/angular/angular-form-multiple-possible-subform-types/</link>
+      <guid>https://torsten-muller.dev/angular/angular-form-multiple-possible-subform-types/</guid>
+      <pubDate>Sat, 30 Nov 2019 16:00:35 GMT</pubDate>
+      <description>
+      
+        Some web forms require the use of different detail sub-forms to collect the data. In this post, I&#39;ll be looking at a form for library items which has different detail data for three library items: books, CDs and DVDs.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/angular-form-multiple-possible-subform-types/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Constructing a rudimentary money transfer architecture</title>
+      <link>https://torsten-muller.dev/architecture/constructing-money-transfer-architecture/</link>
+      <guid>https://torsten-muller.dev/architecture/constructing-money-transfer-architecture/</guid>
+      <pubDate>Thu, 24 Oct 2019 19:30:27 GMT</pubDate>
+      <description>
+      
+        This post takes a look at the obvious things a money transfer implementation would need to account for - it&#39;s more of a brain teaser &quot;what if&quot;, if solutions  wouldn&#39;t be readily available.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/architecture/constructing-money-transfer-architecture/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>A TypeScript pagination component with immutable state</title>
+      <link>https://torsten-muller.dev/architecture/angular-pagination-immutable-state/</link>
+      <guid>https://torsten-muller.dev/architecture/angular-pagination-immutable-state/</guid>
+      <pubDate>Tue, 22 Oct 2019 16:16:53 GMT</pubDate>
+      <description>
+      
+        This post presents a way to implement immutable data objects in TypeScript/JavaScript. It relies on standard JavaScript methods to achieve its goal.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/architecture/angular-pagination-immutable-state/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Angular: Dynamic class instantiation to use different data loading strategies</title>
+      <link>https://torsten-muller.dev/architecture/implementing-selectable-data-loading-strategies/</link>
+      <guid>https://torsten-muller.dev/architecture/implementing-selectable-data-loading-strategies/</guid>
+      <pubDate>Mon, 21 Oct 2019 12:12:03 GMT</pubDate>
+      <description>
+      
+        In this post, I&#39;m developing a data loading mechanism for Angular which can be configured to decide how to select, paginate and filter data from an in-memory cache or to load the data from the server for each page/filter change.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/architecture/implementing-selectable-data-loading-strategies/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Creating a reusable table component in Angular</title>
+      <link>https://torsten-muller.dev/angular/creating-reusable-table-component/</link>
+      <guid>https://torsten-muller.dev/angular/creating-reusable-table-component/</guid>
+      <pubDate>Tue, 15 Oct 2019 19:48:41 GMT</pubDate>
+      <description>
+      
+        Here I&#39;m introducing a reusable table component which can be reused to  render a variety of data in a consistent manner without duplicating code. It  interacts with the host component via a few property and event bindings
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/creating-reusable-table-component/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Angular ng-template to inject content into other components</title>
+      <link>https://torsten-muller.dev/angular/ng-template-content-injection/</link>
+      <guid>https://torsten-muller.dev/angular/ng-template-content-injection/</guid>
+      <pubDate>Sat, 05 Oct 2019 19:34:58 GMT</pubDate>
+      <description>
+      
+        View components sometimes need to have similar appearance but slightly different content  and functionality. In this post, we&#39;re exploring how to use the same component but change out the  link destinations of a list of links.
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/ng-template-content-injection/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Angular custom form field for Reactive Forms</title>
+      <link>https://torsten-muller.dev/angular/angular-custom-form-field-reactive-form/</link>
+      <guid>https://torsten-muller.dev/angular/angular-custom-form-field-reactive-form/</guid>
+      <pubDate>Sat, 05 Oct 2019 08:39:35 GMT</pubDate>
+      <description>
+      
+        We sometimes need specific form fields for special purposes. In this post, I describe how to develop a time duration field for use with Angular Responsive Forms
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/angular/angular-custom-form-field-reactive-form/#disqus_thread</comments>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://torsten-muller.dev/sitemap.xml

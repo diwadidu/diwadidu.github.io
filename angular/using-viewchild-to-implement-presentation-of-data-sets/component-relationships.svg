@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1"
+     viewBox="23 32 882 350" width="750px" height="298px"
+     xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <defs>
+        <font-face font-family="Helvetica Neue" font-size="19" panose-1="2 0 5 3 0 0 0 2 0 4"
+                   units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0"
+                   x-height="517" cap-height="714" ascent="951.99585" descent="-212.99744"
+                   font-weight="500">
+            <font-face-src>
+                <font-face-name name="HelveticaNeue"/>
+            </font-face-src>
+        </font-face>
+        <filter id="Shadow" filterUnits="userSpaceOnUse">
+            <feGaussianBlur in="SourceAlpha" result="blur" stdDeviation=".34696323"/>
+            <feOffset in="blur" result="offset" dx="0" dy="1"/>
+            <feFlood flood-color="#7f7f7f" result="flood"/>
+            <feComposite in="flood" in2="offset" operator="in" result="color"/>
+            <feMerge>
+                <feMergeNode in="color"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <linearGradient x1="0" x2="1" id="Gradient" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="white"/>
+            <stop offset=".5952381" stop-color="#e6e6e6"/>
+            <stop offset="1" stop-color="#e6e6e6"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient" xl:href="#Gradient"
+                        gradientTransform="translate(77.952755 78.433643) rotate(90) scale(17.944309)"/>
+        <font-face font-family="Helvetica" font-size="12" units-per-em="1000"
+                   underline-position="-75.683594" underline-thickness="49.316406" slope="0"
+                   x-height="522.94922" cap-height="717.28516" ascent="770.01953"
+                   descent="-229.98047" font-weight="500">
+            <font-face-src>
+                <font-face-name name="Helvetica"/>
+            </font-face-src>
+        </font-face>
+        <linearGradient id="Obj_Gradient_2" xl:href="#Gradient"
+                        gradientTransform="translate(157.32283 78.433643) rotate(90) scale(17.944309)"/>
+        <font-face font-family="Helvetica Neue" font-size="12" panose-1="2 0 5 3 0 0 0 2 0 4"
+                   units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0"
+                   x-height="517" cap-height="714" ascent="951.99585" descent="-212.99744"
+                   font-weight="500">
+            <font-face-src>
+                <font-face-name name="HelveticaNeue"/>
+            </font-face-src>
+        </font-face>
+        <font-face font-family="Helvetica Neue" font-size="16" panose-1="2 0 5 3 0 0 0 2 0 4"
+                   units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0"
+                   x-height="517" cap-height="714" ascent="951.99585" descent="-212.99744"
+                   font-weight="500">
+            <font-face-src>
+                <font-face-name name="HelveticaNeue"/>
+            </font-face-src>
+        </font-face>
+    </defs>
+    <g stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1">
+        <g>
+            <rect x="25.511811" y="34.015748" width="323.1496" height="345.82677" stroke="black"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width=".5"/>
+            <text transform="translate(39.60187 42.584395)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="19" font-weight="500" x=".4415"
+                       y="18" textLength="90.117">Album List
+                </tspan>
+            </text>
+            <g filter="url(#Shadow)">
+                <rect x="42.519685" y="78.433643" width="70.86614" height="17.944309"
+                      fill="url(#Obj_Gradient)"/>
+                <rect x="42.519685" y="78.433643" width="70.86614" height="17.944309"
+                      stroke="#7e7e7e" stroke-linecap="butt" stroke-linejoin="miter"
+                      stroke-width="1"/>
+                <text transform="translate(47.519685 80.4058)" fill="#333">
+                    <tspan font-family="Helvetica" font-size="12" font-weight="500" fill="#333"
+                           x="21.096157" y="11" textLength="18.673828">List
+                    </tspan>
+                </text>
+            </g>
+            <g filter="url(#Shadow)">
+                <rect x="121.88976" y="78.433643" width="70.86614" height="17.944309"
+                      fill="url(#Obj_Gradient_2)"/>
+                <rect x="121.88976" y="78.433643" width="70.86614" height="17.944309"
+                      stroke="#7e7e7e" stroke-linecap="butt" stroke-linejoin="miter"
+                      stroke-width="1"/>
+                <text transform="translate(126.88976 80.4058)" fill="#333">
+                    <tspan font-family="Helvetica" font-size="12" font-weight="500" fill="#333"
+                           x="11.428188" y="11" textLength="38.009766">Covers
+                    </tspan>
+                </text>
+            </g>
+            <rect x="42.519685" y="107.716535" width="274.96063" height="260.7874" fill="#f26077"/>
+            <rect x="42.519685" y="107.716535" width="274.96063" height="260.7874" stroke="black"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width=".5"/>
+            <text transform="translate(56.35433 113.466284)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="19" font-weight="500" x=".265" y="18"
+                       textLength="78.47">Base List
+                </tspan>
+            </text>
+            <rect x="53.858267" y="144.56693" width="255.11811" height="107.716535" fill="#00bfc0"/>
+            <path d="M 53.858267 144.56693 L 308.97638 144.56693 L 308.97638 252.28346 L 53.858267 252.28346 Z"
+                  stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".5"
+                  stroke-dasharray="2,2"/>
+            <text transform="translate(115.55118 195.65526)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="19" font-weight="500" x=".47" y="18"
+                       textLength="11.609">V
+                </tspan>
+                <tspan font-family="Helvetica Neue" font-size="19" font-weight="500" x="11.737"
+                       y="18" textLength="116.793">iew Container
+                </tspan>
+            </text>
+            <text transform="translate(236.6496 147.06428)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="12" font-weight="500" x=".15" y="11"
+                       textLength="16.932">@V
+                </tspan>
+                <tspan font-family="Helvetica Neue" font-size="12" font-weight="500" x="16.866"
+                       y="11" textLength="45.984">iewChild
+                </tspan>
+            </text>
+            <rect x="435.1181" y="109.522514" width="467.71653" height="209.76378" fill="#00bfc0"/>
+            <path d="M 435.1181 109.522514 L 902.83464 109.522514 L 902.83464 319.2863 L 435.1181 319.2863 Z"
+                  stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".5"
+                  stroke-dasharray="2,2"/>
+            <rect x="615.1181" y="240.94488" width="130.3937" height="53.858267" fill="white"/>
+            <rect x="615.1181" y="240.94488" width="130.3937" height="53.858267" stroke="black"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(620.1181 258.65002)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="16" font-weight="500" fill="black"
+                       x="17.22885" y="15" textLength="85.936">AbstractList
+                </tspan>
+            </text>
+            <rect x="453.5433" y="141.73228" width="130.3937" height="53.858267" fill="white"/>
+            <rect x="453.5433" y="141.73228" width="130.3937" height="53.858267" stroke="black"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(458.5433 159.43742)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="16" font-weight="500" x="18.70085"
+                       y="15" textLength="82.992">NumberList
+                </tspan>
+            </text>
+            <rect x="603.77952" y="141.73228" width="130.3937" height="53.858267" fill="white"/>
+            <rect x="603.77952" y="141.73228" width="130.3937" height="53.858267" stroke="black"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(608.77952 159.43742)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="16" font-weight="500" x="26.12485"
+                       y="15" textLength="68.144">CoverList
+                </tspan>
+            </text>
+            <rect x="754.01574" y="141.73228" width="130.3937" height="53.858267" fill="white"
+                  fill-opacity=".4351723"/>
+            <rect x="754.01574" y="141.73228" width="130.3937" height="53.858267" stroke="black"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(759.01574 159.43742)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="16" font-weight="500" fill="black"
+                       x="39.45285" y="15" textLength="41.488">…List
+                </tspan>
+            </text>
+            <path d="M 518.74015 195.59055 L 518.74015 202.59055 L 518.74015 218.26772 L 599.52756 218.26772 L 680.31496 218.26772 L 680.31496 233.94488 L 680.31496 240.94488"
+                  stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <path d="M 668.97637 195.59055 L 668.97637 202.59055 L 668.97637 218.26772 L 674.64567 218.26772 L 680.31496 218.26772 L 680.31496 233.94488 L 680.31496 240.94488"
+                  stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <path d="M 819.2126 195.59055 L 819.2126 202.59055 L 819.2126 218.26772 L 749.76378 218.26772 L 680.31496 218.26772 L 680.31496 233.94488 L 680.31496 240.94488"
+                  stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <path d="M 419.52756 188.42519 L 419.52756 208.4252 L 351.65354 208.4252 L 351.65354 218.4252 L 331.65354 198.4252 L 351.65354 178.4252 L 351.65354 188.42519 Z"
+                  fill="#3a8eed"/>
+        </g>
+    </g>
+</svg>

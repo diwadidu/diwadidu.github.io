@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1"
+     viewBox="34 67 450 174" width="450pt" height="174pt">
+    <defs>
+        <font-face font-family="Helvetica Neue" font-size="16" panose-1="2 0 5 3 0 0 0 2 0 4"
+                   units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0"
+                   x-height="517" cap-height="714" ascent="951.99585" descent="-212.99744"
+                   font-weight="500">
+            <font-face-src>
+                <font-face-name name="HelveticaNeue"/>
+            </font-face-src>
+        </font-face>
+        <font-face font-family="Courier New" font-size="14" panose-1="2 7 6 9 2 2 5 2 4 4"
+                   units-per-em="1000" underline-position="-232.91016"
+                   underline-thickness="100.097656" slope="0" x-height="443.35938"
+                   cap-height="591.79688" ascent="832.51953" descent="-300.29297"
+                   font-weight="bold">
+            <font-face-src>
+                <font-face-name name="CourierNewPS-BoldMT"/>
+            </font-face-src>
+        </font-face>
+        <linearGradient x1="0" x2="1" id="Gradient" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#ff817f"/>
+            <stop offset="1" stop-color="#c94e4d"/>
+        </linearGradient>
+        <linearGradient id="Obj_Gradient" xl:href="#Gradient"
+                        gradientTransform="translate(260.49035 149.60104) rotate(81.10231) scale(22.677165)"/>
+        <font-face font-family="Courier New" font-size="60" panose-1="2 7 3 9 2 2 5 2 4 4"
+                   units-per-em="1000" underline-position="-232.91016"
+                   underline-thickness="41.015625" slope="0" x-height="422.85156"
+                   cap-height="571.28906" ascent="832.51953" descent="-300.29297" font-weight="500">
+            <font-face-src>
+                <font-face-name name="CourierNewPSMT"/>
+            </font-face-src>
+        </font-face>
+    </defs>
+    <g stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1">
+        <title>Canvas 1</title>
+        <g>
+            <title>Layer 1</title>
+            <rect x="36.850393" y="99.2126" width="192.7559" height="138.89764" fill="#dadada"/>
+            <rect x="36.850393" y="99.2126" width="192.7559" height="138.89764" stroke="black"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(177.6063 72.980725)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="16" font-weight="500" x=".236" y="15"
+                       textLength="24.288">Par
+                </tspan>
+                <tspan font-family="Helvetica Neue" font-size="16" font-weight="500" x="24.236"
+                       y="15" textLength="22.528">ent
+                </tspan>
+            </text>
+            <text transform="translate(56.10236 109.05512)" fill="black">
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="12"
+                       textLength="117.61914">&lt;h1&gt;Title&lt;/h1&gt;
+                </tspan>
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="28"
+                       textLength="159.62598">&lt;p&gt;Some content&lt;/p&gt;
+                </tspan>
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="44"
+                       textLength="109.217773">&lt;ng-template&gt;
+                </tspan>
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="60"
+                       textLength="134.421875">… content here
+                </tspan>
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="76"
+                       textLength="117.61914">&lt;/ng-template&gt;
+                </tspan>
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="92"
+                       textLength="75.612305">&lt;child /&gt;
+                </tspan>
+            </text>
+            <rect x="289.13386" y="99.2126" width="192.7559" height="138.89764" fill="#dadada"/>
+            <rect x="289.13386" y="99.2126" width="192.7559" height="138.89764" stroke="black"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(434.38976 72.980725)" fill="black">
+                <tspan font-family="Helvetica Neue" font-size="16" font-weight="500" x=".48" y="15"
+                       textLength="37.04">Child
+                </tspan>
+            </text>
+            <text transform="translate(308.38582 109.05512)" fill="black">
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="12"
+                       textLength="117.61914">&lt;h2&gt;Child&lt;/h2&gt;
+                </tspan>
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="28"
+                       textLength="126.02051">&lt;img src=“…” /&gt;
+                </tspan>
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="44"
+                       textLength="134.421875">&lt;ng-container /&gt;
+                </tspan>
+                <tspan font-family="Courier New" font-size="14" font-weight="bold" x="0" y="60"
+                       textLength="159.62598">&lt;p&gt;More content&lt;/p&gt;
+                </tspan>
+            </text>
+            <path d="M 221.97923 172.84516 L 220.22549 161.64302 L 282.74963 151.85459 L 281.87276 146.25352 L 303.38582 154.36225 L 285.38024 168.65779 L 284.50337 163.05673 Z"
+                  fill="url(#Obj_Gradient)"/>
+            <path d="M 221.97923 172.84516 L 220.22549 161.64302 L 282.74963 151.85459 L 281.87276 146.25352 L 303.38582 154.36225 L 285.38024 168.65779 L 284.50337 163.05673 Z"
+                  stroke="#b00600" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+            <text transform="translate(187.6063 130.22441)" fill="black">
+                <tspan font-family="Courier New" font-size="60" font-weight="500" x=".4970703"
+                       y="50" textLength="36.00586">}
+                </tspan>
+            </text>
+        </g>
+    </g>
+</svg>

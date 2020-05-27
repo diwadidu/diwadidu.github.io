@@ -1,0 +1,78 @@
+@startuml
+
+allowmixing
+scale 1200 width
+'scale 2048 width
+skinparam monochrome true
+skinparam linetype ortho
+'hide footbox
+hide empty members
+skinparam backgroundColor #f8f8f8
+
+frame PhotoAlbum #a0a0a0 {
+  class AlbumPage #d8d8d8
+  class Album #d8d8d8
+}
+
+frame Authentication #e8e8e8 {
+  class Auth << (S,#FF7700) Service >>
+  class Login
+}
+
+frame Users #e8e8e8 {
+  class Users
+  class Roles
+}
+
+frame Trips #e8e8e8 {
+  class TripsOverview
+  class Trip
+  class TripSegment {
+    travelDate: Date
+    travelMode: string
+  }
+  class TravelPath
+  class TripCatalogMapView
+  class TripCatalogListView
+  class TripImage {
+    isBanner: boolean
+    caption: string
+    order: number
+  }
+}
+
+frame Images #e8e8e8 {
+  class Image {
+    url: string
+    description: string
+    keywords: string[]
+  }
+
+  class ImageSelector
+}
+
+'Trip -(0- Image
+'Trip #-- ImageSelector
+
+'TripsOverview "1" -- "*" Trip
+Trip "1" *-- "*" TripSegment : ""
+TripImage o-down- Image
+TripSegment "1 " *-down- "1 " TravelPath
+TripSegment "1" *-- "*" TripImage
+Image "1" --o "1" Trip
+'TripsOverview -- Auth
+TripCatalogMapView --* TripsOverview
+TripCatalogListView --* TripsOverview
+
+Users -- Roles
+Login -- Auth
+Auth -- Users
+Auth -- Album
+TripsOverview -left- Auth
+
+ImageSelector "1  " -- "*   " Image
+ImageSelector -up- Auth
+Album -down- AlbumPage
+AlbumPage "*" o-- "*" Image
+
+@enduml

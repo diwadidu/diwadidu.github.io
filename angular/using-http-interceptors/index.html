@@ -1,0 +1,172 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Using Angular interceptors to ensure authenticated user state | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="This post introduces the concept of Angular Interceptors and shows an example of their use for managing authentication in an Angular app."><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><div class="header-image"><img src="./interceptor.jpg"></div><article class="full"><h1 itemprop="headline" class="post-heading">Using Angular interceptors to ensure authenticated user state</h1><div class="publish-date right">published Apr 4th, 2020</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/architecture" itemprop="url">#architecture
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/code-reuse" itemprop="url">#code-reuse
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/api-design" itemprop="url">#api-design
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Ok, here we go: Geek alert. I admit that when I first heard about <em>Angular interceptors</em>, I had 
+to think of “Pirates of the Caribbean” and there “… not being a <strong>real</strong> ship as can match <em>The 
+Interceptor</em> for speed.” (Hence the image above)</p>
+<p>But in the Angular context, <em>HTTP Interceptors</em> actually can abstract out and provide a place 
+for some fundamental functionality that should be available throughout the application. While 
+I’m going to discuss managing the authentication status in detail in this post, there are many 
+other uses around such as performance logging of api calls, logging or resolving of API errors 
+etc. You can find a <a href="https://medium.com/angular-in-depth/top-10-ways-to-use-interceptors-in-angular-db450f8a62d6" target="_blank" rel="noopener">list of 10 use cases for interceptors</a>
+on medium.com. </p>
+<h2 id="The-problem-to-solve"><a href="#The-problem-to-solve" class="headerlink" title="The problem to solve"></a>The problem to solve</h2><p>I was working on an Angular app, where the login status was managed server-side, of course. The 
+problem was that the expiration time was stored in a DB on the server and all the Auth cookies
+were set as <em>session cookies</em> and as <code>HTTP Only</code> and <code>secure</code>. So no browser access, and even
+if I had browser access, there was no expiration timestamp to be read. </p>
+<p>With that setup, the server was in lone control of the login status of the user, not even 
+permitting the frontend to provide warning to a user that the session was about to expire.</p>
+<p>Unacceptable!</p>
+<p>From a user experience angle, it is simply good practice to alert a user that he or she is 
+about to be logged out and provide a means to extend a session. With all the state managed 
+server-side, this was solved in a previous project through continuous pings every X seconds 
+to the backend to see if an authentication error was thrown and then logging the user out 
+— without warning! </p>
+<p>So if the session expired server-side, the frontend would find out in a timely manner, but too 
+late: The user would be logged out, regardless of whether he or she had already worked on a form
+for 10 minutes and would lose all that work. On top of that, the pinging solution created a lot
+of unnecessary network traffic and processing overhead with constantly setting up and tearing 
+down HTTP connections to the server. </p>
+<p>I desperately wanted to do better; Hence the implementation of a client-side interceptor with 
+a modification to the server-side code. To get around the problem of not being able to read the
+cookies, the backend sets a custom header on every HTTP response, which is readable by JavaScript.
+That header contains the current expiration timestamp of the session. On the Java server-side, 
+interestingly, this was also solved with the concept of interceptors.  </p>
+<h2 id="How-an-Angular-Interceptor-works"><a href="#How-an-Angular-Interceptor-works" class="headerlink" title="How an Angular Interceptor works"></a>How an Angular Interceptor works</h2><p>An Angular interceptor gets called by (“intercepts”) any AJAX call to the backend. This happens
+both on the way to the server as well as on the way back from the server to the browser —– 
+Thus it can modify the request on the way to and react to an answer from the server before the 
+Angular app gets to process it as an <code>HttpResponse</code>. The basic setup of an interceptor is as
+follows:</p>
+<figcaption class="code-filename typescript">auth.interceptor.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{</span> providedIn<span class="token punctuation">:</span> <span class="token string">'root '</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthInterceptor</span> implement HttpInterceptor <span class="token punctuation">{</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">intercept</span><span class="token punctuation">(</span>req<span class="token punctuation">:</span> HttpRequest<span class="token operator">&lt;</span><span class="token keyword">any</span><span class="token operator">></span><span class="token punctuation">,</span> next<span class="token punctuation">:</span> HttpHandler<span class="token punctuation">)</span><span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>HttpEvent<span class="token operator">&lt;</span><span class="token keyword">any</span><span class="token operator">></span><span class="token operator">></span> <span class="token punctuation">{</span>
+
+    req <span class="token operator">=</span> req<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      setHeaders<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        X<span class="token operator">-</span>my<span class="token operator">-</span>header<span class="token punctuation">:</span> <span class="token string">'some-token-value'</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> next<span class="token punctuation">.</span><span class="token function">handle</span><span class="token punctuation">(</span>req<span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+        <span class="token operator">...</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>That’s a lot of code in only 20 lines, so let’s take this step by step:</p>
+<ol>
+<li>In lines 1 and 2, we set up the interceptor. It’s essentially, in Angular parlance, a <em>service</em>
+that implements the <code>HttpInterceptor</code> interface. That interface requires the implementation of 
+an <code>intercept()</code> method, which is done on line 6.</li>
+<li>The intercept method on line 6 gets passed two parameters: <ol>
+<li>the first one being of type <code>HttpRequest</code>, which gets the information from a previous 
+interceptor or if there is none, directly from the service</li>
+<li>the second one being an <code>HttpHandler</code>, which we’re going to call to pass the results of
+this interceptor to the next one in the chain, or to the server, if we’re the last — or 
+only — one.  </li>
+</ol>
+</li>
+<li>Lines 8 through 12 show how to modify the outgoing HTTP request. To note here is that the
+request, <code>req</code>, is an <em>immutable object</em>. So we’re creating a new instance by using <code>clone()</code> 
+to and supplying an object with the changes we’d like to see in the request we’re intercepting.</li>
+<li>Finally, in lines 14 - 17, we’re performing the action of<ol>
+<li>modifying and sending the request through <code>handle()</code> (line 14) and</li>
+<li>respond to the server response using an Rx.js chain (<code>pipe()</code> in line 15).</li>
+</ol>
+</li>
+</ol>
+<p>Those are the basics for an interceptor, so now we can go and implement the updating</p>
+<h2 id="The-AuthInterceptor"><a href="#The-AuthInterceptor" class="headerlink" title="The AuthInterceptor"></a>The AuthInterceptor</h2><p>First off, in my case, I did not need to modify the request going out. An example, where that
+modification would be necessary is the use of Bearer tokens for authentication, such as in OAuth.
+If the token value was stored in <code>localStorage</code>, we would need to modify each server request with
+a corresponding header passing the value of the token.</p>
+<p>Since that’s not the case here, the implementation only uses
+the response part to achieve the following goals:</p>
+<ol>
+<li>Reset a timer that triggers the display of a modal that warns the user of an impending logout</li>
+<li>Log the user out, if the response from the server indicates that the session has expired
+(or never was started)</li>
+</ol>
+<p>Without going into too many details, this implementation uses an <code>AuthService</code> to manage the
+handling of the login status. That service has two methods:</p>
+<ul>
+<li><code>resetSessionTimeout()</code> reads the header of the server response and restarts the timer for
+the warning modal</li>
+<li><code>logoutUser()</code> gets called, when the server response to a call is a <code>401 Unauthorized</code> error 
+or the renewal of the session failed.</li>
+</ul>
+<p>So our Rx.js chain looks like this:</p>
+<figcaption class="code-filename typescript">auth.interceptor.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">return</span> next<span class="token punctuation">.</span><span class="token function">handle</span><span class="token punctuation">(</span>req<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+    <span class="token function">tap</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">resetSessionTimeout</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>authService<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">catchError</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">logoutUser</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>authService<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">finalize</span><span class="token punctuation">(</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">)</span>
+  <span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>with an implementation for <code>resetSessionTimeout()</code> (going to omit the implementation 
+for <code>logoutUser()</code> method):</p>
+<figcaption class="code-filename typescript">auth.interceptor.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">public</span> <span class="token function">resetSessionTimeout</span><span class="token punctuation">(</span>authService<span class="token punctuation">:</span> AuthService<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>response<span class="token punctuation">:</span> HttpResponse<span class="token operator">&lt;</span><span class="token keyword">any</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>response <span class="token keyword">instanceof</span> <span class="token class-name">HttpResponse</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> eosHeader <span class="token operator">=</span> response<span class="token punctuation">.</span>headers<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'x-eos'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      authService<span class="token punctuation">.</span><span class="token function">setEosTimer</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">EosTime</span><span class="token punctuation">(</span>eosHeader<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Both methods are curried methods accepting the <code>Authenticationservice</code> as their first parameters. 
+This was done to simplify testing the methods. With that, the functionality is straightforward:</p>
+<p>Whenever an <code>HttpEvent</code> is received, the interceptor</p>
+<ol>
+<li>calls <code>resetSessionTimeout()</code>, which<ol>
+<li>checks whether the event contains an <code>HttpResponse</code>, and if so</li>
+<li>reads the <code>X-eos</code> header from the server providing the session expiration time and</li>
+<li>calls the service to reset the timer that triggers the display of a warning modal to the user.</li>
+<li>(not shown): If <code>setEosTimer</code> receives an invalid timestamp, it throws an Exception</li>
+</ol>
+</li>
+<li>if the previous method throws an exception, the Rx chain catches that error to <ol>
+<li>log the user out, by explicitly setting the cookie’s expiration time to January 1st, 1970 and</li>
+<li>redirecting the user to the login page using <code>window.location</code>, since the login 
+functionality ist part of a separate microservice with its own URL.  </li>
+</ol>
+</li>
+<li>If no exception was thrown by <code>resetSessionTimeout()</code>, the <code>catchError()</code> method is not called 
+and the user stays logged in — with an updated timer. </li>
+</ol>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this post I have introduced, and  hopefully sufficiently explained, the concept of
+interceptors in Angular and coded one use case: The management of user login status
+based on the headers set by the server on HTTP Requests.</p>
+<p>The great benefit of this solution, over for example handling the login status in the services
+talking to the backend lies in the fact that the interceptor runs every time without
+duplicating the code, as would be the case if we implemented that same functionality in each 
+service.</p>
+</article><span class="prev-post"><a href="/rxjs/create-new-rx-js-operator-aggregating-events-for-a-length-of-time/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/angular/creating-an-npm-library-from-existing-code/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

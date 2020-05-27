@@ -1,0 +1,267 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Domain driven design and architecture | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Domain driven design and architecture</h1><div class="publish-date left">March 8th, 2020</div><div class="clear"></div><span class="post-meta"></span><p>So far in this project, we’ve looked at 
+<a href="../1-domain-story-telling">what a user needs to accomplish via domain story telling</a> and then
+went on to use what we have discovered to <a href="../2-ux-analysis">create some wireframes</a>, which
+have already shown us what kind of information we need to collect and how the data will relate
+to each other.</p>
+<p>In this step, I’m going to figure out from the (incomplete) wireframe set </p>
+<ol>
+<li>what data we need to capture,</li>
+<li>how the data relates to each other and</li>
+<li>ways of grouping the artifacts into logical pieces</li>
+<li>parts of the domain language I’m going to use throughout the rest of this project</li>
+</ol>
+<p>Along the way we’re probably going to find some edge cases we need to figure out — we always
+do, don’t we? So let’s dive in …</p>
+<h2 id="A-first-look"><a href="#A-first-look" class="headerlink" title="A first look"></a>A first look</h2><p>When looking at the <a href="../1-domain-story-telling">overview domain story</a>, we can already see a few
+parts of the system that should be fairly self-contained: First, there is the authentication
+piece making a brief appearance here, which will govern the functionality such as logins, 
+permissions, user credentials, password resets etc.</p>
+<p>Closely related to authentication, represented by the “Traveler” actor in the diagram, is the 
+user context. This also represents a well defined set of functionality that is self-contained: 
+Sign-up, user management and configuration (such as preferences, language etc.).   </p>
+<p>Although the user and authentication contexts are closely related, and need to work together
+for the login of a user, one can make the argument, that these should be two separate 
+bounded contexts: The user context is for managing the users and the data related to them, 
+whereas the authentication context’s task is to handle the authentication throughout the system.</p>
+<p>And it could be more than humans that need authentication: Other, non-human systems, even our 
+own, might need to get authenticated and the mechanism for authentication might differ between
+the various actors. </p>
+<p>Another factor in the decision could be the relative frequency with which the user information
+and authentication information is accessed: Users usually don’t spend a lot of time managing
+their accounts, but authentication potentially needs to happen on every request to an API or 
+loading of a new screen. Separating these concerns will allow more control when scaling the 
+system.</p>
+<p>At this point, a little aside on the management of the login: Since we’re going to have to 
+check the authentication potentially on every request, it would be advantageous not to have
+to access a database on every request. For this functionality, it might be beneficial to use
+<em>JSON Web Tokens</em> (JWT), a technology where <em>claims</em> in JSON format can be validated using a
+private key on the server and a signature in the JWT. I don’t want to make a decision right
+now, but it is a good thought to keep in mind for later.  </p>
+<p><img src="./component-diagram.svg" alt="Component overview diagram based on the domain story"></p>
+<p>Next up is the “travel report”. This report would make a logical
+bounded context, because it deals with a number of closely related aggregates, value objects
+and entities which are mostly self-contained in functionality but need to work together. This 
+<em>bounded context</em> can present a well-defined interface to the outside world with which 
+to integrate. </p>
+<p>Other bounded contexts could talk to the <em>travel report</em> context using some of the DDD 
+paradigms such as a <em>published language</em> or an <em>anti-corruption layer</em> (ACL) to not mix 
+(pollute) the domain languages in the various bounded contexts. </p>
+<p>Finally, we have the icon for “Travel Journal app” in the domain story (or “TravelAppContext”
+in the UMP diagram shown above). From the domain story drawing we can see that the 
+functionality of this context is to provide a somewhat generic overview of existing
+trips reports, create new ones, and be a jumping-off point for any other contexts we 
+might identify in the future.</p>
+<p>In this small project, it is hard to see exactly what this context, if we decided to split 
+this off into its own, would include, but it’s at the very least a good indicator that this
+might be its own context in the future.  </p>
+<h2 id="A-closer-look-at-the-trip-context"><a href="#A-closer-look-at-the-trip-context" class="headerlink" title="A closer look at the trip context"></a>A closer look at the trip context</h2><p>Now that we have the general lay of the land, let’s take a closer look at the trips
+bounded context, in particular the data classes involved in this part of the domain and
+how they are related to each other. I will leave out for now other architectural concepts such as
+controllers, API interfaces, services etc. That will be topic for another post, as we get closer to 
+actually implementing this system on the backend. There will also be a frontend architecture 
+treatment, since the domains will be the same, but the view classes will be different from what
+we need on the server backend.</p>
+<p>Travel trips will be the main data we’re going to handle in our application, so we can start 
+our discussion there. From the <a href="../2-ux-analysis">wireframes in the previous post</a>
+we can see that a trip consists of the following data for now:</p>
+<ol>
+<li>title</li>
+<li>start and end dates</li>
+<li>one (or more) activity types such as biking, hiking etc.</li>
+<li>a brief summary as</li>
+<li>a cover picture, so we can make the trip appealing in a listing situation</li>
+</ol>
+<p>Right on the home page wireframe, we see that we need to display a list of trips with some 
+of that data in addition to a map presenting the locations of those trips. In the UX, it was
+decided that for now, we’re going to simply put a marker at the center of the trail, so
+we can deduce that we should add a property for the marker coordinates to the <code>Trip</code> class.</p>
+<p>The other option would be to store an entire GPS trace with the <code>Trip</code> instance, but that might
+cause several headaches later:</p>
+<ol>
+<li>Our trip consists of multiple days, so the amount of data to store would be large</li>
+<li>Each stage of the trip will likely have its own trace, so loading the data from a database
+for each trip would be more difficult and likely slower, or we’d have to duplicate the data and
+keep it in sync should it change. </li>
+<li>From a UX perspective, clicking a thin line is harder than clicking on an icon, in particular 
+when several trips overlap, are close to each other or cross each other in the same geographic 
+region. Having an icon<ul>
+<li>allows us to show more details on hover in addition to</li>
+<li>contain an icon indicating the type of trip.</li>
+</ul>
+</li>
+</ol>
+<p>For those reasons, the decision with a single icon makes sense and is easier to implement, despite
+requiring the addition of a property to the <code>Trip</code> entity.</p>
+<p>In terms of <em>domain driven design</em> principles, the <code>Trip</code> is an <em>Aggregate root</em> “containing” 
+several <em>Entities</em>, to which we’re going to come next.</p>
+<p>We now have a representation for our trip, but not for the details. A trip in this scenario is
+made up of days of travel, so we should reflect that with a <code>TravelDayReport</code> class, which
+will contain the content for the day and will have its own “page” in the application. This
+class will contain</p>
+<ol>
+<li>the date of travel</li>
+<li>a number representing the day of the trip (for convenience)</li>
+<li>a summary of the day’s activities the user can supply</li>
+<li>a list of keywords so users can find it to get inspiration</li>
+<li>the main content for the trip report for that date</li>
+</ol>
+<p>This is another <em>entity</em> with relationships to two lists for</p>
+<ol>
+<li>an entity to store the information on the path or path section taken</li>
+<li>an entity containing an image <strong>set</strong> for that day’s travel.</li>
+</ol>
+<p>Both are implemented as <code>List</code>s because a travel day might be encompassing several different
+modes of transportation, which we might want to later represent differently visually. For 
+example, a user might go hiking one way and take a tour boat or canoe back to the starting 
+place (been there, done that).</p>
+<p>The same holds true for the images, as a user might not want to place all images in a particular
+spot on the post, but maybe break images up with the flow of the story. These are reasonable 
+assumptions, and implementing these two relationships as one-to-many is prudent and should not
+significantly increase development time. </p>
+<p>To get certainty in this case, we should ask the 
+customer whether that is something that is already considered and whether it is desirable later
+on to have trips which are not split after that feature will have been rolled out to customers.</p>
+<p>Speaking of images …</p>
+<h3 id="Managing-images"><a href="#Managing-images" class="headerlink" title="Managing images"></a>Managing images</h3><p>When thinking of the management of images, a fundamental question is whether a particular image
+can only be used in one or in many posts. If it is to be used in many posts, it is reasonable to
+assume that the user wants to change the image caption on a per-story basis. If the client agrees
+with that assessment, it leads to the following two likely classes:</p>
+<ol>
+<li>A globally usable <code>RepoImage</code> class, which serves to manage the images globally and contains 
+information specific to the image, such as a title, keywords, a URL under which the image is
+stored on a CDN, a generic description of the image to be used in HTML <code>alt</code> attributes as well
+as possibly a set of coordinates for the location the image was taken in.</li>
+<li>A trip-specific, smaller <code>TripImage</code> class which stores the URL, geo location and a caption 
+specific to the post/story.</li>
+</ol>
+<p>Skipping the discussion of a few more classes we can identify, we end up with a class diagram 
+such as this (ignoring authentication for now):   </p>
+<p><img src="./class-diagram.svg" alt="Class diagram"></p>
+<h2 id="Introducing-structure"><a href="#Introducing-structure" class="headerlink" title="Introducing structure"></a>Introducing structure</h2><p>That class diagram already contains a lot of detail knowledge, but it is currently just a bunch
+of classes which communicate with each other, exchange data etc. To improve on this state, we’re
+going to group the various classes using the <em>domain driven design</em> (DDD) approach by sleuthing 
+out which functionality belongs together, and which can be separated, communicating with each 
+other through interfaces and other approaches used in DDD (see, for example, <a href="https://vaughnvernon.co/" target="_blank" rel="noopener">Vaughn Vernon’s 
+“Implementing Domain Driven Design”</a> for possible integration patterns
+between bounded contexts such as <em>Published Language</em> or <em>Anticorruption Layers</em>, a.k.a. ACLs).</p>
+<p>Looking at the class diagram, we see that a lot of the classes (entities and value objects 
+in DDD speak) have to do with managing trips. Not listed among the classes are things like 
+services and repositories, which take care of the interaction of entities and object persistence,
+respectively. One such example is a service which would manage the addition or modification of
+a day report to a trip, since here, we’d have to modify two entities: the TripReport and the 
+report for the day. If one fails, we can encapsulate the roll-back in a service.</p>
+<p>One question from the UML diagram is where the image management belongs. The images belong to the
+trips, but should they also be part of the same bounded context? </p>
+<p>I’d argue that the image management is its own bounded context, which integrates with the <em>Trips
+Context</em> through one of the integration patterns. The reason for this decision is that</p>
+<ol>
+<li>at this point it is a one-to-many relationship, where the <code>RepoImage</code> instance does not need
+to have a reference to the trips it is being used in.</li>
+<li>we need to store a dedicated caption per story anyway, so we need a simplified reference to 
+the image for our trips </li>
+</ol>
+<p>In the UML diagram we see the <code>TripImage</code> class, which serves as a simplified proxy of the 
+<code>RepoImage</code> in the context of travel. The use of an <em>anticorruption layer</em> (ACL) on the side
+of the <code>RepoImage</code> context would allow us to separate not only the functionality but also the 
+nomenclature used in the two domains: While an image might be referred to as <em>TripImage</em> in the
+trips context to distinguish it from other images, e.g. advertising images, or portraits of 
+account holders (<code>UserImage</code> or <code>ProfileImage</code>), in the <code>ImagesContext</code> it might simply be <code>Image</code> or even 
+<code>Photo</code>.</p>
+<p>This one-way relationship has the effect that we can delete the image reference for the trip 
+and still have the image available for other pages/stories in the ImageContext. Conversely, 
+removing an image from the <code>ImageContext</code> would invalidate the URL of the <code>TripImage</code> in the 
+TripContext. This means we now have the option to knowingly ignore that fact and try to display 
+missing images or put some smarts into the <code>TripsContext</code> to load images and filter out ones 
+that return a 404 or 410 HTTP code.</p>
+<p>Another argument for separating the images from the trips into their own context is that we can
+now easily add new image-based features, such as photo albums which can be put together and sent
+to a printer from the application, without having to go through trips. This is shown in the 
+UML diagrm below, which introduces a new (and incomplete) <code>PhotoAlbumContext</code> for illustration.</p>
+<p><img src="./domain-diagram.svg" alt="Diagram grouping building blocks into domains"></p>
+<h2 id="Adding-functionality-considering-storage"><a href="#Adding-functionality-considering-storage" class="headerlink" title="Adding functionality, considering storage"></a>Adding functionality, considering storage</h2><p>We now have a nice idea of what data types and classes we need, but not quite yet 
+how we should structure our code into <em>Aggregates</em>, <em>Entities</em> and <em>Value Objects</em>.</p>
+<p>It would be natural to model our <code>Trip</code> entity as an aggregate root, which contains all the 
+other entities and value objects. The consequence of that would be a humongous object that 
+would take a long time to create from the database, with only a small subset of the data needed
+for each use of the aggregate — This is not even mentioning the required bandwidth to 
+ship such a massive object over the wire to the requesting computer.</p>
+<p>To reduce the load on the application, it would be good to reduce the amount of unnecessary 
+database requests and data to be loaded for each request, yet still encapsulate the data in 
+an aggregate and not expose the functionality of contained entities to the outside.</p>
+<h3 id="A-way-to-store-data"><a href="#A-way-to-store-data" class="headerlink" title="A way to store data"></a>A way to store data</h3><p>One possible way out of the data glut would be to break with the paradigm to store data 
+normalized in the database. The following data sets might be candidates for duplication, 
+judging by the screen mockups the UX designer has put down the pipe for us:</p>
+<ol>
+<li>A <code>Trip</code> doesn’t need all the data from each travel day, just a summary, the sequence number
+(as the <code>Trip</code>  has the travel dates stored) and possibly the travel mode.</li>
+<li>Since we decided to represent a trip on the overview map as a pin of some sort, we don’t
+need to access the GPS trace entry at all for the overview.</li>
+<li>Adding an image to an image set should be side-effect free as we’re simply creating a new
+instance of a <code>TripImage</code>, which can be modeled as a <em>Value Object</em>, i.e. a class without 
+an id. </li>
+</ol>
+<p>This deduplication bears the risk of data getting out of sync. This is where a <em>service</em> will 
+help. Services are stateless objects that encapsulate some aspect of the business logic. To 
+defuse this data-out-of-sync problem, we could create a service whose task it is to update
+a trip day and synchronize it with the data on the trip instance. </p>
+<p>The service would be called to perform the data mutation in a single place, use an injected 
+<em>repository</em> to store the mutated objects. Having the mutation in a single class would also
+enable us to create compensation mechanisms in case only one of the mutations executes 
+successfully. Since we would return the user to an overview page of some sort in this application, 
+the service does not need to return the mutated objects, because the new landing page will 
+request the needed data from the server.  </p>
+<p>One other paradigm that supports us in this task is <em>immutability</em> of the data objects in 
+question: When the second of the two persistence calls to a repo fails repeatedly, we still have
+the original instance accessible and can easily roll back the first change. This immutability 
+was demonstrated for the <a href="/functional-programming/implementing-the-option-monad-in-javascript/">Option monad implemented in JavaScript</a>
+on this site.</p>
+<p>As a final point regarding storage is the form of storage: Document-based or table-based? For 
+this app’s use case, I would argue for a document-based storage, because the document-based 
+approach would assist us in creating nested, denormalized data sets and make the data structure 
+clearer:</p>
+<ul>
+<li>In the aforementioned case of the <code>trip</code>, it would be trivial to create a nested 
+data structure which would contain the data for the <code>Trip</code> as well as an array for the 
+summary of each day of the trip.</li>
+<li>The same argument holds for the <code>TravelDayImageSet</code> housed in the <code>TravelDayReport</code>. Here,
+one can consider storing the set information together with the <code>TripImage</code> information 
+in a sub-document of the <code>TravelDayReport</code> to avoid multi-join on the DB. The data for each
+entry is manageable, so it would not make the record explode in size, since we’re storing the
+images on a CDN and only store their URLs in the DB this would cut out a significant amount
+of work for the DB to collect all the records for the image from a traditional relational
+database. </li>
+</ul>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>This was a whirlwind tour through setting up a server-side architecture for a large part of 
+the application to be built. We’ve looked at the following topics together:</p>
+<ol>
+<li>Which data types are needed for the application to store all the information as well as</li>
+<li>What is the relationship between them,</li>
+<li>How does the UX analysis inform some optimizations we can consider,</li>
+<li>The way domain driven design can inform the structuring of the code in our application and</li>
+<li>Which flavor of database would be a good fit for this project.  </li>
+</ol>
+<p>We ended up with a few bounded contexts, namely the <strong>TripsContext</strong>, <strong>ImagesContext</strong>, a
+future <strong>PhotoAlbumContext</strong> and skipped talking about two other contexts, the 
+<strong>UserManagementContext</strong> and <strong>AuthorizationContext</strong>. These are left for another time… </p>
+<p><a href="../4-software-architecture-and-components-frontend">Step 4: Frontend Software Architecture</a></p>
+</article></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

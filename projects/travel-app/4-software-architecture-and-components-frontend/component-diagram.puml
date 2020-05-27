@@ -1,0 +1,24 @@
+@startuml
+
+scale 400 width
+hide footbox
+hide empty description
+hide empty members
+skinparam monochrome true
+skinparam linetype ortho
+caption \n\nBounded contexts of the travel appllication
+
+skinparam component {
+	backgroundColor<<proposed>> #a0a0a0
+	backgroundColor<<shared lib>> #e8e8e8
+}
+
+[PhotoAlbumContext]  <<proposed>>
+
+[AuthenticationContext] -up- [UserContext]
+[TravelReportContext] -right- [AuthenticationContext]
+[TravelReportContext] -down- [ImageManagementContext]
+[PhotoAlbumContext] -up- [ImageManagementContext]
+[AuthenticationContext] -down- [TravelAppContext]
+
+@enduml

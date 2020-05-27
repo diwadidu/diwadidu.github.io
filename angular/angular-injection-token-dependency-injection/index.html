@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Angular dependency injection: Use case for downloading assets | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Angular dependency injection: Use case for downloading assets</h1><div class="publish-date right">published Apr 10th, 2020</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/injection" itemprop="url">#injection
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Angular is a great framework, but you sometimes just need to do things outside the 
+framework. In this case, it was to download a file from the server to directly save it on 
+the user’s hard drive. For this functionality to work, one needs to go outside the framework’s
+routing mechanism and make use of some underlying HTTP protocol features.</p>
+<h2 id="Describing-“the-problem”"><a href="#Describing-“the-problem”" class="headerlink" title="Describing “the problem”"></a>Describing “the problem”</h2><p>In a recent application I was working on, we needed to provide download links for pdf 
+documents, which were already created and sitting on the server to be downloaded. Usually,
+I solve this problem with an interplay of the server and the frontend:</p>
+<p>The server provides a download URL that contains either the document ID or the name of the
+file to be downloaded. Any requests to that URL get fulfilled, but the response headers for 
+the request will contain a <code>Content-Disposition: attachment</code> header. This header causes the 
+browser to treat the returned information in different ways, with a value of <code>attachment</code> 
+causing the browser to display a file download dialog in which the user can enter a name
+for the file on disk. This download also does not unload the currently active Angular 
+application and thus is a great way for users to download files from a web application.</p>
+<p>That <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Disposition" target="_blank" rel="noopener">Content-Disposition header</a>
+may also include an additional piece of information, which specifies a default filename for 
+the downloaded document. The header then might look like this:</p>
+<pre><code>Content-Disposition: attachment; filename=&quot;an-awesome-document.pdf&quot;</code></pre><p>To implement this functionality, we need to gain access to the <code>window.location</code> object in the 
+browser. This is fairly trivial to accomplish by simply using <code>window</code> in the TypeScript code, 
+but doing so while keeping the application testable is another thing altogether…</p>
+<h2 id="Enter-Angular-InjectionTokens"><a href="#Enter-Angular-InjectionTokens" class="headerlink" title="Enter: Angular InjectionTokens"></a>Enter: Angular InjectionTokens</h2><p>Since we’re essentially in a browser context, it would be trivial to use the window object
+directly in the code whenever we need it. The thing we would lose doing it that way, though,
+would be to easily test whether an expected value would have been set for the URL.</p>
+<p>This is where <a href="https://angular.io/api/core/InjectionToken#description" target="_blank" rel="noopener">Angular injection tokens</a> 
+come in handy; They provide a means to create an injectable property and specify what should
+be provided, when a user requests this particular token. You can define an Injection Token
+for a window like this:</p>
+<figcaption class="code-filename typescript">window-provider.token.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{</span> InjectionToken <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@angular/core'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> WindowToken <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">InjectionToken</span><span class="token punctuation">(</span><span class="token string">'Window'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">windowProvider</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> window <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In the previous code snippet, we defined an <code>InjectionToken</code> named <code>WindowToken</code> and provided
+a function that simply returns the global <code>window</code> object. With these two building blocks, we
+can define a <em>provider</em>, i.e. telling Angular how to use our implementation, in the 
+application’s <code>AppModule</code> as follows: </p>
+<figcaption class="code-filename typescript">app.module.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">NgModule</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  declarations<span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token operator">...</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  imports<span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token operator">...</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  exports<span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token operator">...</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  providers<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> provide<span class="token punctuation">:</span> WindowToken<span class="token punctuation">,</span> useFactory<span class="token punctuation">:</span> windowProvider <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AppModule</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>So with this Module definition, we can make use of our new <code>WindowToken</code> in, for example, a
+service that needs to have access to the browser’s window object. In the following example, 
+I define a <code>DownloadService</code> whose job it is to download a file from the server: </p>
+<h4 id="Version-1-Plain-HTTP-request-from-Browser"><a href="#Version-1-Plain-HTTP-request-from-Browser" class="headerlink" title="Version 1: Plain HTTP request from Browser"></a>Version 1: Plain HTTP request from Browser</h4><figcaption class="code-filename typescript">download.service.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{</span>providedIn<span class="token punctuation">:</span> <span class="token string">'root'</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DownloadService</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>@<span class="token function">Inject</span><span class="token punctuation">(</span>WindowToken<span class="token punctuation">)</span> <span class="token keyword">private</span> window<span class="token punctuation">:</span> Window<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">downloadFile</span><span class="token punctuation">(</span>documentId<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> assetUrl <span class="token operator">=</span> <span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>environment<span class="token punctuation">.</span>downloadUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>documentId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>window<span class="token punctuation">.</span>location<span class="token punctuation">.</span>href <span class="token operator">=</span> assetUrl<span class="token punctuation">;</span>    
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The sole method in this service performs the download by being called with a <code>documentId</code>, the
+unique identifier for the document in the system. Based on this identifier, it composes the
+URL for the document and uses the injected version of <code>window</code> — notice <code>this.window</code>, i.e. 
+the injected instance for the window object — to directly set the URL in the browser’s
+navigation bar. </p>
+<p>Usually, this would unload the application and replace it with the downloaded asset, but that’s
+where the <code>Content-Disposition</code> header set by the server, described earlier, comes in: The server 
+sets this header and the browser does not unload the application and instead offers the download 
+dialog where the user can specify where to place the file and what to name it. </p>
+<h4 id="Version-2-XMLHttpRequest-and-extra-window"><a href="#Version-2-XMLHttpRequest-and-extra-window" class="headerlink" title="Version 2: XMLHttpRequest and extra window"></a>Version 2: XMLHttpRequest and extra window</h4><p>Another option is to download the file’s content using standard Angular <code>HttpService</code> 
+functionality and then manually open a new window and populate that window with the downloaded
+content. This would look as follows:</p>
+<figcaption class="code-filename typescript">download.service.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{</span>providedIn<span class="token punctuation">:</span> <span class="token string">'root'</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DownloadService</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span>
+      @<span class="token function">Inject</span><span class="token punctuation">(</span>WindowToken<span class="token punctuation">)</span> <span class="token keyword">private</span> window<span class="token punctuation">:</span> Window<span class="token punctuation">,</span>
+      <span class="token keyword">public</span> http<span class="token punctuation">:</span> HttpClient<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">downloadFile</span><span class="token punctuation">(</span>documentId<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> assetUrl <span class="token operator">=</span> <span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>environment<span class="token punctuation">.</span>downloadUrl<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>documentId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>http<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>assetUrl<span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>
+        rawData <span class="token operator">=</span><span class="token operator">></span> <span class="token keyword">this</span><span class="token punctuation">.</span>displayDownloadedFile<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">displayDownloadedFile</span><span class="token punctuation">(</span>rawData<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> fileContentBlob <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Blob</span><span class="token punctuation">(</span><span class="token punctuation">[</span>rawData<span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> type<span class="token punctuation">:</span> <span class="token string">'application/pdf'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> dataUrl <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>window<span class="token punctuation">.</span>URL<span class="token punctuation">.</span><span class="token function">createObjectURL</span><span class="token punctuation">(</span>fileContentBlob<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>window<span class="token punctuation">.</span><span class="token function">open</span><span class="token punctuation">(</span>dataUrl<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this case, too, the injected window token is used to display the file’s (pdf’s) content in a 
+browser window. This approach uses the standard Angular mechanism for HTTP requests and then
+creates a <code>Blob</code> out of the downloaded content to display as a data URL.   </p>
+<h2 id="Discussion"><a href="#Discussion" class="headerlink" title="Discussion"></a>Discussion</h2><p>So why is this so complicated?</p>
+<p>The Angular routing mechanism by default uses the <a href="https://developer.mozilla.org/en-US/docs/Web/API/History_API" target="_blank" rel="noopener">JavaScript History Api</a>
+which does not load new pages but simply simulates the change of URLs while at the same time
+changing the display on the screen. So this means that a simple change in the URL does not
+reach the server but is processed solely in the browser. </p>
+<p>Thus, we need to load the content by one of the two mechanisms described here — and some others 
+not mentioned. Both solutions I presented are using the concept of <em>InjectionToken</em>. The
+benefit is that in our tests, we can provide a dummy object and count calls to methods as 
+well as analyse passed and set properties. The use of injection tokens thus supports testability
+of your Angular app which would be impossible, or at least much more complicated, using the
+stock browser window object.</p>
+<p>The mechanisms discussed here for illustration purposes, the downloading of files while not
+unloading the Angular application, also shows two different paradigms. Which one you choose 
+depends on your requirements, as each one does roughly the same thing, but under different 
+conditions and with different limitations:</p>
+<ol>
+<li><p>The first version, using a simple <code>window.location.href</code> works fairly well, but will not
+work when loading the document requires the setting of custom request headers. 
+An example would be an authorization mechanism based on the OAuth mechanism, which relies on 
+a <em>Bearer Token</em> contained in the request headers to the server.</p>
+</li>
+<li><p>When the authentication information for the loading of files and data is stored in secure, 
+HttpOnly cookies, the browser automatically sends them along with the request and thus the 
+first option setting the <code>window.location</code> should work fine.</p>
+</li>
+<li><p>The second version, using the <code>Blob</code>, permits the user to immediately see the downloaded
+asset – a pdf, for example – in a separate browser window. This is in contrast to the first
+version, where the file immediately gets saved to disk.</p>
+</li>
+<li><p>The second version also allows us to set any kind of request header we desire, for example
+a header with authentication information that is not managed in browser cookies. It has, 
+however, the drawback that it  </p>
+<ul>
+<li>uses system memory to load and store all the data in the response, then </li>
+<li>create a <code>Blob</code> out of it and finally</li>
+<li>open a window showing that blob.</li>
+</ul>
+</li>
+</ol>
+<p>For larger files, memory issues within the browser might come into play, whereas the first 
+version simply downloads a file to disk.</p>
+<p>So the choice is up to you. Choose wisely!</p>
+</article><span class="prev-post"><a href="/angular/creating-an-npm-library-from-existing-code/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/rxjs/rxjs-paradigm-resolving-nested-observables-and-side-effects/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

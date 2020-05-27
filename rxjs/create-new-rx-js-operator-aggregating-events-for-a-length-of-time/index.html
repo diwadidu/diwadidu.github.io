@@ -1,0 +1,268 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Create custom Rx.js operator: Aggregating events for a length of time | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="In this post, I'm developing a custom Rx.js operator that aggregates events in the chain with a timeout the developer can specify"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Create custom Rx.js operator: Aggregating events for a length of time</h1><div class="publish-date right">published Feb 29th, 2020</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/typescript" itemprop="url">#typescript
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/functional-programming" itemprop="url">#functional-programming
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/rxjs" itemprop="url">#rxjs
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>Rx.js offers a lot of operators out of the box, but sometimes, you just have to roll your own.</p>
+<p>That happened to me when I needed functionality to handle 
+<a href="/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/">navigation in an Angular application via key commands</a>.
+Specifically, I needed to listen to multi-key commands such as <code>rev</code>, which were supposed to
+<em>reverse</em> the order in a table, for example. The relevant part of the currently implemented
+Rx chain looks as follows:</p>
+<figcaption class="code-filename typescript">abstract-keypress.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">this</span><span class="token punctuation">.</span>obsRef <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>keyPressObservable
+  <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+    <span class="token function">filter</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>permitKey<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>convertToString<span class="token punctuation">)</span>
+  <span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>reactToKeyPress<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In short, it listens for key press events, filters out unwanted keys and then converts the 
+information about the key in question, the <code>KeypressEvent</code>, into a unique string identifier. 
+It performed those actions for every keypress. </p>
+<p>The envisioned aggregation of events over a period of time shares characteristics of
+the <a href="https://rxjs-dev.firebaseapp.com/api/operators/scan" target="_blank" rel="noopener"><code>scan()</code></a> operator, which keeps 
+aggregating events, the <a href="https://rxjs-dev.firebaseapp.com/api/operators/debounceTime" target="_blank" rel="noopener"><code>debounceTime()</code></a> 
+operator, which suppresses events that follow each other within a time span the developer can 
+specify and the <a href="https://rxjs-dev.firebaseapp.com/api/operators/pairwise" target="_blank" rel="noopener"><code>pairwise()</code></a> operator,
+which takes subsequent pairs of events and passes them on as an array with two entries (the pair). 
+In a marble diagram, the functionality of our <code>aggregate</code> operator looks like this:</p>
+<p><img src="/rxjs/create-new-rx-js-operator-aggregating-events-for-a-length-of-time/aggregate-marbles.png" alt="Marble diagram for the aggregate() operator under development"> </p>
+<h2 id="Setting-up-the-operator-infrastructure"><a href="#Setting-up-the-operator-infrastructure" class="headerlink" title="Setting up the operator infrastructure"></a>Setting up the operator infrastructure</h2><p>To start our implementation, we can use the following shell:</p>
+<figcaption class="code-filename typescript">aggregate.operator.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">function</span> aggregate<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">(</span>stopAggregationIn<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token punctuation">(</span>source<span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> Observable<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">function</span><span class="token punctuation">(</span>source<span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Observable</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>subscriber<span class="token punctuation">:</span> Subscriber<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token comment" spellcheck="true">// Functionality here</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We define a new operator, <code>aggregate()</code>, which takes a <code>number</code> as an argument, in analogy 
+to the <code>debounceTime()</code> operator, which only passes on an event if it occurs after a specified
+amount of time has passed between events (<a href="https://rxjs-dev.firebaseapp.com/api/operators/debounceTime" target="_blank" rel="noopener">Rx documentation for debounceTime()</a>).</p>
+<p><code>aggregate()</code> is a curried function that returns a function accepting the source observable
+and returning an observable of a different type, here an array with the aggregated Rx events,
+on line 3. This is an example of <em>immutability</em>, since the observable does simply change the
+value of the source observable, but instead creates a new observable, which will contain the 
+result of our operation.</p>
+<p>With this basic implementation out of the way, we can get to the meat of the implementation.</p>
+<h2 id="Aggregating-values"><a href="#Aggregating-values" class="headerlink" title="Aggregating values"></a>Aggregating values</h2><p>In a first step, I’m going to emulate the functionality of the scan operator, sort of: every 
+event passed in will be aggregated in an array indefinitely — the <code>scan()</code> operator in contrast 
+passes any new event to a function also accepting the current value and returns a new value to 
+be “memoized” within the <code>scan()</code> operator. </p>
+<p>With this functionality, our custom operator might look like this:</p>
+<figcaption class="code-filename typescript">aggregate.operator.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">function</span> aggregate<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">(</span>stopAggregationIn<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token punctuation">(</span>source<span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> Observable<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">let</span> aggregatedEventValues<span class="token punctuation">:</span> T<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token keyword">function</span><span class="token punctuation">(</span>source<span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Observable</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>subscriber<span class="token punctuation">:</span> Subscriber<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      source<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        <span class="token function">next</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          <span class="token keyword">if</span> <span class="token punctuation">(</span>value <span class="token operator">!==</span> undefined <span class="token operator">&amp;&amp;</span> value <span class="token operator">!==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            aggregatedEventValues<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            subscriber<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>aggregatedEventValues<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token function">error</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          subscriber<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          subscriber<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The new functionality is in lines 3 and 7-20. On line 3, we define an array of type <code>T</code>, which
+will be the home for the aggregated events as they come in. </p>
+<p>The real implementation occurs 
+starting on line 7, where we subscribe to the <code>source</code> observable with an object for the three
+operator functions provided by Rx.js. The <code>onError</code> and <code>onCompleted()</code> events simply patch 
+through to the next observable in the chain (or the subscription, if we’re the last operator in 
+the pipe).</p>
+<p>In the <code>onNext</code> method, we ascertain that we have a valid value, and if we do, we add it to the
+<code>agggregatedEventValues</code> property and pass it on to the next observable on line 11.</p>
+<p>To recap: Our implementation so far </p>
+<ol>
+<li>listens for events</li>
+<li>pushes (aggregates) the events in an array</li>
+<li>passes on the augmented array containing the new value to the next operator in the Rx chain.</li>
+<li>passes through any error or completion events</li>
+</ol>
+<h2 id="Aggregating-values-for-a-set-period-of-time"><a href="#Aggregating-values-for-a-set-period-of-time" class="headerlink" title="Aggregating values for a set period of time"></a>Aggregating values for a set period of time</h2><p>With the implementation in current state, we would be aggregating forever, always
+passing on an ever bigger array of events, as shown in this marble diagram:</p>
+<p><img src="/rxjs/create-new-rx-js-operator-aggregating-events-for-a-length-of-time/aggregate-infinity-marbles.png" alt="Event aggregation in perpetuity"> </p>
+<p>To limit the period we’re aggregating events,
+we need to refactor the implementation to use a timer which after elapsing sends the
+aggregate value, i.e. the array of events, on to the next observer and clears the aggregating 
+array for the next sequence of events.</p>
+<p>With those additional pieces, our final operator looks like this:</p>
+<figcaption class="code-filename typescript">aggregate.operator.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">function</span> aggregate<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">(</span>stopAggregationIn<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token punctuation">(</span>source<span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> Observable<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">let</span> aggregatedEventValues<span class="token punctuation">:</span> T<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">let</span> timerRef <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> handleTimeout <span class="token operator">=</span> <span class="token punctuation">(</span>subscriber<span class="token punctuation">:</span> Subscriber<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">:</span> TimerHandler <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> keyEventsCopy <span class="token operator">=</span> aggregatedEventValues<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      aggregatedEventValues <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+      subscriber<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>keyEventsCopy<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token keyword">function</span><span class="token punctuation">(</span>source<span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Observable</span><span class="token punctuation">(</span> <span class="token punctuation">(</span>subscriber<span class="token punctuation">:</span> Subscriber<span class="token operator">&lt;</span>T<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span>
+      source<span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        <span class="token function">next</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          <span class="token keyword">if</span> <span class="token punctuation">(</span>value <span class="token operator">!==</span> undefined <span class="token operator">&amp;&amp;</span> value <span class="token operator">!==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>timerRef<span class="token punctuation">)</span> <span class="token function">clearTimeout</span><span class="token punctuation">(</span>timerRef<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            timerRef <span class="token operator">=</span> <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token function">handleTimeout</span><span class="token punctuation">(</span>subscriber<span class="token punctuation">)</span><span class="token punctuation">,</span> stopAggregationIn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            aggregatedEventValues<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token function">error</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          subscriber<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          subscriber<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The timeout functionality is implemented in the <code>onNext</code> method on lines 19 and 20. On line
+4 we define a property <code>timerRef</code>, which will keep a reference to the currently active timer
+instance. Before we call <code>setTimeout()</code>, we first check whether a timer exists and stop
+it using the JavaScript <code>clearTimeout()</code> function.</p>
+<p>Immediately following the clearing, we restart a new timer with the duration passed to the
+<code>aggregate()</code> operator. As the method to call at that time, we defined a new function 
+<code>handleTimeout</code> on lines 6-12. This also is a curried function which takes an instance of a 
+subscriber of type <code>Subscriber&lt;T[]&gt;</code> and returns a function which </p>
+<ol>
+<li>makes a copy of the array holding all previous events (line 8)</li>
+<li>empties the original list so we reset the operator for another burst of keypresses (line 9) 
+and, finally,</li>
+<li>provides the copy of the collected events as an <code>onNext()</code> event on the current
+observable (line 10) to its subscriber.</li>
+</ol>
+<p>Compared to the previous state of the implementation, this one moves the call to <code>onNext()</code> 
+from directly after adding a new item to the
+events array into a method which gets called after the timer expired. Thus, we have implemented
+an asynchronous mechanism for this operator, as it takes input and at some point in the future
+triggers an event — when the user has stopped typing for <code>stopAggregationIn</code> milliseconds, 
+the parameter to our operator.</p>
+<h2 id="Using-the-operator"><a href="#Using-the-operator" class="headerlink" title="Using the operator"></a>Using the operator</h2><p>This whole thing came about because I needed to implement a mechanism for an Angular 
+app <a href="/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/">that allows the use of key shortcuts</a> 
+for navigation and the execution of commands. In that implementation, I used an Rx chain
+like this:</p>
+<figcaption class="code-filename typescript">abstract-keypress.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>obsRef <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>keyServiceRef<span class="token punctuation">.</span>keyEventObs
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+        <span class="token function">filter</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>permitKey<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>convertToString<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>reactToKeyPress<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In short, it filters out unwanted keys and then builds a custom identifier to be used in a 
+component to trigger actions. This works well for single-key instructions/commands, but now
+I’m going to extend this so that a user can blindly type a key combination and have that
+key combination trigger some kind of action.</p>
+<p>So I need to add the new <code>aggregate()</code> operator (line 3) into the pipe, with a collection 
+timeout of 300 ms between keystrokes, much like the <code>debounceTime()</code> operator:</p>
+<figcaption class="code-filename typescript">some.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+    <span class="token function">filter</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>permitKey<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">aggregate</span><span class="token punctuation">(</span><span class="token number">300</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>convertToString<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>and modify the <code>convertToString()</code> method to now accept an array of <code>KeyboardEvent</code>s instead
+of a single event. Now the implementation looks like this:</p>
+<figcaption class="code-filename typescript">abstract-keypress.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> <span class="token function">convertToString</span><span class="token punctuation">(</span>keyEventList<span class="token punctuation">:</span> KeyboardEvent<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>keyEventList<span class="token punctuation">.</span>length <span class="token operator">></span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">generateMultiKeystrokeString</span><span class="token punctuation">(</span>keyEventList<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> modifiers <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">modifierKeysToString</span><span class="token punctuation">(</span>keyEventList<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span> modifiers <span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">-</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span> keyEventList<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>code <span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">generateMultiKeystrokeString</span><span class="token punctuation">(</span>keyEventList<span class="token punctuation">:</span> KeyboardEvent<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> prefix <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">modifierKeysToString</span><span class="token punctuation">(</span>keyEventList<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">'s-'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">let</span> keySequence <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> event of keyEventList<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      keySequence <span class="token operator">+</span><span class="token operator">=</span> event<span class="token punctuation">.</span>key<span class="token punctuation">.</span><span class="token function">toLowerCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>prefix<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">-</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>keySequence<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">modifierKeysToString</span><span class="token punctuation">(</span>keypress<span class="token punctuation">:</span> KeyboardEvent<span class="token punctuation">,</span> prefix <span class="token operator">=</span> <span class="token string">'k-'</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> modifierKeys <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'altKey'</span><span class="token punctuation">,</span> <span class="token string">'ctrlKey'</span><span class="token punctuation">,</span> <span class="token string">'shiftKey'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">let</span> keyCode <span class="token operator">=</span> prefix<span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> code of modifierKeys<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>keypress<span class="token punctuation">[</span>code<span class="token punctuation">]</span><span class="token punctuation">)</span> keyCode <span class="token operator">+</span><span class="token operator">=</span> code<span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> keyCode<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>You might have noticed the <code>this.convertToString.bind(this)</code> call in the <code>pipe()</code>. The <code>bind()</code> 
+changes the execution context for the function passed to <code>map()</code> to the class containing 
+the called methods in the second listing, <code>generateMultiKeyStrokeString()</code> and 
+<code>modifierKeysToString()</code>. Without this <code>bind()</code>, the <code>this</code> references in the previous listing
+wouldn’t work.</p>
+<p>This functionality is quickly explained:</p>
+<ol>
+<li>The <code>convertToString()</code> method now distinguishes between a multi-key command and single-key
+command, where multi refers to multiple keys in sequence, not keys like Ctrl, which are pressed
+at the same time. </li>
+<li>When generating the ID string in <code>generateMultiKeystrokeString()</code>, we prefix the resulting
+string with <code>s-</code> and then proceed to parse the modifier keys and build a string of the keys 
+having been used.</li>
+<li>The <code>modifierKeysToString()</code> method is unchanged from its previous incarnation.</li>
+</ol>
+<p>In this implementation, it is noteworthy that there is an assumption that the special keys on
+the first key press are also valid for all subsequent events, as shown in this line (11):</p>
+<p><code>const prefix = this.modifierKeysToString(keyEventList[0], &#39;s-&#39;);</code></p>
+<p>It passes only the
+first event in the array to analyse the special keys and passes the <code>s-</code> prefix. </p>
+<p>The rest of the code in the last listing should be self-explanatory. </p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this post, I have shown how to implement an asynchronous Rx.js operator, which aggregates
+events in the Rx chain into an array with a provided timeout and then releases an event
+containing an array with all the buffered events in an <code>onNext()</code> event. </p>
+<p>I have shown how to use that operator in a previous Rx.js-based implementation <a href="/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/">converting
+keypress events into unique strings</a>.  </p>
+<p>The code for this implementation can be found <a href="https://bitbucket.org/tmuller/keypress-navigation/src/master/" target="_blank" rel="noopener">on bitbucket</a>.</p>
+</article><span class="prev-post"><a href="/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/angular/using-http-interceptors/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>

@@ -1,0 +1,28 @@
+@startuml
+
+hide empty description
+skinparam monochrome true
+scale 2048 width
+
+interface MoneyTransferService {
+  +string transactionId
+  +debitAccount(acctInfo, amount)
+  +creditAccount(accctInfo, amount)
+  +rollbackTransaction(transactionId)
+}
+
+MoneyTransferService <|.. CreditCardTransferService
+MoneyTransferService <|.. WireTransferService
+MoneyTransferService <|.. DebitCardTransferService
+MoneyTransferService <|.. CashDepositService
+
+hide CreditCardTransferService fields
+hide CreditCardTransferService methods
+hide WireTransferService fields
+hide WireTransferService methods
+hide DebitCardTransferService fields
+hide DebitCardTransferService methods
+hide CashDepositService fields
+hide CashDepositService methods
+
+@enduml

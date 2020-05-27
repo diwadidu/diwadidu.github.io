@@ -1,0 +1,125 @@
+@startuml
+
+scale 1600 width
+hide footbox
+hide empty description
+hide empty members
+skinparam monochrome true
+skinparam linetype ortho
+allowmixing
+
+frame TripsContext #e8e8e8 {
+    class Trip {
+       id
+       title: String
+       startDate: Date
+       endDate: Date
+       type: Set<TripType>
+       abstract: String
+       cover: TitlePicture
+
+       addReport(TravelDayReport)
+       updateReport(TravelDayReport)
+    }
+
+    class TravelDayReport {
+       id
+       tripId
+       day: Int
+       date: Date
+       type: Set<TripType>
+       abstract: String
+       keywords: Set<String>
+       content: String
+       imageSets: List<TravelDayImageSet>
+       travelPath: List<TravelDayTrace>
+    }
+
+    class TravelDayTrace {
+       trace: String
+       format: Enum
+       imageLocation: Set<TravelDayImageLocation>
+       traceColor: String
+       toKml()
+       toKmz()
+    }
+
+    class TravelImageLocation {
+       id
+       travelImageSetId
+       geoLocation: GeoLocation
+    }
+
+    class TripType {
+       type: Enum
+       logo: LogoImage
+       label: String
+    }
+
+    enum LogoImage {
+       id
+       url: Url
+       alt: String
+    }
+    class TripImage {
+       title: String
+       url: Url
+       caption: String
+       alt: String
+    }
+
+    class TravelDayImageSet {
+       id
+       images: List<TripImage>
+       caption: String
+       geoLocation: GeoLocation
+       displayStyle: Enum
+       addImage(TripImage)
+    }
+}
+
+frame ImagesContext #e8e8e8 {
+    class RepoImage {
+       id
+       title: String
+       keywords: Set<String>
+       url: Url
+       description: String
+       location: GeoLocation
+       categories: Set<ImageCategory>
+    }
+
+
+    enum ImageCategory {
+       key: String
+       label: String
+    }
+}
+
+frame PhotoAlbumContext #a0a0a0 {
+    class ImageAlbum #d8d8d8
+    class AlbumPage #d8d8d8
+    class AlbumPageImage #d8d8d8 {
+        image: TripImage
+        position: Offsets
+        caption: String
+        treatment: Enum
+    }
+}
+
+TripType "1 " -- "1..n" LogoImage
+Trip "1" *-right- "n" TravelDayReport
+Trip "1" *-- "1..n " TripType
+
+TravelDayReport "1" *-- "0..n  " TravelDayImageSet
+TravelDayImageSet "1   " *-- "1..n"  TripImage
+TripImage "n  " o-- "1" RepoImage
+TravelDayReport "0..1  " *-- "n" TravelDayTrace
+TravelImageLocation "0..1  " *-u- "n  " TravelDayTrace
+
+RepoImage o-left- ImageCategory
+AlbumPageImage "1    " o-- "1    " RepoImage
+AlbumPage "1" -- "1..n" AlbumPageImage
+ImageAlbum "1" -- "0..n" AlbumPage
+@enduml
+

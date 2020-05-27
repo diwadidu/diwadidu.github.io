@@ -1,0 +1,39 @@
+@startuml
+
+scale 2048 width
+skinparam monochrome true
+
+interface DataSource
+
+together {
+  class DataSourceFactory
+  interface DataSource
+  class CacheDataSource
+  class ServerDataSource
+}
+
+DataListComponent --> DataSourceFactory : uses
+DataSourceFactory --> DataSource : instantiates
+DataSource <|.. CacheDataSource
+DataSource <|.. ServerDataSource
+
+interface DataSource {
+  getWithFilterSortParameters()
+}
+
+class DataSourceFactory {
+  +initializeDataSource<T>()
+  +getInitialDataFromDataSource<T>()
+  -instantiateObject<T>()
+}
+
+hide DataSource fields
+hide DataSourceFactory fields
+hide CacheDataSource fields
+hide ServerDataSource fields
+hide CacheDataSource methods
+hide ServerDataSource methods
+hide DataListComponent fields
+hide DataListComponent methods
+
+@enduml

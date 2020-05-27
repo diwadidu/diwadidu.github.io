@@ -1,0 +1,22 @@
+<svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 612 398">
+<g id="Front">
+	<path style="fill:none;stroke:#333333;stroke-width:4;" d="M409.581,9.122c0,0-228.825-3.968-230.809-2.646
+		C176.788,7.799,57.746,108.323,57.746,108.323l-30.422,89.282L5.5,360.296l23.147,30.42l479.474,1.985l72.747-35.713L606,293.499
+		l-33.729-119.042L529.945,97.08L409.581,9.122z"/>
+	<polyline style="fill:none;stroke:#333333;stroke-width:4;" points="5.5,360.296 483.651,362.939 504.153,212.154 490.926,119.566
+		409.581,9.122 	"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="529.945" y1="97.08" x2="490.926" y2="119.566"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="572.271" y1="174.457" x2="504.153" y2="212.154"/>
+	<line style="fill:none;stroke:#333333;stroke-width:4;" x1="508.121" y1="392.701" x2="483.651" y2="362.939"/>
+</g>
+<g id="back">
+	<polyline style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" points="180.756,5.154 96.765,94.435
+		94.781,167.183 129.171,292.838 104.04,352.358 581.531,355.665 	"/>
+	<line style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" x1="606" y1="292.838" x2="129.171" y2="292.838"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" x1="29.308" y1="388.072" x2="104.04" y2="352.358"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" x1="27.986" y1="196.282" x2="94.781" y2="167.183"/>
+	<line style="fill:none;stroke:#aaaaaa;stroke-width:4;stroke-dasharray:11,4;" x1="57.085" y1="108.984" x2="96.765" y2="94.435"/>
+</g>
+</svg>

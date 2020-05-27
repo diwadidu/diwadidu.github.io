@@ -1,0 +1,21 @@
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="112.5 0 273 500">
+<g id="Back">
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:2;stroke-dasharray:11,5;" x1="306.737" y1="89.188" x2="313.434" y2="353.714"/>
+	<path style="fill:none;stroke:#aaaaaa;stroke-width:2;stroke-dasharray:11,5;" d="M371.473,81.933l-64.178,3.907l-92.64-22.881
+		c0,0,8.929,309.172,8.929,310.848c0,1.674,89.85-20.092,89.85-20.092l48.554,30.695l-42.973,111.057"/>
+	<line style="fill:none;stroke:#aaaaaa;stroke-width:2;stroke-dasharray:11,5;" x1="166.661" y1="13.29" x2="214.655" y2="62.958"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:2;stroke-dasharray:11,5;" x1="181.729" y1="479.28" x2="223.584" y2="373.807"/>
+
+		<line style="fill:none;stroke:#aaaaaa;stroke-width:2;stroke-dasharray:11,5;" x1="361.987" y1="384.409" x2="380.403" y2="373.807"/>
+</g>
+<g id="Front">
+	<polyline style="fill:none;stroke:#555555;stroke-width:3;" points="318.458,22.218 186.193,4.918 183.691,5.95 167.219,12.731
+		119.783,133.275 139.315,122.672 186.193,151.134 191.774,416.776 128.712,422.915 182.287,480.397 316.783,496.581
+		331.85,493.233 284.973,443.007 275.484,131.043 319.015,22.218 372.59,80.816 380.403,375.479 332.409,493.233 	"/>
+	<line style="fill:none;stroke:#555555;stroke-width:3;" x1="139.315" y1="123.788" x2="185.636" y2="6.035"/>
+	<path style="fill:none;stroke:#555555;stroke-width:3;" d="M119.225,133.275c0,2.791,8.929,289.082,8.929,289.082"/>
+	<line style="fill:none;stroke:#555555;stroke-width:3;" x1="186.193" y1="151.134" x2="276.043" y2="131.043"/>
+	<line style="fill:none;stroke:#555555;stroke-width:3;" x1="191.774" y1="416.218" x2="284.973" y2="443.562"/>
+</g>
+</svg>

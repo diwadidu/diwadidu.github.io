@@ -1,0 +1,312 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Navigation in an Angular application using keyboard shortcuts | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="This is the first of two posts about how to implement navigation via keyboard shortcuts in an Angular application, using services, Rx.js and event propagation"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full"><h1 itemprop="headline" class="post-heading">Navigation in an Angular application using keyboard shortcuts</h1><div class="publish-date right">published Feb 27th, 2020</div><div class="clear"><span class="page-tag-anchor"><a href="/tags/angular" itemprop="url">#angular
+&nbsp;&nbsp;</a></span><span class="page-tag-anchor"><a href="/tags/typescript" itemprop="url">#typescript
+&nbsp;&nbsp;</a></span></div><span class="post-meta"></span><div id="toc"></div><p>My first reaction was “What? Why?”, quickly followed by a “Wow! Cool!” when I heard that a
+client had the requirement to permit navigating and executing commands in an Angular app using 
+keyboard commands. </p>
+<p>The reason for this somewhat unusual request was that we were building a 
+replacement for a legacy application that has been doing duty for several decades. We didn’t
+want to disrupt the user experience of people used to the key shortcuts but merely augment the
+existing functionality with a “modern”, click-based interface. Here is a list of 
+the requirements:</p>
+<ol>
+<li>Key strokes should cause navigation within the application as well as execute functionality 
+within a page.</li>
+<li>The available commands were specific to the different pages, i.e. different Angular
+components support different key commands.</li>
+<li>Commands included the use of the shift, control and option/alt keys.</li>
+<li>Data entry into form elements should not trigger the functionality, obviously.</li>
+<li>Some commands required the processing of multiple key strokes, since they were
+multi-character commands, such as <code>rev</code> for “reverse order”. The implementation of this 
+requirement is explained in a post on <a href="/rxjs/create-new-rx-js-operator-aggregating-events-for-a-length-of-time/">creating custom Rx.js operators</a></li>
+</ol>
+<h2 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h2><p>Based on the aforementioned requirements, there are several technical consequences for its 
+implementation:</p>
+<ol>
+<li>The event listener for key presses needs to be on an HTML tag near the root of the element 
+tree to capture events from anywhere on the page through <em>event bubbling</em>.</li>
+<li>Though key press events need to be caught at or near the root of the DOM tree, they need to be
+processed in the currently active component further down in the tree, because it contains
+the implementation of the functionality to be triggered by the key command. Reacting to the 
+event in the <code>AppComponent</code> would cause us to handle the events
+for every component and module in one spot, which would be unwieldy and break encapsulation of
+functionality. This requirement suggests passing events 
+from a parent (the root component) to the current child component. Several different 
+components can have the same key binding, albeit for different functionality.</li>
+<li>The previous point suggests the use of an <em>Angular service</em>, which is a singleton and can 
+be injected into every component. This enables the communication of events in the opposite 
+direction of the standard Angular event binding between many different components, i.e. from 
+a parent to a child component. The child components can be dynamically replaced through the 
+router. 1. Key strokes in form elements such as text boxes should not trigger a command, so 
+the implementation needs to account for this scenario and use the <code>event.stopPropagation()</code>
+method in the right places. This will prevent those events from making it to the key event 
+listener near the root element and thus prevent inadvertent execution of functionality.</li>
+</ol>
+<p>Based on these requirements, we can see that we need an <em>Angular Service</em> to react and distribute
+the events and an abstract class which will be inherited by every component that needs to 
+react to key events. This service will also need to be imported into the <code>AppComponent</code> root 
+of the application, so we can trigger the distribution of the event to the currently active 
+component.</p>
+<p>Based on what we know now, the following architecture is one possibility to implement these 
+technical requirements:</p>
+<p><img src="class-diagram.svg" alt="Diagram showing the parts of the implementation and their relation"></p>
+<p>We have the <code>AppComponent</code>, which contains a <code>&lt;router-outlet&gt;&lt;/router-outlet&gt;</code> tag pair to 
+permit the router to fill that space with a component based on the URL — in this case with 
+one of the components <code>ComponentA</code> through <code>ComponentC</code>. The functionality to respond to a 
+valid key pressed lies in those components and is thus contained where it belongs.</p>
+<p>Each of those components extends the abstract class <code>AbstractKeypress</code>, which will require
+each extending component to provide </p>
+<ol>
+<li>a <code>keyActions</code> property with a mapping of the key codes to executable functions and</li>
+<li>a <code>reactToKeypress()</code> method which will be called whenever a specified key combination has 
+been entered by the user.</li>
+</ol>
+<p>This setup allows the developer to specify the key combinations and the corresponding actions 
+to execute based on the key(s) pressed — separately and independently for each component.    </p>
+<h2 id="Handling-of-keyboard-events"><a href="#Handling-of-keyboard-events" class="headerlink" title="Handling of keyboard events"></a>Handling of keyboard events</h2><p>As mentioned in the previous section, we will use an Angular Service, a singleton, to achieve
+the communication from the <code>AppComponent</code> down to the component currently contained in the 
+<code>router-outlet</code>. To achieve this event-based communication, we will use Functional Reactive
+programming, Rx.js, which will allow us later to cleanly write the processing of the events 
+generated here.</p>
+<p>The code for the actual service is pretty straightforward and consists merely of an Rx <code>Subject</code>
+which is exposed to the outside world as an <code>Observable</code> through a public class property. The
+sole method in this service accepts and publishes to the subject a <code>KeyboardEvent</code>, which will 
+then lead to an <code>onNext</code> event on the publicly available observable. </p>
+<figcaption class="code-filename typescript">keypress-distribution.service.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Injectable</span><span class="token punctuation">(</span><span class="token punctuation">{</span> providedIn<span class="token punctuation">:</span> <span class="token string">'root'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">KeyPressDistributionService</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">private</span> keyEventSubject <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Subject</span><span class="token operator">&lt;</span>KeyboardEvent<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">public</span> keyEventObs<span class="token punctuation">:</span> Observable<span class="token operator">&lt;</span>KeyboardEvent<span class="token operator">></span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>keyEventSubject<span class="token punctuation">.</span><span class="token function">asObservable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">public</span> <span class="token function">distributeKeyPress</span><span class="token punctuation">(</span>keyValue<span class="token punctuation">:</span> KeyboardEvent<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>keyEventSubject<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span>keyValue<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In order to react to user input, the <code>AppComponent</code>, i.e. the application’s root component, 
+contains a <code>@HostListener</code> on <code>keyup</code> events. This permits reacting to a keypress in any part
+of the application’s interface through <em>event bubbling</em>, a standard browser behavior where any 
+event that has not been explicitly stopped from propagating will “bubble up” through the tree 
+to the root HTML element, in our case contained in the template for the AppComponent.</p>
+<p>The <code>AppComponent</code> will then pass the corresponding <code>KeyboardEvent</code> to the
+service we just looked at, via the <code>distributeKeyPress()</code> method. And that’s really all our
+implementation requires in the <code>AppComponent</code>:</p>
+<ol>
+<li>Inject the <code>KeyPressDistributionService</code> and</li>
+<li>send any <code>keyup</code> events to the service. </li>
+</ol>
+<p>By injecting the service into any child component, we can get notification of a key being
+pressed through the exposed <code>keyEventObs</code> observable. Here’s the relevant code from 
+AppComponent:</p>
+<figcaption class="code-filename typescript">app.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AppComponent</span> <span class="token punctuation">{</span>
+
+  @<span class="token function">HostListener</span><span class="token punctuation">(</span><span class="token string">'document:keyup'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">'$event'</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  <span class="token keyword">public</span> <span class="token function">onKeyUp</span><span class="token punctuation">(</span>eventData<span class="token punctuation">:</span> KeyboardEvent<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>keyService<span class="token punctuation">.</span><span class="token function">distributeKeyPress</span><span class="token punctuation">(</span>eventData<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> keyService<span class="token punctuation">:</span> KeyPressDistributionService<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="Converting-KeyboardEvent-objects"><a href="#Converting-KeyboardEvent-objects" class="headerlink" title="Converting KeyboardEvent objects"></a>Converting <code>KeyboardEvent</code> objects</h2><p>If you’ve never looked at a <code>KeyboardEvent</code> in a browser console, I encourage you to do so: 
+There’s <em>a lot</em> of stuff in there. For purpose of this implementation, all I need is an 
+identifier which unambiguously tells me the
+key combination the user pressed — Ideally in the form of a string, so that I can use that 
+identifier as the key in a configuration object telling Angular what to do in response to that 
+user action. Since further development will include multi-letter commands,
+we need to namespace our events so that we can identify the following parts in a unique ID 
+string identifying the key combination pressed:</p>
+<ol>
+<li>If only a single key was pressed, as discussed in this post, we prefix the string with <code>k-</code>
+for <strong>k</strong>ey. For multi-letter commands, where a user enters <code>agr</code> for example, the prefix
+will be <code>s-</code>, for <strong>s</strong>tring.</li>
+<li>The next segment in our identifier will list any special keys pressed at the same time, <code>a</code>
+for the ALT key (OPTION on Macs), <code>c</code> for CTRL an <code>s</code> for SHIFT</li>
+<li>Finally, the last segment will identify the key pressed, using the newer Javascript 
+property provided by the <code>KeypressEvent</code> object, called <code>code</code> and providing a string such 
+as <code>KeyD</code>.</li>
+</ol>
+<p>Using this paradigm, the string <code>k-as-KeyF</code> would indicate that the user pressed the <code>f</code> key at 
+the same time as the ALT and SHIFT keys and <code>k--F5</code> identifies the F5 key without any modifying 
+keys pressed at the same time.</p>
+<p>Since all keystroke events are ending up in the <code>KeyPressDistributionService</code> via a component, we
+can implement the abstract class <code>AbstractKeypress</code> from our class diagram. This abstract class
+will be extended by every component needing to react to key press events.</p>
+<p>Here is the beginning of that class:</p>
+<figcaption class="code-filename typescript">abstract-keypress.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> abstract <span class="token keyword">class</span> <span class="token class-name">AbstractKeypress</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span><span class="token punctuation">,</span> OnDestroy <span class="token punctuation">{</span>
+
+  <span class="token keyword">private</span> obsRef<span class="token punctuation">:</span> Subscription<span class="token punctuation">;</span>
+
+  abstract keyActions<span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">[</span>key<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">]</span><span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token keyword">void</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  abstract <span class="token function">reactToKeyPress</span><span class="token punctuation">(</span>key<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">protected</span> <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> keyServiceRef<span class="token punctuation">:</span> KeyPressDistributionService<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>obsRef <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>keyServiceRef<span class="token punctuation">.</span>keyEventObs
+      <span class="token punctuation">.</span><span class="token function">pipe</span><span class="token punctuation">(</span>
+        <span class="token function">filter</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>permitKey<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>convertToString<span class="token punctuation">)</span>
+      <span class="token punctuation">)</span>
+      <span class="token punctuation">.</span><span class="token function">subscribe</span><span class="token punctuation">(</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>reactToKeyPress<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+
+  <span class="token keyword">public</span> <span class="token function">ngOnDestroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>obsRef<span class="token punctuation">.</span><span class="token function">unsubscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment" spellcheck="true">// ... more implementation here</span>
+
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>There are a few things noteworthy about this (part of the) class:</p>
+<ol>
+<li>It, like <code>AppComponent</code>, gets the <code>KeyPressDistributionService</code> injected to receive the 
+events from the <code>AppComponent</code></li>
+<li>The implementation of the <code>OnInit</code> and <code>OnDestroy</code> interfaces allows us to set up
+the functionality in this class for every extending component on instantiation.</li>
+<li>It uses the Rx.js paradigm in the <code>ngOnInit()</code> method to handle the events, process the 
+data and transfer the result to the extending class.</li>
+<li>It contains two <code>abstract</code> properties (<code>keyActions</code> and <code>reactToKeyPress()</code>) whose 
+implementation is up to the extending class. These properties define which keys to listen for and
+how to process the events (<code>keyActions</code>).</li>
+<li>The <code>keyActions</code> object literal will be a mapping of a string as described in the previous
+section to a function, as indicated by its type signature.</li>
+<li>It uses a functional reactive programming paradigm to do its job.</li>
+<li>There seem to be two methods, <code>permitKey()</code> and <code>convertToString()</code> which I am keeping from 
+you at the moment.</li>
+</ol>
+<p>Let’s look at the Rx chain, which pipes any event from the service through a filter that
+removes events from special keys and keys we do not want to listen to. For example, we do not
+want a separate event when the user presses the “Shift” key.</p>
+<p>In the next step, we pipe the filtered event into the <code>convertToString()</code> method, which will 
+perform the conversion of the <code>KeyboarEvent</code> into a string as previously stated. Once we have
+our identifying string for the entered key combo, we call the <code>reactToKeyPress()</code> method in the
+<code>onNext</code> event of the subscription. This method is declared <code>abstract</code> in this class so that 
+any component extending this class will have to implement it.</p>
+<p>That leaves the definition of the two operator functions, as shown here:</p>
+<figcaption class="code-filename typescript">abstract-keypress.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> <span class="token function">permitKey</span><span class="token punctuation">(</span>keyEvent<span class="token punctuation">:</span> KeyboardEvent<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">boolean</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> disallowedKeys <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'Shift'</span><span class="token punctuation">,</span> <span class="token string">'Control'</span><span class="token punctuation">,</span> <span class="token string">'Alt'</span><span class="token punctuation">,</span> <span class="token string">'Meta'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span>disallowedKeys<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span>keyEvent<span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">convertToString</span><span class="token punctuation">(</span>keyEvent<span class="token punctuation">:</span> KeyboardEvent<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">string</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> modifierKeys <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'altKey'</span><span class="token punctuation">,</span> <span class="token string">'ctrlKey'</span><span class="token punctuation">,</span> <span class="token string">'shiftKey'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">let</span> keyCode <span class="token operator">=</span> <span class="token string">'k-'</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> code of modifierKeys<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>keyEvent<span class="token punctuation">[</span>code<span class="token punctuation">]</span><span class="token punctuation">)</span> keyCode <span class="token operator">+</span><span class="token operator">=</span> code<span class="token punctuation">.</span><span class="token function">substr</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>keyCode<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">-</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>keyEvent<span class="token punctuation">.</span>code<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The <code>permitKey()</code> method filters out unwanted key press events; It returns
+<code>false</code> for key codes contained in the <code>disallowedKeys</code> array, thereby suppressing events in the
+Rx chain of the service via the <code>filter</code> operator.. </p>
+<p>The <code>convertToString()</code> method builds the identifying string described before, For example, the
+string <code>k-acs-KeyA</code> indicates that the <code>A</code> key was pressed together with the ALT, SHIFT 
+and CONTROL keys, here prefixed with the string <code>k-</code> (for “key”).</p>
+<p>That includes all the functionality of the abstract class. Let’s next look at how this class
+is extended by Angular components.  </p>
+<h2 id="Implementing-the-components-reacting-to-key-presses"><a href="#Implementing-the-components-reacting-to-key-presses" class="headerlink" title="Implementing the components reacting to key presses"></a>Implementing the components reacting to key presses</h2><p>Here is an example of a component that extends the <code>AbstractKeypress</code> class:</p>
+<figcaption class="code-filename typescript">example-landing.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ExampleLandingComponent</span> <span class="token keyword">extends</span> <span class="token class-name">AbstractKeypress</span> <span class="token punctuation">{</span>
+
+  <span class="token keyword">public</span> keyActions<span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">[</span>key<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">]</span><span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token keyword">void</span><span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token string">'k--KeyA'</span><span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'reacting to A'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">'k-as-KeyD'</span><span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>deleteSomething<span class="token punctuation">,</span>
+    <span class="token string">'k--F5'</span><span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">{</span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'F5 clicked!!!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> keyService<span class="token punctuation">:</span> KeyPressDistributionService<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span>keyService<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">public</span> <span class="token function">reactToKeyPress</span><span class="token punctuation">(</span>key<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>keyActions<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">this</span><span class="token punctuation">.</span>keyActions<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token function">deleteSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'deleting something due to key click'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We see that it specifies the <code>keyActions</code> as an object literal with the previously explained
+key format and assigns functions to each key, with the one for Alt+Shift+D calling up the 
+<code>deleteSomething()</code> method defined in this component. As usual in Angular, the service is 
+injected through the constructor.</p>
+<p>The method <code>reactToKeyPress()</code> is defined here as required by the class <code>AbstractKeypress</code>
+and simply calls the method defined in the <code>keyActions</code> definition. It would be possible, to 
+assign certain functionality to the component that is not defined in <code>keyActions</code>, should the 
+need arise.</p>
+<p>One more noteworthy fact is that we inject the <code>KeyPressDistributionService</code> here and call
+<code>super()</code> in the constructor, to form the connection with the abstract class. The implementation
+thus far gives us the capability to define key commands in the browser and execute functionality
+that we specify for different commands. One thing missing from our list of requirements is to
+suppress the entry of information into form field, which we’re looking at next.</p>
+<h2 id="Adding-a-form-to-the-component"><a href="#Adding-a-form-to-the-component" class="headerlink" title="Adding a form to the component"></a>Adding a form to the component</h2><p>Web apps are nothing without the use of forms. And of course, entering content into text fields
+is standard functionality but will interfere with our current navigation scheme, if we don’t 
+take action to prevent that interference.</p>
+<p>Here is the relevant part of a template for a component with a reactive form, setting a
+<code>formGroup</code> property binding and an event binding for form submission on the root element 
+of the form:</p>
+<figcaption class="code-filename html">example-landing.component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">[formGroup]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>userForm<span class="token punctuation">"</span></span> <span class="token attr-name">(ngSubmit)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onSubmit()<span class="token punctuation">"</span></span> <span class="token attr-name">(keypress)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>stopKeyPressPropagation($event)<span class="token punctuation">"</span></span> <span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ul</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span><span class="token punctuation">></span></span> ... <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span><span class="token punctuation">></span></span> ... <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ul</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span><span class="token punctuation">></span></span>Submit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>The last event binding is for the <code>keypress</code> event to which we’re assigning a method, which 
+looks like this:</p>
+<figcaption class="code-filename typescript">example-landing.component.ts</figcaption>
+
+<pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> <span class="token function">stopKeyPressPropagation</span><span class="token punctuation">(</span>$event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    $event<span class="token punctuation">.</span><span class="token function">stopPropagation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>No magic here: When a keypress event is about to bubble out of the form, this code captures
+the event and calls the <code>stopPropagation()</code> method on it, thereby preventing the event to ever 
+make it to our event listener on the top-level HTML element triggering our logic. Note that if 
+you change the event used in the service, the event will have to be likewise adapted in all 
+templates containing forms. Overall, though, this implementation nicely separates the entry of 
+data into a form field from the navigation scheme cooked up in this post.</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this blog post I looked at how one could implement a mechanism to allow applications
+to provide a means to execute functionality using keyboard commands. Going along in the 
+implementation, I demonstrated how to separate commands from different Angular components to
+isolate and structure the functionality, avoid interference with form input fields and showed
+how one could pass events from a parent to a child component via an Angular service.</p>
+<p>In a follow-up post, I will look at how to extend this implementation to permit multi-key 
+commands, such as the <code>rev</code> mentioned earlier, which might be used to indicate that the 
+user wants to <em>review</em> something. </p>
+<p>The code for this implementation, including the upcoming implementation of the multi-key 
+commands is <a href="https://bitbucket.org/tmuller/keypress-navigation/src/master/" target="_blank" rel="noopener">in bitbucket</a>.</p>
+</article><span class="prev-post"><a href="/javascript/converting-get-request-data-into-a-json-object/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/rxjs/create-new-rx-js-operator-aggregating-events-for-a-length-of-time/" itemprop="url">Next Post ⇒</a></span></div></main><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>
