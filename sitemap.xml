@@ -2,6 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     
     <url>
+        <loc>https://torsten-muller.dev/functional-programming/implementing-the-option-monad-in-javascript/</loc>
+        
+        <lastmod>2020-05-27T20:04:03.712Z</lastmod>
+        
+    </url>
+    
+    <url>
+        <loc>https://torsten-muller.dev/functional-programming/implementing-immutable-list-javascript/</loc>
+        
+        <lastmod>2020-05-27T20:02:11.705Z</lastmod>
+        
+    </url>
+    
+    <url>
+        <loc>https://torsten-muller.dev/architecture/angular-pagination-immutable-state/</loc>
+        
+        <lastmod>2020-05-27T19:34:55.129Z</lastmod>
+        
+    </url>
+    
+    <url>
+        <loc>https://torsten-muller.dev/angular/angular-form-multiple-possible-subform-types/</loc>
+        
+        <lastmod>2020-05-27T19:30:14.473Z</lastmod>
+        
+    </url>
+    
+    <url>
         <loc>https://torsten-muller.dev/angular/navigation-in-an-angular-application-using-keyboard-shortcuts/</loc>
         
         <lastmod>2020-05-27T04:50:18.856Z</lastmod>
@@ -86,14 +114,14 @@
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/de/ueber-mich/index.html</loc>
+        <loc>https://torsten-muller.dev/de/arbeitserfahrung/index.html</loc>
         
         <lastmod>2020-05-27T04:17:23.886Z</lastmod>
         
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/de/arbeitserfahrung/index.html</loc>
+        <loc>https://torsten-muller.dev/de/ueber-mich/index.html</loc>
         
         <lastmod>2020-05-27T04:17:23.886Z</lastmod>
         
@@ -128,13 +156,6 @@
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/functional-programming/implementing-the-option-monad-in-javascript/</loc>
-        
-        <lastmod>2020-05-27T04:17:23.880Z</lastmod>
-        
-    </url>
-    
-    <url>
         <loc>https://torsten-muller.dev/javascript/converting-get-request-data-into-a-json-object/</loc>
         
         <lastmod>2020-05-27T04:17:23.880Z</lastmod>
@@ -142,23 +163,9 @@
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/functional-programming/implementing-immutable-list-javascript/</loc>
-        
-        <lastmod>2020-05-27T04:17:23.878Z</lastmod>
-        
-    </url>
-    
-    <url>
         <loc>https://torsten-muller.dev/architecture/implementing-selectable-data-loading-strategies/</loc>
         
         <lastmod>2020-05-27T04:17:23.875Z</lastmod>
-        
-    </url>
-    
-    <url>
-        <loc>https://torsten-muller.dev/architecture/angular-pagination-immutable-state/</loc>
-        
-        <lastmod>2020-05-27T04:17:23.873Z</lastmod>
         
     </url>
     
@@ -198,13 +205,6 @@
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/angular/angular-injection-token-dependency-injection/</loc>
-        
-        <lastmod>2020-05-27T04:17:23.866Z</lastmod>
-        
-    </url>
-    
-    <url>
         <loc>https://torsten-muller.dev/angular/creating-an-npm-library-from-existing-code/</loc>
         
         <lastmod>2020-05-27T04:17:23.866Z</lastmod>
@@ -212,9 +212,9 @@
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/angular/angular-form-multiple-possible-subform-types/</loc>
+        <loc>https://torsten-muller.dev/angular/angular-injection-token-dependency-injection/</loc>
         
-        <lastmod>2020-05-27T04:17:23.864Z</lastmod>
+        <lastmod>2020-05-27T04:17:23.866Z</lastmod>
         
     </url>
     

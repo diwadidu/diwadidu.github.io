@@ -15,6 +15,8 @@ state, immutable objects create a new instance of the same class with the mutate
 <p>In JavaScript, <code>string</code> and <code>integer</code> are always passed as values, whereas objects and arrays
 are passed by reference. That means that any change to any object reference modifies the
 properties for all references. The following code demonstrates that behavior:</p>
+<figcaption class="code-filename javascript">example.js</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> a <span class="token operator">=</span> <span class="token punctuation">{</span>test<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> b <span class="token operator">=</span> a<span class="token punctuation">;</span> 
 console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'a='</span><span class="token punctuation">,</span> a<span class="token punctuation">,</span> <span class="token string">'b='</span><span class="token punctuation">,</span> b<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// prints "a= {test: 1}, b= {test: 1}"</span>
@@ -37,6 +39,8 @@ different data.  </p>
 <h2 id="Implementation-of-an-immutable-class-in-TypeScript"><a href="#Implementation-of-an-immutable-class-in-TypeScript" class="headerlink" title="Implementation of an immutable class in TypeScript"></a>Implementation of an immutable class in TypeScript</h2><p>The following example shows an immutable <code>DataDisplaySettings</code> class. It is using various data 
 types (<code>FilterValues</code>, <code>SortOption</code> and <code>PagingParams</code>), whose details are irrelevant for this 
 discussion and are not further explored in this post.</p>
+<figcaption class="code-filename typescript">data-display-setting.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">type DataModifier <span class="token operator">=</span> FilterValues <span class="token operator">|</span> SortOption <span class="token operator">|</span> PagingParams<span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> defaultParams <span class="token operator">=</span> <span class="token punctuation">{</span>
@@ -128,6 +132,8 @@ object literal and then calls <code>Object.freeze()</code> to prevent further mo
 the object. This effectively “updates” the values for that setting.</p>
 <h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><p>So, how do you use that thing we just created? Here is an example for changing the page
 of data displayed in a table:</p>
+<figcaption class="code-filename typescript">example.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">let</span> display <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">DataDisplaySettings</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> valueChanges <span class="token operator">=</span> <span class="token punctuation">{</span>
   paging<span class="token punctuation">:</span> <span class="token punctuation">{</span>

@@ -37,6 +37,8 @@ changes in the displayed form.</li>
 the implementation.</p>
 <p>The main type/class will be called <code>LibraryItem</code> and will manage all the data common among
 the various library types. Its class is defined as follows:</p>
+<figcaption class="code-filename typescript">library-items.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LibraryItem</span><span class="token operator">&lt;</span>T<span class="token operator">></span> <span class="token punctuation">{</span>
   id<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
   type<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
@@ -55,6 +57,8 @@ the various different library items such as books, CDs, DVDs, magazines etc.</p>
 the data for the various item types managed in a library by our application. Here are 
 sample implementations for rudimentary <code>BookItem</code> and <code>CdItem</code> classes, defining the detail 
 data to collect for their respective library items:</p>
+<figcaption class="code-filename typescript">library-items.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BookItem</span> <span class="token punctuation">{</span>
   <span class="token keyword">public</span> numPages<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
   <span class="token keyword">public</span> edition<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
@@ -71,6 +75,8 @@ of the various types for the library item details. This type, <code>LibraryTypeU
 whenever a variable or return type in our application can be any library item, for example on the
 list page, which should be able to list any and all library items, regardless of the detail type.</p>
 <p>So with that requirement, we get:</p>
+<figcaption class="code-filename typescript">library-items.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> type LibraryTypeUnion <span class="token operator">=</span> LibraryItem<span class="token operator">&lt;</span>BookItem<span class="token operator">></span> <span class="token operator">|</span> 
                                LibraryItem<span class="token operator">&lt;</span>CdItem<span class="token operator">></span> <span class="token operator">|</span> 
                                LibraryItem<span class="token operator">&lt;</span>DvdItem<span class="token operator">></span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
@@ -84,6 +90,8 @@ the data for the details of a <code>LibraryItem</code> into a common, abstract c
 assure that the classes behave the same. This abstract class, which will be extended by all 
 components managing the detailed type information, contains only the object
 variable that should be uniform across all classes:</p>
+<figcaption class="code-filename typescript">abstract-lib-item-detail.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> abstract <span class="token keyword">class</span> <span class="token class-name">AbstractLibItemDetail</span> <span class="token punctuation">{</span>
   <span class="token keyword">public</span> childForm<span class="token punctuation">:</span> FormGroup<span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
@@ -100,6 +108,8 @@ Angular’s <code>FormBuilder</code>, which is used to define the detail form to
 form as an Angular <code>FormGroup</code>. Notice how the structure of that <code>FormGroup</code> matches the 
 structure of the <code>BookItem</code> class shown earlier. Also in the constructor, in line 8, we 
 instantiate the extended abstract class through a call to <code>super()</code>.</p>
+<figcaption class="code-filename typescript">book-detail.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
   selector<span class="token punctuation">:</span> <span class="token string">'app-book-detail'</span><span class="token punctuation">,</span>
   templateUrl<span class="token punctuation">:</span> <span class="token string">'./book-detail.component.html'</span><span class="token punctuation">,</span>
@@ -118,6 +128,8 @@ instantiate the extended abstract class through a call to <code>super()</code>.<
 which will be form elements with the usual (for Angular) <code>formControlName</code> property bindings, but
 since we’re defining a nested form, there won’t be any <code>&lt;form /&gt;</code> elements. The template might
 look like this:</p>
+<figcaption class="code-filename html">book-detail.component.html</figcaption>
+
 <pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h3</span><span class="token punctuation">></span></span>Book Detail<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h3</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>book-detail-form<span class="token punctuation">"</span></span> <span class="token attr-name">[formGroup]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>childForm<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
@@ -158,6 +170,8 @@ same template, so we can simply extend our initial implementation with the creat
 second step.</p>
 <h4 id="Editing-existing-entries-using-LibraryItemDetailComponent"><a href="#Editing-existing-entries-using-LibraryItemDetailComponent" class="headerlink" title="Editing existing entries using LibraryItemDetailComponent"></a>Editing existing entries using LibraryItemDetailComponent</h4><p>Let’s start off with the template for the library items. An abbreviated version of a 
 <code>LibraryItemDetailComponent</code> template, omitting a few form fields, looks like this:</p>
+<figcaption class="code-filename html">library-item-detail.component.html</figcaption>
+
 <pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">[formGroup]</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>formDefinition<span class="token punctuation">"</span></span> <span class="token attr-name">(ngSubmit)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onFormSubmit()<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
@@ -186,6 +200,8 @@ will be the place we’re going to place our detail templates we defined earlier
 <li>On form submission, we’re going to call a method named <code>onFormSubmit</code>.</li>
 </ul>
 <p>Correspondingly, our component class is going to start out like this:</p>
+<figcaption class="code-filename typescript">library-item-detail.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LibraryItemDetailComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span> <span class="token punctuation">{</span>
 
   <span class="token keyword">public</span> formDefinition<span class="token punctuation">:</span> FormGroup<span class="token punctuation">;</span>
@@ -236,6 +252,8 @@ it’s time to look at how we can inject one of the detail forms into that base 
 item to load from the URL in line 4, then load the data belonging to that ID (not shown) 
 and then pass the loaded data to a method <code>instantiateDetailForm</code> which performs the 
 instantiation of the component of the corresponding type.</p>
+<figcaption class="code-filename typescript">library-item-detail.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">private</span> childComponent<span class="token punctuation">:</span> <span class="token keyword">any</span><span class="token punctuation">;</span>
 
   <span class="token function">ngOnInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -266,6 +284,8 @@ map, then extract its factory method and invokes the latter to instantiate
 the child component (i.e. child form) to be placed into the form. A reference to that 
 component is stored in the <code>childComponent</code> object property shown in line 1. We also need 
 to add the <code>componentFactoryResolver</code> to our constructor to make it available to this method:</p>
+<figcaption class="code-filename typescript">library-item-detail.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">constructor</span><span class="token punctuation">(</span>
     <span class="token keyword">public</span> fb<span class="token punctuation">:</span> FormBuilder<span class="token punctuation">,</span>
     <span class="token keyword">public</span> route<span class="token punctuation">:</span> ActivatedRoute<span class="token punctuation">,</span>
@@ -306,6 +326,8 @@ create two separate routes in the applications routing module, <code>list/:id</c
 For this to work, it is important that the <code>list/new</code> route come first, since the Angular
 router operates by the “first man wins” principle, and if the order is reversed, we would 
 always load the <code>list/:id</code> route, only that sometimes the value of <code>:id</code> would be “new”. </p>
+<figcaption class="code-filename typescript">app-routing.module.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> routes<span class="token punctuation">:</span> Routes <span class="token operator">=</span> <span class="token punctuation">[</span>
   <span class="token punctuation">{</span> path<span class="token punctuation">:</span> <span class="token string">'list'</span><span class="token punctuation">,</span> component<span class="token punctuation">:</span> LibraryItemListComponent <span class="token punctuation">}</span><span class="token punctuation">,</span>
   <span class="token punctuation">{</span> 
@@ -321,6 +343,8 @@ but pass a different <code>data</code> value for the <code>createNew</code> prop
 to edit or add. To read that value, we need to extend our <code>ngOnInit()</code> method to store
 the value of the passed <code>createNew</code> value in a local property. Thus, we need to add something
 like the following to the component:</p>
+<figcaption class="code-filename typescript">library-item-detail.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> createNewLibraryItem<span class="token punctuation">:</span> <span class="token keyword">boolean</span><span class="token punctuation">;</span>
   <span class="token keyword">private</span> iterableContentTypes <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 
@@ -350,6 +374,8 @@ library item types, which we defined earlier in a property called <code>detailCo
 <code>detailContentStyles</code> to get around a limitation of Angular’s <code>*ngFor</code>, which cannot 
 iterate over objects.</p>
 <p>The corresponding template is extended with the following markup:</p>
+<figcaption class="code-filename html">library-item-detail.component.html</figcaption>
+
 <pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">*ngIf</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>createNewLibraryItem<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>label</span> <span class="token attr-name">for</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>type<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Type<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>label</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>select</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>type<span class="token punctuation">"</span></span> <span class="token attr-name">id</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>type<span class="token punctuation">"</span></span> 
@@ -365,6 +391,8 @@ each entry in the <code>iterableContentTypes</code> array we populated in the pr
 <p>Finally, we see that whenever the user changes the selection, the <code>onMediaTyeSelectionChanged()</code>
 method is invoked, which will change the detail part of the form we generated earlier. This 
 method is defined like this:</p>
+<figcaption class="code-filename typescript">library-item-detail.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">public</span> <span class="token function">onMediaTypeSelectionChanged</span><span class="token punctuation">(</span>$event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>itemDetailContainer<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">instantiateDetailForm</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -380,6 +408,8 @@ generation and repopulating of the form fields.</p>
 template. We still need to remove the old control from the form instance, which we do by adding to
 the <code>rebuildFormAndPopulateWith(formData)</code> method to remove the reference to the <code>FormGroup</code>. 
 This is shown on line 3 of the following listing, which shows the method in its final state:</p>
+<figcaption class="code-filename typescript">library-item-detail.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">  <span class="token keyword">private</span> <span class="token function">rebuildFormAndPopulateWith</span><span class="token punctuation">(</span>formData<span class="token punctuation">:</span> LibraryTypeUnion<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
     <span class="token keyword">const</span> childForm <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>childComponent<span class="token punctuation">.</span>instance<span class="token punctuation">.</span>childForm<span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span><span class="token function">removeControl</span><span class="token punctuation">(</span><span class="token string">'details'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -394,6 +424,8 @@ is left <code>undefined</code>, Angular will throw an error:</p>
 (recall that we’re determining which form field set to display through a <code>data</code> attribute on 
 the route). If we don’t receive an <code>:id</code>, we use the empty form and then populate the <code>type</code>
 field with the first entry in our detail type list: </p>
+<figcaption class="code-filename typescript">library-item-detail.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">const</span> itemId <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>route<span class="token punctuation">.</span>snapshot<span class="token punctuation">.</span>paramMap<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span><span class="token string">'id'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">let</span> formData<span class="token punctuation">:</span> LibraryTypeUnion <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>formDefinition<span class="token punctuation">.</span>value<span class="token punctuation">;</span>
 

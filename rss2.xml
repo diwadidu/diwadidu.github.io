@@ -183,7 +183,7 @@ framework. In this case, it was to download a file
     </item>
     
     <item>
-      <title>Implementing the Option monad in JavaScript</title>
+      <title>Implementing the Option Monad in JavaScript</title>
       <link>https://torsten-muller.dev/functional-programming/implementing-the-option-monad-in-javascript/</link>
       <guid>https://torsten-muller.dev/functional-programming/implementing-the-option-monad-in-javascript/</guid>
       <pubDate>Mon, 23 Dec 2019 11:45:08 GMT</pubDate>

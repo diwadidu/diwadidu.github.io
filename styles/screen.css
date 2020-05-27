@@ -784,12 +784,14 @@ main article.full .code-filename {
   position: relative;
   border-radius: 7px;
   top: 15px;
-  margin-bottom: -60px;
+  height: 1.8em;
+  margin-bottom: -16px;
   display: inline-block;
-  padding: 0px 15px 15px;
+  padding: 0 15px;
   font-family: Nunito;
   font-size: 0.75em;
-  border-top: 7px solid #222;
+  border-top: 8px solid #222;
+  border-bottom: 19px solid #222;
 }
 main article.full .code-filename.typescript {
   border-color: #007acc;
@@ -811,6 +813,11 @@ main article.full .code-filename.sass {
 }
 main article.full .code-filename.shell {
   border-color: #6e4cce;
+}
+main article.full .code-filename:after {
+  content: "";
+  padding-bottom: 20px;
+  display: block;
 }
 main article.full a {
   text-decoration: none;

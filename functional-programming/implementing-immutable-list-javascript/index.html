@@ -42,6 +42,8 @@ i.e. which holds a reference to the first node in the <code>List</code>.</p>
 <h3 id="The-node-of-a-List"><a href="#The-node-of-a-List" class="headerlink" title="The node of a List"></a>The node of a <code>List</code></h3><p>When we think of a <code>List</code>, we can imagine it being comprised of a multitude of container elements,
 or nodes, where each one contains a value and a reference to the next node in the list. This
 can be expressed as in the following code snippet:</p>
+<figcaption class="code-filename javascript">immutable-list.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">var</span> Node <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span> <span class="token punctuation">{</span>
 
   <span class="token keyword">var</span> nodeValue <span class="token operator">=</span> val<span class="token punctuation">;</span>
@@ -75,6 +77,8 @@ be immutable!</p>
 <p>To ensure that immutability, we clone entities passed by reference (objects, arrays) into the new
 list, instead of just pointing them to the existing instance. That is accomplished by the 
 <code>cloneNodeValue()</code> function, which I’ll list here without going into details of its implementation.</p>
+<figcaption class="code-filename javascript">immutable-list.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">function</span> <span class="token function">cloneNodeValue</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span> <span class="token punctuation">{</span>
 
   <span class="token keyword">var</span> type <span class="token operator">=</span> Object<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>toString<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>val<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -104,6 +108,8 @@ list, instead of just pointing them to the existing instance. That is accomplish
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>Now that we have the functionality of a <code>Node</code> squared away, we can start to look at the 
 implementation of the actual <code>List</code>:</p>
+<figcaption class="code-filename javascript">immutable-list.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">var</span> ImmutableList <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
 
   <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span> <span class="token keyword">instanceof</span> <span class="token class-name">ImmutableList</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -151,6 +157,8 @@ the prototype and contain all the methods we’re going to develop which operate
 values. The remainder of
 the code sets up the prototypal inheritance and exports the constructor function.</p>
 <p>Here is how we would create a list:</p>
+<figcaption class="code-filename javascript">fibonacci.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> fibonacci <span class="token operator">=</span> <span class="token function">ImmutableList</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">13</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>So now, we’re able to create a new <code>List</code>, but with the code the way it stands right now, we can’t 
 do anything useful with it. Let’s look at what we might reasonably do with our list and how
@@ -180,6 +188,8 @@ the second node in the list. The resulting list therefore does not know about th
 and thus looks like a different list, although no new nodes were created or removed.</li>
 </ul>
 <p>Here is a sample implementation of those two methods:</p>
+<figcaption class="code-filename javascript">immutable-list.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">var</span> ListProto <span class="token operator">=</span> <span class="token punctuation">{</span>
 
   insertHead<span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>el<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -245,6 +255,8 @@ of what these methods do:</p>
 </tr>
 </tbody></table>
 <p>Their implementation would look like this:</p>
+<figcaption class="code-filename javascript">immutable-list.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript">map<span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span>
 
   <span class="token keyword">function</span> <span class="token function">iterate</span><span class="token punctuation">(</span>node<span class="token punctuation">,</span> nl<span class="token punctuation">,</span> fct<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -395,6 +407,8 @@ omits more than the head element? To make that use case easier to handle, we hav
 <code>dropWhile()</code>, which create a new list without the first <code>n</code> nodes (<code>drop</code>) or a <code>List</code> starting 
 with the first node for which the passed predicate function returns <code>false</code> (<code>dropWhile</code>). Their 
 implementation is shown here, again using recursion:</p>
+<figcaption class="code-filename javascript">immutable-list.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript">drop<span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>num<span class="token punctuation">)</span> <span class="token punctuation">{</span>
 
   <span class="token keyword">var</span> findNewHeadNode <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>headNode<span class="token punctuation">,</span> n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -434,6 +448,8 @@ dropWhile<span class="token punctuation">:</span> <span class="token keyword">fu
 <p><img src="drop-and-dropWhile.svg" alt="Using the two drop() methods on a List"></p>
 <h3 id="Other-noteworthy-methods-on-the-List"><a href="#Other-noteworthy-methods-on-the-List" class="headerlink" title="Other noteworthy methods on the List"></a>Other noteworthy methods on the <code>List</code></h3><p>The implementation <a href="https://bitbucket.org/tmuller/functional-objects/src/master/" target="_blank" rel="noopener">found on bitbucket</a>
 implements a few more methods, of which I will discuss two more, <code>findNode()</code> and <code>foldLeft()</code>:</p>
+<figcaption class="code-filename javascript">immutable-list.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript">findNode<span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>fct<span class="token punctuation">)</span> <span class="token punctuation">{</span>
 
   <span class="token keyword">function</span> <span class="token function">iterate</span><span class="token punctuation">(</span>h<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -472,6 +488,8 @@ the function used for the processing of every node as its second parameter. This
 expects the passed function processing the entries (the second parameter) to take the current
 aggregate value as its first parameter and the value to be processed as its second parameter. A
 sample implementation would look like this:</p>
+<figcaption class="code-filename javascript">example.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">const</span> origList <span class="token operator">=</span> <span class="token function">ImmutableList</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">,</span><span class="token number">6</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> processing <span class="token operator">=</span> <span class="token punctuation">(</span>agg<span class="token punctuation">,</span> current<span class="token punctuation">)</span> <span class="token operator">=</span><span class="token operator">></span> agg <span class="token operator">+</span> current<span class="token punctuation">;</span>
 <span class="token keyword">const</span> listSum <span class="token operator">=</span> origList<span class="token punctuation">.</span><span class="token function">foldLeft</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">(</span>processing<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -494,6 +512,8 @@ Developing this example has also helped me to more deeply understand the princip
 functional programming.</p>
 <p>Finally, here is a (somewhat contrived) example on how to use the implementation developed in 
 this post:</p>
+<figcaption class="code-filename javascript">example.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">const</span> initialValues <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">45</span><span class="token punctuation">,</span><span class="token number">14</span><span class="token punctuation">,</span><span class="token number">28</span><span class="token punctuation">,</span><span class="token number">154</span><span class="token punctuation">,</span><span class="token number">117</span><span class="token punctuation">,</span><span class="token number">58</span><span class="token punctuation">,</span><span class="token number">67</span><span class="token punctuation">,</span><span class="token number">98</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token keyword">var</span> l <span class="token operator">=</span> <span class="token function">iList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">fromArray</span><span class="token punctuation">(</span>initialValues<span class="token punctuation">)</span>
   <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span>x <span class="token operator">=</span><span class="token operator">></span> x <span class="token operator">%</span> <span class="token number">2</span> <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token comment" spellcheck="true">// [14,28,154,58,98]</span>
