@@ -7,6 +7,8 @@
 was also sent from another API via a JSON object, so we needed to convert the GET data into
 JSON. This post describes two ways to accomplish that, one procedural and one using 
 recursion. This is an example of the data object we’re trying to convert to JSON:</p>
+<figcaption class="code-filename javascript">sample-data.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> testObject <span class="token operator">=</span> <span class="token punctuation">{</span>
   a<span class="token punctuation">:</span> <span class="token string">'some string'</span><span class="token punctuation">,</span>
   <span class="token string">'b[some][label]'</span><span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
@@ -26,16 +28,22 @@ recursion. This is an example of the data object we’re trying to convert to JS
 <h2 id="Common-code-for-both-solutions"><a href="#Common-code-for-both-solutions" class="headerlink" title="Common code for both solutions"></a>Common code for both solutions</h2><p>One of the main tasks to accomplish is to determine the parameter names in order to create 
 corresponding object properties. This can be done
 through parsing the key name using a regular expression (RegEx) such as the following:</p>
+<figcaption class="code-filename javascript">Example RegEx</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> partsRegEx <span class="token operator">=</span> <span class="token regex">/\[?(\w+)/g</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>This RegEx starts capturing all patterns (because of the <code>g</code> flag) that contain a sequence of letters
 and is optionally preceded by an opening square bracket. So from a string representing a key 
 such as the following, we get an array containing the following matches from the expression:</p>
+<figcaption class="code-filename javascript">Split result</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> key <span class="token operator">=</span> <span class="token string">'b[some][key]'</span><span class="token punctuation">;</span>
 <span class="token keyword">let</span> parsedKeys <span class="token operator">=</span> <span class="token punctuation">[</span> <span class="token string">'b'</span><span class="token punctuation">,</span> <span class="token string">'[some'</span><span class="token punctuation">,</span> <span class="token string">'[key'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>The alternative, and probably more efficient and faster, is using the JavaScript <code>split()</code> function:</p>
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> key <span class="token operator">=</span> <span class="token string">'b[some][key]'</span><span class="token punctuation">;</span>
 <span class="token keyword">let</span> parsedKeys <span class="token operator">=</span> key<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">'['</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment" spellcheck="true">// Returns [ 'b', 'some]', 'key]' ];</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<h2 id="Imperative-implementation"><a href="#Imperative-implementation" class="headerlink" title="Imperative implementation"></a>Imperative implementation</h2><pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> targetObj <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+<h2 id="Imperative-implementation"><a href="#Imperative-implementation" class="headerlink" title="Imperative implementation"></a>Imperative implementation</h2><figcaption class="code-filename javascript">imperative-split.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">let</span> targetObj <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword">for</span> <span class="token punctuation">(</span>a <span class="token keyword">in</span> testObject<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span>a<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token string">'['</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> targetObj<span class="token punctuation">[</span>a<span class="token punctuation">]</span> <span class="token operator">=</span> testObject<span class="token punctuation">[</span>a<span class="token punctuation">]</span><span class="token punctuation">;</span>
   <span class="token keyword">else</span> <span class="token punctuation">{</span>
@@ -68,6 +76,8 @@ value, if we finished traversing the object key list, as indicated by the condit
 reference to the current node to the variable <code>current</code>. The end result 
 of this code with the data shown at the beginning of this post looks like the following JSON
 object:</p>
+<figcaption class="code-filename json">Result object</figcaption>
+
 <pre class="line-numbers language-json"><code class="language-json"><span class="token punctuation">{</span>
   <span class="token property">"a"</span><span class="token operator">:</span> <span class="token string">"some string"</span><span class="token punctuation">,</span>
   <span class="token property">"b"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
@@ -96,6 +106,8 @@ object:</p>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="Implementation-using-Recursion"><a href="#Implementation-using-Recursion" class="headerlink" title="Implementation using Recursion"></a>Implementation using Recursion</h2><p>The same result can also be achieved using a recursive implementation using three functions that
 work together as shown in this code example: </p>
+<figcaption class="code-filename javascript">functional-recursive.js</figcaption>
+
 <pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">function</span> <span class="token function">setNestedObjectProperty</span><span class="token punctuation">(</span>targetObj<span class="token punctuation">,</span> keySegmentList<span class="token punctuation">,</span> propValue<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span>keySegmentList<span class="token punctuation">.</span>length <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> propValue<span class="token punctuation">;</span>
   <span class="token keyword">else</span> <span class="token punctuation">{</span>
@@ -125,6 +137,8 @@ the <code>setNestedObjectProperty()</code> method for each key found in the obje
 </ol>
 <p>The <code>setNestedObjectProperty()</code> function is recursive to handle objects with deeply nested 
 structures, such as this object, already seen in the very first listing of this post:</p>
+<figcaption class="code-filename json">Deep nested object</figcaption>
+
 <pre class="line-numbers language-json"><code class="language-json"><span class="token punctuation">{</span> <span class="token property">"c[do_something][or_other][and][more]"</span><span class="token operator">:</span> <span class="token string">"yes"</span> <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>The “real work” takes place in <code>setNestedObjectProperty()</code>, which either returns the passed value
 for this object path or recurses one level deeper into the passed object, creating new object 
@@ -142,6 +156,8 @@ for this implementation is going to be easy, in particular for special cases for
 </ol>
 <p>There is also one ambiguity in this implementation/requirements. The parameter <code>d</code> has the same
 path twice:</p>
+<figcaption class="code-filename json">Duplicate key</figcaption>
+
 <pre class="line-numbers language-json"><code class="language-json"><span class="token punctuation">{</span>
   <span class="token property">"d[some][label]"</span><span class="token operator">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
   <span class="token property">"d[some][label]"</span><span class="token operator">:</span> <span class="token number">26</span>
@@ -149,6 +165,8 @@ path twice:</p>
 <p>In the current implementation, this construct overwrites the first value with the second 
 one (same string index on the object), so that the last value is the only one available. If we 
 wanted to create arrays of values, we’d have to specify the keys as follows: </p>
+<figcaption class="code-filename json">Duplicate key</figcaption>
+
 <pre class="line-numbers language-json"><code class="language-json"><span class="token punctuation">{</span>
   <span class="token property">"d[some][label][0]"</span><span class="token operator">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
   <span class="token property">"d[some][label][1]"</span><span class="token operator">:</span> <span class="token number">26</span>

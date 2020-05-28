@@ -814,6 +814,9 @@ main article.full .code-filename.sass {
 main article.full .code-filename.shell {
   border-color: #6e4cce;
 }
+main article.full .code-filename.json {
+  border-color: #018d33;
+}
 main article.full .code-filename:after {
   content: "";
   padding-bottom: 20px;

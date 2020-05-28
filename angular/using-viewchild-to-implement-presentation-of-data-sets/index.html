@@ -34,6 +34,8 @@ specialized list render components, such as the <code>NumberedListComponent</cod
 <p>Let’s start with the outermost <code>album-list.component.html</code> template.</p>
 <h3 id="Step-1-Data-retrieval-and-UI-setup"><a href="#Step-1-Data-retrieval-and-UI-setup" class="headerlink" title="Step 1: Data retrieval and UI setup"></a>Step 1: Data retrieval and UI setup</h3><p>Following is the HTML we’re using on the album list page to allow a user to switch
 between different representations of the list of albums. </p>
+<figcaption class="code-filename html">album-list.component.html</figcaption>
+
 <pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumlist-container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>format-selector<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>button<span class="token punctuation">"</span></span> <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onChangeAlbumDisplayClick(<span class="token punctuation">'</span>list<span class="token punctuation">'</span>)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>List<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
@@ -44,6 +46,8 @@ between different representations of the list of albums. </p>
 will change the object property determining which list view will be rendered. The
 corresponding Typescript code of the component
 looks like this (excluding the <code>@Component</code> decorator):</p>
+<figcaption class="code-filename typescript">album-list.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AlbumListComponent</span> <span class="token punctuation">{</span>
 
   <span class="token keyword">public</span> currentStyle <span class="token operator">=</span> <span class="token string">'covers'</span><span class="token punctuation">;</span>
@@ -59,6 +63,8 @@ Both will be passed to a child <code>BaseListComponent</code> we’re going to d
 <p>The basic UI is now ready, so we can embed the <code>BaseListComponent</code> into the
 template and pass the two data properties, so the logic can react to any changes.
 With this addition, the <code>album-list.component.html</code> looks like this:</p>
+<figcaption class="code-filename html">album-list.component.html</figcaption>
+
 <pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumlist-container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>format-selector<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>button<span class="token punctuation">"</span></span> <span class="token attr-name">(click)</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>onChangeAlbumDisplayClick(<span class="token punctuation">'</span>list<span class="token punctuation">'</span>)<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>List<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
@@ -74,6 +80,8 @@ orchestrating the rendering of the actual display components for the lists and
 contain the code to swap the view components for the data dynamically. </p>
 <p>Here’s the code for the <code>AlbumListComponent</code> class (again without <code>@Component</code> 
 decorator)</p>
+<figcaption class="code-filename typescript">album-list.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AlbumListComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span> <span class="token punctuation">{</span>
 
   <span class="token comment" spellcheck="true">// The two properties, which are passed to BaseListComponent via property binding </span>
@@ -103,6 +111,8 @@ rendering the data in different ways, we will look at the <code>BaseListComponen
 will make the dynamic rendering of the selected view component happen.</p>
 <p>To start out, let’s create the component and hook it up with the inputs it will
 receive from the <code>AlbumListComponent</code>:</p>
+<figcaption class="code-filename typescript">base-list.component.html</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
   selector<span class="token punctuation">:</span> <span class="token string">'base-list'</span><span class="token punctuation">,</span>
   templateUrl<span class="token punctuation">:</span> <span class="token string">'./base-list.component.html'</span><span class="token punctuation">,</span>
@@ -134,6 +144,8 @@ into the template of the <code>BaseListComponent</code>. The template for this c
 short and simple and consists only of a <code>&lt;div /&gt;</code> element with an identifier we’re going
 to use later to insert the rendered component (<code>#albumListStyle</code>) at that location
 of the template:</p>
+<figcaption class="code-filename html">base-list.component.html</figcaption>
+
 <pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">#albumListStyle</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
@@ -147,6 +159,8 @@ to instantiate. This method needs to accomplish the following tasks:</p>
 <li>Place the rendered component into the parent template. </li>
 </ol>
 <p>The following code accomplishes these tasks:</p>
+<figcaption class="code-filename typescript">base-list.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">  @<span class="token function">ViewChild</span><span class="token punctuation">(</span><span class="token string">'albumListStyle'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>read<span class="token punctuation">:</span> ViewContainerRef<span class="token punctuation">,</span> <span class="token keyword">static</span><span class="token punctuation">:</span> <span class="token keyword">true</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
   albumListContainer<span class="token punctuation">:</span> ViewContainerRef<span class="token punctuation">;</span>
 
@@ -205,12 +219,16 @@ of the rendering of the list. In line 15 of the last listing, you may have notic
 reference to an <code>AbstractList</code>. That (abstract) class is the basis for all 
 components tasked with rendering lists. It provides a common data reference and 
 looks as follows:</p>
+<figcaption class="code-filename typescript">abstract-list.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> abstract <span class="token keyword">class</span> <span class="token class-name">AbstractList</span> <span class="token punctuation">{</span>
   <span class="token keyword">public</span> albumListToRender<span class="token punctuation">:</span> Album<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>For a real implementation of a list we look at the component rendering the albums in
 form of a grid of cards with the album covers, artist and album name. The Typescript
 class is very straight forward:</p>
+<figcaption class="code-filename typescript">cover-list.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript">@<span class="token function">Component</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
   selector<span class="token punctuation">:</span> <span class="token string">'app-cover-list'</span><span class="token punctuation">,</span>
   templateUrl<span class="token punctuation">:</span> <span class="token string">'./cover-list.component.html'</span><span class="token punctuation">,</span>
@@ -224,6 +242,8 @@ class is very straight forward:</p>
 <p>It extends and instantiates the <code>AbstractList</code> class in its constructor method, 
 thereby gaining access to the <code>albumListToRender</code> property. The corresponding 
 template is straight forward Angular templating:</p>
+<figcaption class="code-filename html">cover-list.component.html</figcaption>
+
 <pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">*ngFor</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>let album of albumListToRender<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumcard-container<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>albumcard-cover<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token comment" spellcheck="true">&lt;!-- image tag here--></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
@@ -247,6 +267,8 @@ adding the new component to the <code>contentStyles</code> property in the <code
 rendering of the components displaying the list and a problem that an existing
 component is not removed when the view should be changed. To solve these two problems,
 we’re going to use the <code>ngOnChange</code> and <code>ngOnDestroy</code> methods in the <code>BaseListComponent</code>:</p>
+<figcaption class="code-filename typescript">base-list.component.ts</figcaption>
+
 <pre class="line-numbers language-typescript"><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BaseListComponent</span> <span class="token keyword">implements</span> <span class="token class-name">OnInit</span><span class="token punctuation">,</span> OnDestroy<span class="token punctuation">,</span> OnChanges <span class="token punctuation">{</span>
 
   <span class="token operator">...</span>
