@@ -806,7 +806,7 @@ main article.full .code-filename.javascript {
   border-color: #fdd83d;
 }
 main article.full .code-filename.scala {
-  border-color: #e03c3a;
+  border-color: #db322f;
 }
 main article.full .code-filename.sass {
   border-color: #cd669a;
@@ -821,6 +821,109 @@ main article.full .code-filename:after {
   content: "";
   padding-bottom: 20px;
   display: block;
+}
+main article.full .badge {
+  border-radius: 8px;
+  overflow: hidden;
+}
+main article.full .badge a {
+  border-radius: 6px;
+  background-color: #ccc;
+  padding: 0 0 0 8px;
+  font-family: "Nunito", "Times New Roman", sans-serif;
+  font-size: 0.75em;
+}
+main article.full .badge a:before {
+  content: "";
+  display: inline-block;
+  position: relative;
+  left: -4px;
+  width: 10px;
+  color: #eee;
+  background-repeat: no-repeat;
+}
+main article.full .badge a.typescript {
+  background-color: #007acc;
+}
+main article.full .badge a.html {
+  background-color: #e44d26;
+}
+main article.full .badge a.css {
+  background-color: #278dcb;
+}
+main article.full .badge a.javascript {
+  background-color: #fdd83d;
+}
+main article.full .badge a.scala {
+  background-color: #db322f;
+}
+main article.full .badge a.scala:before {
+  background-image: url("/images/logo-images/scala-logo.png");
+  -webkit-background-size: 8px;
+  -moz-background-size: 8px;
+  background-size: 8px;
+  background-position-x: 4px;
+  width: 15px;
+  height: 12px;
+}
+main article.full .badge a.sass {
+  background-color: #cd669a;
+}
+main article.full .badge a.shell {
+  background-color: #6e4cce;
+}
+main article.full .badge a.json {
+  background-color: #018d33;
+}
+main article.full .badge a.architecture {
+  background-color: #357e2f;
+}
+main article.full .badge a.angular {
+  background-color: #c3012f;
+}
+main article.full .badge a.libraries {
+  background-color: #aaa;
+}
+main article.full .badge a.code-reuse {
+  background-color: #aaa;
+}
+main article.full .badge a.npm {
+  background-color: #aaa;
+}
+main article.full .badge a.api-design {
+  background-color: #aaa;
+}
+main article.full .badge a.documentation {
+  background-color: #aaa;
+}
+main article.full .badge a.domain-driven-design {
+  background-color: #99ec95;
+}
+main article.full .badge a.functional-programming {
+  background-color: #7e2f7e;
+}
+main article.full .badge a.http {
+  background-color: #015b9d;
+}
+main article.full .badge a.rxjs {
+  background-color: #8c288c;
+}
+main article.full .badge a.rxjs:before {
+  background-image: url("/images/logo-images/rxjs.png");
+  -webkit-background-size: 8px;
+  -moz-background-size: 8px;
+  background-size: 8px;
+  background-position-x: 4px;
+  width: 15px;
+  height: 12px;
+}
+main article.full .badge a.injection {
+  background-color: #aaa;
+}
+main article.full .badge a span {
+  background-color: #ccc;
+  padding: 0 0.6em;
+  border-radius: 0 8px 8px 0;
 }
 main article.full a {
   text-decoration: none;
