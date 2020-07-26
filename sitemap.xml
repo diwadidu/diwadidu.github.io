@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     
     <url>
+        <loc>https://torsten-muller.dev/de/arbeitserfahrung/index.html</loc>
+        
+        <lastmod>2020-07-26T15:22:01.240Z</lastmod>
+        
+    </url>
+    
+    <url>
+        <loc>https://torsten-muller.dev/work-history/index.html</loc>
+        
+        <lastmod>2020-07-26T15:16:56.150Z</lastmod>
+        
+    </url>
+    
+    <url>
         <loc>https://torsten-muller.dev/javascript/converting-get-request-data-into-a-json-object/</loc>
         
         <lastmod>2020-05-28T16:04:20.182Z</lastmod>
@@ -58,13 +72,6 @@
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/work-history/index.html</loc>
-        
-        <lastmod>2020-05-27T04:17:23.903Z</lastmod>
-        
-    </url>
-    
-    <url>
         <loc>https://torsten-muller.dev/tags/index.html</loc>
         
         <lastmod>2020-05-27T04:17:23.902Z</lastmod>
@@ -114,13 +121,6 @@
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/projects/index.html</loc>
-        
-        <lastmod>2020-05-27T04:17:23.886Z</lastmod>
-        
-    </url>
-    
-    <url>
         <loc>https://torsten-muller.dev/de/index.html</loc>
         
         <lastmod>2020-05-27T04:17:23.886Z</lastmod>
@@ -128,7 +128,7 @@
     </url>
     
     <url>
-        <loc>https://torsten-muller.dev/de/arbeitserfahrung/index.html</loc>
+        <loc>https://torsten-muller.dev/projects/index.html</loc>
         
         <lastmod>2020-05-27T04:17:23.886Z</lastmod>
         
