@@ -15,8 +15,52 @@
     <atom:link href="/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Wed, 27 May 2020 04:17:23 GMT</pubDate>
+    <pubDate>Fri, 01 Jan 2021 21:10:30 GMT</pubDate>
     <generator>http://hexo.io/</generator>
+    
+    <item>
+      <title>Web Components: A Closer Look</title>
+      <link>https://torsten-muller.dev/web-components/web-components-a-deeper-look/</link>
+      <guid>https://torsten-muller.dev/web-components/web-components-a-deeper-look/</guid>
+      <pubDate>Fri, 01 Jan 2021 19:44:21 GMT</pubDate>
+      <description>
+      
+        
+        
+          
+          
+            &lt;p&gt;In the previous post, I covered the &lt;a href=&quot;../web-components-the-basics&quot;&gt;basics of web components&lt;/a&gt;,
+starting with how to set up a
+          
+        
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/web-components/web-components-a-deeper-look/#disqus_thread</comments>
+    </item>
+    
+    <item>
+      <title>Web Components: The Basics</title>
+      <link>https://torsten-muller.dev/web-components/web-components-the-basics/</link>
+      <guid>https://torsten-muller.dev/web-components/web-components-the-basics/</guid>
+      <pubDate>Wed, 30 Dec 2020 16:56:16 GMT</pubDate>
+      <description>
+      
+        
+        
+          
+          
+            &lt;p&gt;Ever since one of the teams I worked with was using Web Components I was intrigued. Taking
+the rewrite of a web site as an excuse, I
+          
+        
+      
+      </description>
+      
+      
+      <comments>https://torsten-muller.dev/web-components/web-components-the-basics/#disqus_thread</comments>
+    </item>
     
     <item>
       <title>Angular Decorators to Create Mixable, Self-contained Functionality</title>
@@ -300,21 +344,6 @@ framework. In this case, it was to download a file
       
       
       <comments>https://torsten-muller.dev/angular/ng-template-content-injection/#disqus_thread</comments>
-    </item>
-    
-    <item>
-      <title>Angular custom form field for Reactive Forms</title>
-      <link>https://torsten-muller.dev/angular/angular-custom-form-field-reactive-form/</link>
-      <guid>https://torsten-muller.dev/angular/angular-custom-form-field-reactive-form/</guid>
-      <pubDate>Sat, 05 Oct 2019 08:39:35 GMT</pubDate>
-      <description>
-      
-        We sometimes need specific form fields for special purposes. In this post, I describe how to develop a time duration field for use with Angular Responsive Forms
-      
-      </description>
-      
-      
-      <comments>https://torsten-muller.dev/angular/angular-custom-form-field-reactive-form/#disqus_thread</comments>
     </item>
     
   </channel>

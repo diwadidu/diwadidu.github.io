@@ -817,6 +817,9 @@ main article.full .code-filename.shell {
 main article.full .code-filename.json {
   border-color: #018d33;
 }
+main article.full .code-filename.web-components {
+  border-color: rgba(0,0,0,0) 0;
+}
 main article.full .code-filename:after {
   content: "";
   padding-bottom: 20px;
@@ -904,6 +907,13 @@ main article.full .badge a.functional-programming {
 }
 main article.full .badge a.http {
   background-color: #015b9d;
+}
+main article.full .badge a.web-components {
+  background: -webkit-linear-gradient(#325aa2 50%, #cadf3c 50%);
+  background: -moz-linear-gradient(#325aa2 50%, #cadf3c 50%);
+  background: -o-linear-gradient(#325aa2 50%, #cadf3c 50%);
+  background: -ms-linear-gradient(#325aa2 50%, #cadf3c 50%);
+  background: linear-gradient(#325aa2 50%, #cadf3c 50%);
 }
 main article.full .badge a.rxjs {
   background-color: #8c288c;

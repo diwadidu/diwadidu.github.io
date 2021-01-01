@@ -1,0 +1,278 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Web Components: The Basics | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full tag-list-root"><h1 itemprop="headline" class="post-heading">Web Components: The Basics</h1><div class="publish-date left">published Dec 30th, 2020</div><div class="clear"><ul class="tag-list"><li class="badge"><a href="/tags/javascript" itemprop="url" class="javascript"><span>javascript</span></a></li><li class="badge"><a href="/tags/web-components" itemprop="url" class="web-components"><span>web-components</span></a></li></ul></div><span class="post-meta"></span><div id="toc"></div><p>Ever since one of the teams I worked with was using Web Components I was intrigued. Taking
+the rewrite of a web site as an excuse, I finally got around to learn how to implement and
+use them.</p>
+<h2 id="The-Problem-to-Solve"><a href="#The-Problem-to-Solve" class="headerlink" title="The Problem to Solve"></a>The Problem to Solve</h2><p>For the new web site I want to have a feature that shows readers the last few stories
+that they viewed and enable them to go back and look at them again. Since the site will
+be a static site, encapsulating the view and functionality was important to not copy/paste
+code all over the place. </p>
+<p>On a former job, a team was using web components, and a brief look at 
+<a href="https://caniuse.com/?search=components" target="_blank" rel="noopener">Can-I-Use for web components</a> showed that for the
+web site under consideration, web components, HTML templates and shadow DOM are supported
+in browsers for 99% of the site’s traffic/visitors. Here is a visual of what I’m about to 
+develop:</p>
+<p><img src="web-component-screenshot-sm.png" alt="Screenshot of the web component"></p>
+<p>From this screen grab, the following features are discernable:</p>
+<ol>
+<li>A link to a web page, with the page title shown</li>
+<li>Long page titles are truncated with ellipses</li>
+<li>The last access time is displayed in human-readable form</li>
+<li>Content will be scrollable</li>
+</ol>
+<p>So here we go! You can go along and/or
+look at the code <a href="https://bitbucket.org/tmuller/web-component-recent-list/" target="_blank" rel="noopener">on Bitbucket</a>.</p>
+<h2 id="Rendering-Some-Output"><a href="#Rendering-Some-Output" class="headerlink" title="Rendering Some Output"></a>Rendering Some Output</h2><p>The first step consists in setting up the web component and getting something rendered
+on the page when it is included on the page. Here is the HTML to embed an instance
+of the web component <code>last-viewed</code> into a HTML document:</p>
+<figcaption class="code-filename html">use-component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>sidebar<span class="token punctuation">"</span></span><span class="token style-attr language-css"><span class="token attr-name"> <span class="token attr-name">style</span></span><span class="token punctuation">="</span><span class="token attr-value"><span class="token property">width</span><span class="token punctuation">:</span><span class="token number">150</span>px</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>last-viewed</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>last-viewed</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<blockquote>
+<p><em>Note:</em> The explicit closing tag is required for web components, so you can’t write the 
+same as you could normally with self-closing tags like <code>&lt;last-viewed /&gt;</code>.</p>
+</blockquote>
+<p>Now that we have used an unknown tag, we need to go and set up our web component. In this
+first step, I’ll define one and set up some basic rendering. Here is the JavaScript code
+to define a web component and get something rendered — The details of how the various
+functions generate the HTML used in this snippet are not important for this
+discussion, so I will skip discussing the details. I’ll have more to say about the 
+rendering later.</p>
+<figcaption class="code-filename javascript">last-viewed-stories.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">class</span> <span class="token class-name">LastViewedStories</span> <span class="token keyword">extends</span> <span class="token class-name">HTMLElement</span> <span class="token punctuation">{</span>
+
+  shadowRoot <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>shadowRoot <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">attachShadow</span><span class="token punctuation">(</span><span class="token punctuation">{</span>mode<span class="token punctuation">:</span> <span class="token string">'open'</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">const</span> storyListContainer <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">renderContainer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> documentPageList <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">renderLinksFor</span><span class="token punctuation">(</span>previousPagesViewedList<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    storyListContainer<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>documentPageList<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>shadowRoot<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>storyListContainer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">renderContainer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> container <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'section'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    container<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'class'</span><span class="token punctuation">,</span> <span class="token string">'recent-articles__box'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> container<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token operator">...</span>
+<span class="token punctuation">}</span>
+
+customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">'last-viewed'</span><span class="token punctuation">,</span> LastViewedStories<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>There are a few lines in this code, which warrant comment:</p>
+<ol>
+<li><p><em>Line 1:</em> Web Components extend a base class with the desired behavior and features.
+While I’m using <code>HTMLElement</code> here, one could extend off more specific elements such as 
+<code>HTMLSelectElement</code> to inherit specific behaviors.</p>
+</li>
+<li><p><em>Line 6:</em> Since we’re extending, we need to call the extended class’ constructor</p>
+</li>
+<li><p><em>Line 7:</em> We can use an approach called <em>Shadow DOM</em> for web components to 
+<a href="https://developers.google.com/web/fundamentals/web-components/shadowdom" target="_blank" rel="noopener">make them more robust</a>: </p>
+<blockquote>
+<p>It introduces scoped styles to the web platform. Without tools or naming conventions, you can bundle CSS with markup, hide implementation details, and author self-contained components in vanilla JavaScript. </p>
+</blockquote>
+</li>
+<li><p><em>Lines 9-11:</em> Take care of rendering the web component’s HTML</p>
+</li>
+<li><p><em>Lines 15-19:</em> An example of how one could render the HTML for the component</p>
+</li>
+<li><p><em>Line 24:</em> So far <code>LastViewedStories</code> is just a class. We’ll turn this class into a
+web component in line 24 and assign the class the tag name <code>last-viewed</code>. It is mandatory
+for web components to contain at least one hyphen to avoid collision with standard HTML 
+tags, current or future ones.</p>
+</li>
+</ol>
+<h2 id="Simplifying-the-HTML-Generation-and-Slots"><a href="#Simplifying-the-HTML-Generation-and-Slots" class="headerlink" title="Simplifying the HTML Generation and Slots"></a>Simplifying the HTML Generation and Slots</h2><p>In the previous section, I built the HTML very laboriously using JavaScript in functions
+like <code>renderContainer()</code>. While some use of <code>createElement</code> is unavoidable, building an 
+entire DOM tree that way is unnecessary. The following snippet uses a predefined
+class constant to hold HTML and attach it to an element via an element’s <code>innerHtml</code>
+property (on line 12):</p>
+<figcaption class="code-filename javascript">last-viewed-stories.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">  template <span class="token operator">=</span> <span class="token string">'&lt;div>'</span> <span class="token operator">+</span>
+    <span class="token string">'&lt;h3>Recent stories ...&lt;/h3>'</span> <span class="token operator">+</span>
+    <span class="token string">'&lt;slot name="story-list" id="list-slot">&lt;/slot>'</span> <span class="token operator">+</span>
+    <span class="token string">'&lt;p class="auxiliary-copy">There could be a little description here ...&lt;/p>'</span> <span class="token operator">+</span>
+    <span class="token string">'&lt;/div>'</span><span class="token punctuation">;</span>
+
+  <span class="token operator">...</span>
+
+  <span class="token function">renderContainer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> container <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'section'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    container<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'class'</span><span class="token punctuation">,</span> <span class="token string">'recent-articles__box'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    container<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>template<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> container<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Line 3 sports a <code>&lt;slot&gt;</code> tag, which is a tag provided by the Web Components API. it is a
+placeholder into which a programmer can fill markup from outside the web component. The
+markup to be included needs to be inserted in between the Web Component’s tags and the
+top-level HTML tag needs to have a <code>slot</code> attribute specifying the <code>name</code>. So for the
+following HTML, the Browser would display a list consisting of an ordered list with three
+items with content “one”, “two” and “three” respectively.</p>
+<figcaption class="code-filename html">use-component.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>last-viewed</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ol</span> <span class="token attr-name">slot</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>story-list<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span><span class="token punctuation">></span></span>one<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span><span class="token punctuation">></span></span>two<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>li</span><span class="token punctuation">></span></span>three<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>li</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ol</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>last-viewed</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="web-component-from-html-sm.png" alt="Content injected from HTML"></p>
+<p>There are more scenarios that the <code>&lt;slot&gt;</code> syntax supports, which are summarized
+in the <a href="https://developers.google.com/web/fundamentals/web-components/shadowdom#composition_slot" target="_blank" rel="noopener">Google Developers page</a>
+on the shadow DOM. The main take-away is that <code>&lt;slot&gt;</code> permits the population of web
+components with static HTML at predefined points in the HTML, thus making the component
+more versatile to display different main content. An example might be to permit the
+display of the three different HTML lists, ordered, unordered and definition lists.</p>
+<h3 id="Rendering-Content-in-Slots-With-JavaScript"><a href="#Rendering-Content-in-Slots-With-JavaScript" class="headerlink" title="Rendering Content in Slots With JavaScript"></a>Rendering Content in Slots With JavaScript</h3><p>Using slots to populate components from HTML markup is a nice feature, but
+for my purposes, I want to dynamically update the list, in particular the time since a
+page was last accessed needs to be updated every minute. Thus, using a JS timer, we query
+the storage every few seconds and update the content in <code>&lt;slot&gt;</code> accordingly. </p>
+<figcaption class="code-filename javascript">last-viewed-stories.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">  interval<span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token operator">...</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>interval <span class="token operator">=</span> <span class="token function">setInterval</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>reloadAndRerender<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">60000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">reloadAndRerender</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> slotElement <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>shadowRoot<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'list-slot'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> updatedEntries <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">renderLinksFor</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadStoredList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    slotElement<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+    slotElement<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>updatedEntries<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>We set an interval in the constructor, repeatedly calling the <code>reloadAndRerender()</code>
+method. That method then retrieves a reference to the slot via the specified ID,
+renders the new content from the stored data and clears the DOM inside 
+using <code>innerHtml = &#39;&#39;</code>. As the final step, the method inserts the generated HTML on
+line&nbsp;12.</p>
+<p>With all the heavy lifting of rendering the individual list entries and aggregating them 
+to a list and HTML tree done in the background, the actual process of changing out the 
+DOM is quick and unnoticeable.</p>
+<h3 id="Using-both-HTML-and-JavaScript-for-slot"><a href="#Using-both-HTML-and-JavaScript-for-slot" class="headerlink" title="Using both HTML and JavaScript for slot"></a>Using both HTML and JavaScript for slot</h3><p>Can you use both mechanisms to populate slots, or asked another way: Is it possible to
+set a default in the HTML using the <code>slot</code> mechanism and overwrite that from JavaScript?
+First attempts to do that failed: Even though the code to update the slot is called
+and executed, the view does not update when we try to overwrite the HTML content in <code>&lt;slot&gt;</code>
+with a naïve approach such as using the shown JavaScript code with HTML nested in 
+the <code>&lt;slot&gt;</code>&hellip;<code>&lt;/slot&gt;</code> tag pair.</p>
+<p>A look at the debug tool shows that the HTML structure for using the HTML population 
+looks different between the two approaches — It appears that the HTML version does 
+not insert the HTML children under <code>&lt;slot&gt;</code> but instead attached them to another place 
+in the HTML, away from the slot:</p>
+<p><img src="browser-elements-console-sm.png" alt="Screenshot of the Chrome browser &#39;Elements&quot; debug panel"></p>
+<p>I’ll update this or create another post if I find a way to make this work using the 
+HTML as a default that can be overwritten from the JavScript side if needed. </p>
+<h2 id="Styling-the-Component"><a href="#Styling-the-Component" class="headerlink" title="Styling the Component"></a>Styling the Component</h2><p>Web Components are self-contained, as the previous quote suggests. That means that we can
+specify CSS rules within the component and not have component-styles be affected by styles
+on the page and vice versa. The specification of styles within a web component can occur
+either by creating a style tag from JavaScript  with the requisite style rules attached
+as a text node or by adding a <code>&lt;style&gt;</code> section to the template markup for the web 
+component, as outlined for the component’s HTML in
+<a href="#simplifying-the-html-generation-and-slots">“Simplifying the HTML Generation”</a> </p>
+<p>To create the styling without extending the component markup, one can create a 
+function setting up the required styles and invoke that function in the constructor
+of the web component (we’ll see another way in a subsequent post). The setup would
+look like this:</p>
+<hr>
+<h2 id="Talk-about-the-CSS-not-spilling-outside-of-the-component"><a href="#Talk-about-the-CSS-not-spilling-outside-of-the-component" class="headerlink" title="Talk about the CSS not spilling outside of the component"></a>Talk about the CSS not spilling outside of the component</h2><figcaption class="code-filename javascript">last-viewed-stories.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>shadow <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">attachShadow</span><span class="token punctuation">(</span><span class="token punctuation">{</span>mode<span class="token punctuation">:</span> <span class="token string">'open'</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token operator">...</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>shadow<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">returnStyling</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>shadow<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>storyListContainer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">returnStyling</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> styleElement <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'style'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    styleElement<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'type'</span><span class="token punctuation">,</span> <span class="token string">'text/css'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    styleElement<span class="token punctuation">.</span>textContent <span class="token operator">=</span> '
+      <span class="token punctuation">.</span>recent<span class="token operator">-</span>articles__box <span class="token punctuation">{</span>
+        border<span class="token punctuation">:</span> 1px solid #<span class="token number">555</span><span class="token punctuation">;</span>
+        border<span class="token operator">-</span>radius<span class="token punctuation">:</span>7px<span class="token punctuation">;</span>
+        padding<span class="token punctuation">:</span>0px<span class="token punctuation">;</span>
+        min<span class="token operator">-</span>width<span class="token punctuation">:</span>250px<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>  
+    <span class="token operator">...</span>
+    '
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This little snippet shows that we have created a method to generate the requisite
+method to generate the CSS and then invoke that method from the constructor. This 
+approach also allows for the inclusion of dynamically changing style parameters — 
+maybe an element should be styled according to the available screen real estate. In JS,
+we have the opportunity to measure the available dimensions and then dynamically adjust 
+the height of an element, for example. </p>
+<p>It is noteworthy here that we should include the <code>&lt;style&gt;</code> before the markup, as done here,
+to rule out a “flash of unstyled content.”  </p>
+<h2 id="Rerendering-the-Component"><a href="#Rerendering-the-Component" class="headerlink" title="Rerendering the Component"></a>Rerendering the Component</h2><p>Since in this example we deal with periodic re-rendering of the list content to update
+the timing information, we’ll have to make sure of three things:</p>
+<ol>
+<li>The old content gets removed and replaced with new content, not new content appended,</li>
+<li>the update should be instantaneous or at least fast enough to not be noticeable and</li>
+<li>any scroll position should be preserved because otherwise, the list display jumps
+to the top at seemingly arbitrary points in time.</li>
+</ol>
+<p>The method <code>reloadAndRerender()</code> in the following example implements the solution to 
+these three concerns.</p>
+<figcaption class="code-filename javascript">last-viewed-stories.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token operator">...</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>interval <span class="token operator">=</span> <span class="token function">setInterval</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>reloadAndRerender<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">60000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">reloadAndRerender</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> slotElement <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>shadowRoot<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'list-slot'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> updatedEntries <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">renderLinksFor</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">loadStoredList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> listOffset <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>shadowRoot<span class="token punctuation">.</span><span class="token function">getElementById</span><span class="token punctuation">(</span><span class="token string">'list-root-element'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>scrollTop<span class="token punctuation">;</span>
+    slotElement<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+    slotElement<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>updatedEntries<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    slotElement<span class="token punctuation">.</span>childNodes<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>scrollTop <span class="token operator">=</span> listOffset<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In the first 2 lines, <code>reloadAndRerender()</code> gets a reference to the <code>&lt;slot&gt;</code> element
+via the id set on the tag (line 1), then loads the data to be rendered from localStorage
+and generates the HTML markup for the list of links in the element (line 2).</p>
+<p>In line 3, it stores the current scroll offset, so that we can reset it after the new list
+has rendered.</p>
+<p>The rest of the method is fairly mundane: We clear the HTML from within the <code>&lt;slot&gt;</code>, 
+append our new HTML list and then reset the vertical scroll position. With this code 
+in place, the list gets replaced and reset so that upon changing the markup no noticeable
+visual shift will occur, but the times under the link names will have updated — again
+instantaneously because of the show DOM in use here.</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this post, I have taken a quick overview of the main features of web components and
+the corresponding features in shadow DOM. Both techniques are by now well-supported by the
+major browsers and are ready for use.</p>
+<p>This code still has some issues and can be improved upon, but that’ll be the topic of 
+another post in the near future.</p>
+</article><span class="prev-post"><a href="/typescript/angular-decorators-to-create-mixable-self-contained-functionality/" itemprop="url">⇐ Previous Post</a></span><span class="next-post"><a href="/web-components/web-components-a-deeper-look/" itemprop="url">Next Post ⇒</a></span></div></main><script defer>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script async>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>
