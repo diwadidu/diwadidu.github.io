@@ -15,7 +15,7 @@
     <atom:link href="/rss2.xml" rel="self" type="application/rss+xml"/>
     
     <description></description>
-    <pubDate>Sat, 02 Jan 2021 11:37:05 GMT</pubDate>
+    <pubDate>Sat, 02 Jan 2021 12:25:47 GMT</pubDate>
     <generator>http://hexo.io/</generator>
     
     <item>
@@ -25,14 +25,7 @@
       <pubDate>Fri, 01 Jan 2021 19:44:21 GMT</pubDate>
       <description>
       
-        
-        
-          
-          
-            &lt;p&gt;In the previous post, I covered the &lt;a href=&quot;../web-components-the-basics&quot;&gt;basics of web components&lt;/a&gt;,
-starting with how to set up a
-          
-        
+        This is a continuation of my previous post about Web Components. Here, I will introduce life cycle hooks, adding tag properties and look at CSS encapsulation in more detail.
       
       </description>
       
@@ -47,14 +40,7 @@ starting with how to set up a
       <pubDate>Wed, 30 Dec 2020 16:56:16 GMT</pubDate>
       <description>
       
-        
-        
-          
-          
-            &lt;p&gt;Ever since one of the teams I worked with was using Web Components I was intrigued. Taking
-the rewrite of a web site as an excuse, I
-          
-        
+        This post introduces web components: How to set one up, deal with HTML, CSS and the use of slots in the web component specification
       
       </description>
       
