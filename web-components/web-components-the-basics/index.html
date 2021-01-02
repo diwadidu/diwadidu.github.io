@@ -39,7 +39,7 @@ same as you could normally with self-closing tags like <code>&lt;last-viewed /&g
 first step, I’ll define one and set up some basic rendering. Here is the JavaScript code
 to define a web component and get something rendered — The details of how the various
 functions generate the HTML used in this snippet are not important for this
-discussion, so I will skip discussing the details. I’ll talk more about the 
+discussion, so I will skip discussing the details. I’ll have more to say about the 
 rendering later.</p>
 <figcaption class="code-filename javascript">last-viewed-stories.js</figcaption>
 
@@ -51,7 +51,6 @@ rendering later.</p>
     <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>shadowRoot <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">attachShadow</span><span class="token punctuation">(</span><span class="token punctuation">{</span>mode<span class="token punctuation">:</span> <span class="token string">'open'</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
 
-    <span class="token keyword">const</span> previousPagesViewedList <span class="token operator">=</span> <span class="token operator">...</span> <span class="token comment" spellcheck="true">// Retrieving content to render </span>
     <span class="token keyword">const</span> storyListContainer <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">renderContainer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">const</span> documentPageList <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">renderLinksFor</span><span class="token punctuation">(</span>previousPagesViewedList<span class="token punctuation">)</span><span class="token punctuation">;</span>
     storyListContainer<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>documentPageList<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -67,7 +66,7 @@ rendering later.</p>
   <span class="token operator">...</span>
 <span class="token punctuation">}</span>
 
-customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">'last-viewed'</span><span class="token punctuation">,</span> LastViewedStories<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">'last-viewed'</span><span class="token punctuation">,</span> LastViewedStories<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>There are a few lines in this code, which warrant comment:</p>
 <ol>
 <li><p><em>Line 1:</em> Web Components extend a base class with the desired behavior and features.
@@ -82,11 +81,11 @@ While I’m using <code>HTMLElement</code> here, one could extend off more speci
 <p>It introduces scoped styles to the web platform. Without tools or naming conventions, you can bundle CSS with markup, hide implementation details, and author self-contained components in vanilla JavaScript. </p>
 </blockquote>
 </li>
-<li><p><em>Lines 10-12:</em> Take care of rendering the web component’s HTML</p>
+<li><p><em>Lines 9-11:</em> Take care of rendering the web component’s HTML</p>
 </li>
-<li><p><em>Lines 16-20:</em> An example of how one could render the HTML for the component</p>
+<li><p><em>Lines 15-19:</em> An example of how one could render the HTML for the component</p>
 </li>
-<li><p><em>Line 25:</em> So far <code>LastViewedStories</code> is just a class. We’ll turn this class into a
+<li><p><em>Line 24:</em> So far <code>LastViewedStories</code> is just a class. We’ll turn this class into a
 web component in line 24 and assign the class the tag name <code>last-viewed</code>. It is mandatory
 for web components to contain at least one hyphen to avoid collision with standard HTML 
 tags, current or future ones.</p>
@@ -186,7 +185,8 @@ component, as outlined for the component’s HTML in
 function setting up the required styles and invoke that function in the constructor
 of the web component (we’ll see another way in a subsequent post). The setup would
 look like this:</p>
-<figcaption class="code-filename javascript">last-viewed-stories.js</figcaption>
+<hr>
+<h2 id="Talk-about-the-CSS-not-spilling-outside-of-the-component"><a href="#Talk-about-the-CSS-not-spilling-outside-of-the-component" class="headerlink" title="Talk about the CSS not spilling outside of the component"></a>Talk about the CSS not spilling outside of the component</h2><figcaption class="code-filename javascript">last-viewed-stories.js</figcaption>
 
 <pre class="line-numbers language-javascript"><code class="language-javascript">  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>

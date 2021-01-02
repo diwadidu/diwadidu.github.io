@@ -1062,13 +1062,6 @@ main article.full .left {
 main article.full .right {
   float: right;
 }
-main article.full li > p {
-  margin: 0;
-}
-main article.full li > blockquote {
-  margin-top: 0.2em;
-  margin-bottom: 0.2em;
-}
 main span.next-post {
   float: right;
 }
