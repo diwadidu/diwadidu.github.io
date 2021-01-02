@@ -138,10 +138,108 @@ standard HTML tags:</p>
 <pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>sidebar<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>last-viewed</span> <span class="token attr-name">width</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>400px<span class="token punctuation">"</span></span> <span class="token attr-name">height</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>200px<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>last-viewed</span><span class="token punctuation">></span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<h2 id="Application-of-external-styles"><a href="#Application-of-external-styles" class="headerlink" title="Application of external styles"></a>Application of external styles</h2><p>Web Components behave like a closed system when it comes to styling, but there are a few
+finer points about when external styles will be correctly applies and when they will be ignored.</p>
+<p>For this sections, let’s assume the component <code>last-view</code> specifies the following template 
+in its JavaScript class:</p>
+<figcaption class="code-filename html">web-component-template.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>slot</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>headline<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h3</span><span class="token punctuation">></span></span>Recent stories ...<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h3</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>slot</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>and the template using the web component looks like this, where I have added a style section
+where any of the “external” styling would be applied in this example:</p>
+<figcaption class="code-filename html">site-template.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>sidebar<span class="token punctuation">"</span></span><span class="token style-attr language-css"><span class="token attr-name"> <span class="token attr-name">style</span></span><span class="token punctuation">="</span><span class="token attr-value"><span class="token property">width</span><span class="token punctuation">:</span><span class="token number">150</span>px</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>last-viewed</span><span class="token punctuation">></span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>last-viewed</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>style</span><span class="token punctuation">></span></span><span class="token style language-css"> <span class="token number">...</span> </span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>style</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="Case-1-Trying-to-overwrite-component-internal-styles-from-HTML"><a href="#Case-1-Trying-to-overwrite-component-internal-styles-from-HTML" class="headerlink" title="Case 1: Trying to overwrite component-internal styles from HTML"></a>Case 1: Trying to overwrite component-internal styles from HTML</h3><p>As the code stands right now, we do not specify an override of the web component’s headline
+so the default <code>&lt;h3&gt;</code> tag included within the <code>&lt;slot&gt;</code> tag pair will be used. If we’re trying to
+style that headline from the outside with something like this</p>
+<figcaption class="code-filename css">external-stylesheet.css</figcaption>
+
+<pre class="line-numbers language-css"><code class="language-css"><span class="token selector">h3 </span><span class="token punctuation">{</span>
+    <span class="token property">font-size</span><span class="token punctuation">:</span> <span class="token number">24</span>px<span class="token punctuation">;</span>
+    <span class="token property">font-style</span><span class="token punctuation">:</span> italic<span class="token punctuation">;</span>
+    <span class="token property">color</span><span class="token punctuation">:</span> <span class="token hexcode">#941645</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>it will lead to an output as shown on the left side of the following screenshot overview. This
+demonstrates that any external styles do not affect the styling of elements inside the web
+component — The two are separate!</p>
+<h3 id="Case-2-Providing-a-slot-override-without-external-styling"><a href="#Case-2-Providing-a-slot-override-without-external-styling" class="headerlink" title="Case 2: Providing a slot override without external styling"></a>Case 2: Providing a slot override without external styling</h3><p>Let’s now remove the external styling in the template which embeds the web component and instead
+provide a custom headline as a child of the component tags:</p>
+<figcaption class="code-filename html">site-template.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>sidebar<span class="token punctuation">"</span></span><span class="token style-attr language-css"><span class="token attr-name"> <span class="token attr-name">style</span></span><span class="token punctuation">="</span><span class="token attr-value"><span class="token property">width</span><span class="token punctuation">:</span><span class="token number">150</span>px</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>last-viewed</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h3</span> <span class="token attr-name">slot</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>headline<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Some other headline<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h3</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>last-viewed</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>style</span><span class="token punctuation">></span></span><span class="token style language-css"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>style</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this case, the element renders as shown in the middle of the three screenshots seen above. 
+It shows that the headline we provide replaces the default headline in the web component, 
+albeit without taking on any of its styling — There are no margins, the font-size is 
+larger etc. </p>
+<p>This means that our internal styles for the <code>h3</code> element are not applied to the node coming 
+from the outside of the web component. </p>
+<h3 id="Case-3-Providing-a-slot-override-and-external-styling"><a href="#Case-3-Providing-a-slot-override-and-external-styling" class="headerlink" title="Case 3: Providing a slot override and external styling"></a>Case 3: Providing a slot override <strong>and</strong> external styling</h3><p>In this case, we’re providing both a headline element <em>and</em> the styling the containing web
+application/template. The code for the screenshot on the far right looks like this:</p>
+<figcaption class="code-filename html">site-template.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>div</span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>sidebar<span class="token punctuation">"</span></span><span class="token style-attr language-css"><span class="token attr-name"> <span class="token attr-name">style</span></span><span class="token punctuation">="</span><span class="token attr-value"><span class="token property">width</span><span class="token punctuation">:</span><span class="token number">150</span>px</span><span class="token punctuation">"</span></span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>last-viewed</span><span class="token punctuation">></span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h3</span> <span class="token attr-name">slot</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>headline<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Some other headline<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h3</span><span class="token punctuation">></span></span>
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>last-viewed</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>div</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>style</span><span class="token punctuation">></span></span><span class="token style language-css">
+  <span class="token selector">h3 </span><span class="token punctuation">{</span>
+    <span class="token property">font-size</span><span class="token punctuation">:</span> <span class="token number">24</span>px<span class="token punctuation">;</span>
+    <span class="token property">font-style</span><span class="token punctuation">:</span> italic<span class="token punctuation">;</span>
+    <span class="token property">color</span><span class="token punctuation">:</span> <span class="token hexcode">#949645</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>style</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this case, the externally defined style is applied to the externally provided <code>h3</code> tag, which
+means we’re overriding both the content and the styling from the outside.</p>
+<h3 id="Case-4-Styling-a-web-component-from-the-outside"><a href="#Case-4-Styling-a-web-component-from-the-outside" class="headerlink" title="Case 4: Styling a web component from the outside"></a>Case 4: Styling a web component from the outside</h3><p>So this strict separation between shadow DOM and the page DOM allows/condemns us to deal with
+styling separately since the style rules don’t &quot;break the barrier.&quot; Or do they?</p>
+<p>The latest CSS specification includes the <code>var()</code> construct, which permits to globally define 
+CSS variables and use them throughout the site — even inside a web component/custom element. 
+This, in essence, is what CSS preprocessors have been providing for a while: Define variables 
+and use them in your stylesheet. </p>
+<p>The basic approach is to define some variables in your global stylesheet. Variables can be
+named however you like, but they are prefixed with two hyphens, so for example: <code>--my-magic-size</code>.
+You would define them ideally in your global stylesheet for the <code>html</code> element, like this:</p>
+<figcaption class="code-filename css">site-wide.css</figcaption>
+
+<pre class="line-numbers language-css"><code class="language-css"><span class="token selector">html </span><span class="token punctuation">{</span>
+  <span class="token property">--site-font-size</span><span class="token punctuation">:</span> <span class="token number">24</span>px<span class="token punctuation">;</span>
+  <span class="token property">--site-font-style</span><span class="token punctuation">:</span> italic<span class="token punctuation">;</span>
+  <span class="token property">--site-color</span><span class="token punctuation">:</span> <span class="token hexcode">#949645</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Now that these values are defined, you can use the CSS <code>var()</code> function to read them
+and at the same time specify a default value — in case the global stylesheet
+does not define a value for it. The <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/var()" target="_blank" rel="noopener">Mozilla developer docs for var()</a> describes the approach:</p>
+<figcaption class="code-filename css">web-component-style.css</figcaption>
+
+<pre class="line-numbers language-css"><code class="language-css"><span class="token selector">h3 </span><span class="token punctuation">{</span>
+  <span class="token property">font-size</span><span class="token punctuation">:</span> <span class="token function">var</span><span class="token punctuation">(</span>--site-font-size, <span class="token number">15</span>px<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token number">...</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>In this style definition, the web component attempts to use the <code>--site-font-size</code> value 
+defined in the rules for the page’s <code>html</code> tag and if that is not defined falls back to 
+use 15px as the value for the font size.</p>
+<p>This approach is a &quot;safe&quot; approach, as the author of a web component gets to decide, 
+which styles the component accepts from the outside for styling its content. It thus does not
+break encapsulation as it would if global styles  </p>
 <h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>In this short post, I’ve expanded on the capabilities of web components by providing life cycle
 hooks to perform actions at critical points of a component’s life cycle and have implemented 
 attributes on the web component tags to permit the user of these components to affect the way
-that a component is rendered on the page.  </p>
+a browser renders a component on a page. The final part examined the separation of the barrier
+between the shadow DOM and the regular DOM as it applies to CSS rules and how one can use CSS
+<code>var()</code> to define global styles that a web component can choose to apply.     </p>
 </article><span class="prev-post"><a href="/web-components/web-components-the-basics/" itemprop="url">⇐ Previous Post</a></span></div></main><script defer>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
 function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
 e=o.createElement(i);r=o.getElementsByTagName(i)[0];
