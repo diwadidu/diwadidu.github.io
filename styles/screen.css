@@ -1002,6 +1002,12 @@ main article.full blockquote cite a {
   color: #8d0139;
   font-weight: norma;
 }
+main article.full figcaption.image-caption {
+  font-size: 90%;
+  font-style: oblique;
+  margin: -0.5em 5em 0.5em;
+  line-height: 1.25em;
+}
 main article.full ol li ol {
   counter-reset: list;
   padding-left: 8px;

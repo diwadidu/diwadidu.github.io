@@ -170,6 +170,11 @@ style that headline from the outside with something like this</p>
 demonstrates that any external styles do not affect the styling of elements inside the web
 component — The two are separate!</p>
 <p><img src="css-comparison.png" alt="Comparison of three setups for styling web components."></p>
+<figcaption class="image-caption">Screenshots of the first three cases discussed: 1. Define 
+styles outside the web component (left), 2. provide content overwrite within component tags, 
+w/o specifying styles and 3. Defining global styles and providing tag between web component 
+tag pair.</figcaption>
+
 <h3 id="Case-2-Providing-a-slot-override-without-external-styling"><a href="#Case-2-Providing-a-slot-override-without-external-styling" class="headerlink" title="Case 2: Providing a slot override without external styling"></a>Case 2: Providing a slot override without external styling</h3><p>Let’s now remove the external styling in the template which embeds the web component and instead
 provide a custom headline as a child of the component tags:</p>
 <figcaption class="code-filename html">site-template.html</figcaption>
