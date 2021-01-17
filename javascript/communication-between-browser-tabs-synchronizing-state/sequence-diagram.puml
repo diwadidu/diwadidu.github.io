@@ -1,0 +1,50 @@
+@startuml
+
+actor user
+
+scale 2048 width
+skinparam monochrome true
+hide footbox
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 10
+
+participant user as user
+box "Browser UI"
+participant Tab_1 as "Tab 1"
+participant Tab_2 as "Tab 2"
+participant Tab_3 as "Tab 3"
+end box
+participant storage as "Window.storage"
+participant Server as Server
+
+== User Logged in ==
+
+user -> Tab_1: Opens application
+activate Tab_1
+Tab_1 -> storage: property set?
+activate storage
+storage --> Tab_1: yes
+deactivate storage
+Tab_1 -> Tab_1: Show application state
+deactivate Tab_1
+
+== User logging out ==
+
+user -> Tab_2: Logout
+activate Tab_2
+Tab_2 -> Server: Log user out on server
+Server --> Tab_2: 200 OK
+Tab_2 -> storage:   Update localStorage
+deactivate Tab_2
+
+activate Tab_1
+storage --> Tab_1: localStorage changed
+Tab_1 -> Tab_1: Load login screen
+deactivate Tab_1
+
+activate Tab_3
+storage --> Tab_3: localStorage changed
+Tab_3 -> Tab_3: Load login screen
+deactivate Tab_3
+
+@enduml

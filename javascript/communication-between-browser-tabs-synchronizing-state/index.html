@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="en-us"><head><meta name="generator" content="Hexo 3.9.0"><title>Communication between Browser tabs: Synchronizing State | Torsten Müller</title><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta name="description" content="Web applications requiring authentication can run in multiple browser tabs at the same  time, thus requiring — for good UX — to synchronize global application state such  as auth status, name changes, data updates etc."><meta name="author" content="Torsten Muller"><meta name="HandheldFriendly" content="True"><meta name="MobileOptimized" content="320"><meta name="viewport" content="width=device-width,initial-scale=1.0"><link rel="stylesheet" type="text/css" href="/styles/screen.css"><link rel="apple-touch-icon" sizes="57x57" href="/images/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/images/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/images/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/images/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/images/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/images/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/images/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/images/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png"><link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png"><link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png"><link rel="icon" type="image/png" sizes="128x128" href="/images/favicon-128.png"><link rel="icon" type="image/png" sizes="196x196" href="/images/favicon-196x196.png"><meta name="msapplication-TileColor" content="#FFFFFF"><meta name="msapplication-TileImage" content="mstile-144x144.png"><meta name="msapplication-square70x70logo" content="mstile-70x70.png"><meta name="msapplication-square150x150logo" content="mstile-150x150.png"><meta name="msapplication-wide310x150logo" content="mstile-310x150.png"><meta name="msapplication-square310x310logo" content="mstile-310x310.png"><link rel="alternate" href="/atom.xml" title="Torsten Müller" type="application/atom+xml">
+<link rel="alternate" href="/rss2.xml" title="Torsten Müller" type="application/rss+xml">
+<link rel="stylesheet" href="/css/prism-cb.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head><body itemscope itemtype="https://schema.org/WebPage"><header itemscope itemtype="https://schema.org/WPHeader"><div class="logo-container"><div id="crystal-container" class="logo"></div></div><h1>Torsten Müller<!--a(href= config.root, alt= config.title, title= config.title, itemprop='headline')= config.title--></h1><p itemprop="description"></p><nav itemscope itemtype="https://schema.org/SiteNavigationElement"><ul><li itemprop="name"><a href="/ " alt="Home" title="Home" itemprop="url">Home</a></li><li itemprop="name"><a href="/projects" alt="Projects" title="Projects" itemprop="url">Projects</a></li><li itemprop="name"><a href="/tags" alt="Topics" title="Topics" itemprop="url">Topics</a></li><li itemprop="name"><a href="/about-me" alt="About me" title="About me" itemprop="url">About me</a></li><li itemprop="name"><a href="/de/ueber-mich" alt="Auf Deutsch" title="Auf Deutsch" itemprop="url">Auf Deutsch</a></li></ul></nav><div class="space"></div></header><main itemscope itemtype="https://schema.org/Blog"><div class="story-container"><article class="full tag-list-root"><h1 itemprop="headline" class="post-heading">Communication between Browser tabs: Synchronizing State</h1><div class="publish-date left">published Jan 16th, 2021</div><div class="clear"><ul class="tag-list"><li class="badge"><a href="/tags/javascript" itemprop="url" class="javascript"><span>javascript</span></a></li></ul></div><span class="post-meta"></span><div id="toc"></div><p>Web applications requiring authentication can run in multiple browser tabs at the same 
+time, thus requiring — for good UX — to synchronize global application state such 
+as auth status, name changes, data updates etc.</p>
+<p>In principle, I can think of three mechanisms that would accomplish this synchronization:</p>
+<ol>
+<li>Maintaining state on the server, implementing a polling mechanism to ask for updates</li>
+<li>Using web sockets to permit the server to push state changes to the browser</li>
+<li>A pure frontend solution, where state changes are communicated among tabs without
+involvement of a server.</li>
+</ol>
+<p>In this post, I will describe a solution to the last approach, using <code>localStorage</code> to 
+communicate a change in authentication status among different tabs/instances of a 
+web application.   </p>
+<h2 id="Features-of-localStorage"><a href="#Features-of-localStorage" class="headerlink" title="Features of localStorage"></a>Features of localStorage</h2><p>When storing, deleting or modifying data in <code>localStorage</code>, modern browsers emit
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event" target="_blank" rel="noopener"><code>storage</code>  events</a> 
+The browser tab which updates <code>localStorage</code> 
+triggers that event which is communicated to all <em>other</em> tabs in the same domain only, 
+meaning the triggering tab does not receive the event it emits itself, nor do tabs showing
+content from different domains. The <code>StorageEvent</code> is well-supported in all modern browsers, 
+with the exception Internet Explorer.</p>
+<p>To receive that event, you can request to be notified using an event listener on the
+window object:</p>
+<figcaption class="code-filename javascript">auth.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript">window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'storage'</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>onLocalStorageEvent<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>The data passed to the event listener function contains, among many other properties, 
+the name of the <code>localStorage</code> key name that was modified plus the old and new content 
+being stored. Omitting many properties, the following listing shows the properties
+of interest to this discussion: </p>
+<figcaption class="code-filename json">StorageEvent</figcaption>
+
+<pre class="line-numbers language-json"><code class="language-json">StorageEvent <span class="token punctuation">{</span>
+  ...
+  currentTarget<span class="token operator">:</span> Window 
+  key<span class="token operator">:</span> <span class="token string">"userInfo"</span>
+  newValue<span class="token operator">:</span> "<span class="token punctuation">{</span><span class="token property">"user"</span><span class="token operator">:</span><span class="token string">"Somebody"</span><span class="token punctuation">,</span><span class="token property">"sourceId"</span><span class="token operator">:</span><span class="token number">49638</span><span class="token punctuation">}</span><span class="token string">"
+  oldValue: null
+  storageArea: Storage {...}
+  type: "</span>storage"
+  ...
+  __proto__<span class="token operator">:</span> StorageEvent
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This event object tells us that which property in <code>localStorage</code> has changed (<code>key: &quot;userInfo&quot;</code>), 
+its current value (<code>newValue: &quot;{...}&quot;</code>) and that it previously was not set (<code>oldValue: null</code>).
+The <code>storageArea</code> property “represents the Storage object that was affected” 
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/StorageEvent" target="_blank" rel="noopener">StorageEvent detail documentation</a></p>
+<p>As you can see in the object, the values for the current and previous state are provided as
+strings and therefore need to be converted to a proper JavaScript object using <code>JSON.parse()</code>. </p>
+<p>The following screenshot shows the same application loaded into two windows demonstrating
+the functionality. It was taken after clicking on the “Toggle status” button in the left
+window, and shows: </p>
+<ol>
+<li>both windows displaying the same JSON object/state and</li>
+<li>the instance of the received event payload from the left window with the <code>sourceId</code> 83077
+(the source ID is a random number created upon instantiation of this application — it is 
+not a feature of the Storage mechanism and used here only for demonstration)</li>
+</ol>
+<p><img src="./two-instances.jpg" alt="Screenshot with two tabs of the application"></p>
+<h2 id="Implementation"><a href="#Implementation" class="headerlink" title="Implementation"></a>Implementation</h2><p>With this basic browser functionality, we can take a look at the code. In principle, 
+there are several tasks the code needs to accomplish:</p>
+<ol>
+<li>An initialization which attaches an event handler to the browser’s <code>storage</code> event,</li>
+<li>a function invoked whenever a <code>storage</code> event occurs and</li>
+<li>a function which updates the <code>localStorage</code> property and thus triggers the event</li>
+</ol>
+<p>the following listing shows the relevant parts of the implementation; You can find the 
+full <a href="https://bitbucket.org/tmuller/transtab/src/master/" target="_blank" rel="noopener">implementation on bitbucket</a>:</p>
+<figcaption class="code-filename javascript">auth.js</figcaption>
+
+<pre class="line-numbers language-javascript"><code class="language-javascript"><span class="token keyword">const</span> Fct <span class="token operator">=</span> <span class="token punctuation">{</span>
+
+  lsProperty<span class="token punctuation">:</span> <span class="token string">'userInfo'</span><span class="token punctuation">,</span>
+
+  <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    window<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'storage'</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>onLocalStorageEvent<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+  <span class="token function">onLocalStorageEvent</span><span class="token punctuation">(</span>authData<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> isLoggedIn <span class="token operator">=</span> <span class="token operator">!</span><span class="token operator">!</span><span class="token punctuation">(</span>authData <span class="token operator">&amp;&amp;</span> authData<span class="token punctuation">.</span>newValue<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">updateUI</span><span class="token punctuation">(</span>isLoggedIn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+  <span class="token function">triggerBtnClickEvent</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> loggedIn <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">setNewState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">updateUI</span><span class="token punctuation">(</span>loggedIn<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+  <span class="token function">setNewState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> storedData <span class="token operator">=</span> window<span class="token punctuation">.</span>localStorage<span class="token punctuation">[</span><span class="token keyword">this</span><span class="token punctuation">.</span>lsProperty<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>storedData<span class="token punctuation">)</span> <span class="token keyword">delete</span> window<span class="token punctuation">.</span>localStorage<span class="token punctuation">[</span><span class="token keyword">this</span><span class="token punctuation">.</span>lsProperty<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> dataTostore <span class="token operator">=</span> <span class="token operator">...</span>
+      window<span class="token punctuation">.</span>localStorage<span class="token punctuation">[</span><span class="token keyword">this</span><span class="token punctuation">.</span>lsProperty<span class="token punctuation">]</span> <span class="token operator">=</span> JSON<span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>dataToStore<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token operator">!</span>window<span class="token punctuation">.</span>localStorage<span class="token punctuation">[</span><span class="token keyword">this</span><span class="token punctuation">.</span>lsProperty<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+  <span class="token operator">...</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>This simplified implementation achieves the following objectives:</p>
+<ol>
+<li>The <code>init()</code> function sets up the event listener to call the <code>onLocalStorageEvent()</code> 
+method and should be called after page load.</li>
+<li><code>onLocalStorageEvent()</code> receives the <code>StorageEvent</code> object and determines whether the 
+user is logged in based on whether <code>newValue</code> contains a JSON string and then updates 
+the UI. If <code>newValue</code> is <code>null</code>, the value has just been cleared, indicating a logout event.</li>
+<li><code>triggerBtnClickEvent()</code> is a function that gets invoked whenever a user clicks on the
+button to change the login state; it invokes the <code>setNewState()</code> method, which does the
+actual work of manipulating <code>localStorage</code>.</li>
+<li><code>setNewState()</code> determines whether <code>localStorage</code> currently stores data for the key
+indicating the logged-in state and either removes or sets the entry. Either change 
+will trigger a
+<code>StorageEvent</code> in all other tabs on the same domain and will ultimately cause a change in
+their UIs via the <code>updateUI()</code> method.</li>
+</ol>
+<p>The code sample uses a method <code>updateUI()</code> which is where the update to the UI and browser
+display happens in each tab. While this example implementation simply updates the UI with 
+new copy, a real implementation would take appropriate steps to react to a change in
+login status. Possible options might be to load the login page or show a message on a 
+translucent overlay, which makes it impossible to further interact with the application.</p>
+<p>The missing pieces pulling this implementation together, such as setting up the 
+functionality happen (in this simple case) in the HTML:</p>
+<figcaption class="code-filename html">auth.html</figcaption>
+
+<pre class="line-numbers language-html"><code class="language-html">  ... 
+  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>button</span> <span class="token attr-name">onclick</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>Fct.triggerBtnClickEvent()<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Toggle status<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>button</span><span class="token punctuation">></span></span>
+  ...
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>application/javascript<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>transtab.js<span class="token punctuation">"</span></span><span class="token punctuation">></span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">></span></span><span class="token script language-javascript">Fct<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">></span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>Frameworks such as <em>React.js</em> or <em>Angular</em> provide lifecycle hooks which can be leveraged
+to set up this functionality as part of an application and should be used instead of 
+this plain POC implementation.</p>
+<p>The following sequence diagram visualizes the chain of events for three tabs, where a 
+user logs out of the application on tab 2.</p>
+<p><img src="./sequence-diagram.svg" alt="Sequence diagram for localStorage based tab synchronization">  </p>
+<h2 id="Summary-and-Discussion"><a href="#Summary-and-Discussion" class="headerlink" title="Summary and Discussion"></a>Summary and Discussion</h2><p>As demonstrated in this post, the solution is a pure frontend solution which does not
+rely on communication with the server — the source of truth. Therefore, it is not
+impossible for the frontend to get out of sync with the backend if errors during the API 
+call changing the authorization status are not properly handled on the frontend.</p>
+<p>The safety implications are minimal, though, as even if the frontend shows a logged-in 
+state, the server will reject any unauthenticated requests and prevent data manipulation
+or unauthenticated access to data — Developers can and should not rely on the frontend 
+alone to implement secure web applications. </p>
+<p>This solution’s main benefit is that it eliminates the need for repetitive polling of the 
+server to retrieve login state. Considering the web traffic required for multiple tabs 
+contacting the server every minute for potentially thousands of concurrent users adds up
+and can be avoided with this mechanism, which does not rely on requests to the server.</p>
+<p>The process described here, and implemented in the 
+<a href="https://bitbucket.org/tmuller/transtab/src/master/" target="_blank" rel="noopener">code on bitbucket</a>, can be simplified
+if the login system is accessible under a different URL, as can be the case in a
+microservice architecture. In that case, the property in <code>localStorage</code> can be set in a 
+frame when being instantiated. On change of the login state 
+indicated through <code>localStorage</code>, a redirect to the login page then suffices to bring 
+the UI in sync with the application state.</p>
+</article><span class="prev-post"><a href="/web-components/web-components-a-deeper-look/" itemprop="url">⇐ Previous Post</a></span></div></main><script defer>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+e.src='//www.google-analytics.com/analytics.js';
+r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+ga('create','UA-697637-4');ga('send','pageview');
+</script><script async>let crystalDrawings = [
+  'albit.svg', 'apatit.svg', 'axinit.svg', 'benitoit.svg', 'beryll.svg', 'boracit.svg',
+  'cahnit.svg', 'calcit.svg', 'calcit2.svg', 'calciumthiosulfat.svg', 'chalkopyrit.svg',
+  'dioptas.svg', 'dolomit.svg', 'galenit.svg', 'granat.svg', 'hamatit.svg',
+  'hemimorhpit.svg', 'iodsuccinimid.svg', 'natriumperiodat.svg', 'rohrzucker.svg',
+  'sodiumchlorate.svg', 'struvit.svg', 'sulfur.svg', 'topas-top.svg', 'topas.svg',
+  'weinsaure.svg', 'wulfenit.svg', 'wurtzit.svg', 'zinkblende.svg', 'zirkon.svg'
+];
+const selection = Math.floor(Math.random() * crystalDrawings.length);
+const crystalFileName = '/images/crystals/' + crystalDrawings[selection];
+//console.log(selection, crystalDrawings[selection], crystalFileName);
+document.getElementById('crystal-container').style.backgroundImage = 'url('+ crystalFileName + ')';</script><script src="/scripts/toc.js" type="text/javascript"></script><script>TocGenerator.renderInto()</script></body></html>
