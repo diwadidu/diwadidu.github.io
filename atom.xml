@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://torsten-muller.dev/"/>
-  <updated>2021-01-17T13:52:38.737Z</updated>
+  <updated>2021-02-18T11:42:39.543Z</updated>
   <id>https://torsten-muller.dev/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://torsten-muller.dev/javascript/communication-between-browser-tabs-synchronizing-state/"/>
     <id>https://torsten-muller.dev/javascript/communication-between-browser-tabs-synchronizing-state/</id>
     <published>2021-01-16T07:09:10.000Z</published>
-    <updated>2021-01-17T13:52:38.737Z</updated>
+    <updated>2021-02-18T11:42:39.543Z</updated>
     
     <summary type="html">
     
@@ -336,9 +336,9 @@ framework. In this case, it was to download a file
     
       <category term="functional-programming" scheme="https://torsten-muller.dev/tags/functional-programming/"/>
     
-      <category term="javascript" scheme="https://torsten-muller.dev/tags/javascript/"/>
-    
       <category term="option-type" scheme="https://torsten-muller.dev/tags/option-type/"/>
+    
+      <category term="javascript" scheme="https://torsten-muller.dev/tags/javascript/"/>
     
   </entry>
   

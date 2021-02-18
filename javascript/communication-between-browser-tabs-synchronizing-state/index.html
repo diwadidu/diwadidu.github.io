@@ -15,11 +15,12 @@ involvement of a server.</li>
 communicate a change in authentication status among different tabs/instances of a 
 web application.   </p>
 <h2 id="Features-of-localStorage"><a href="#Features-of-localStorage" class="headerlink" title="Features of localStorage"></a>Features of localStorage</h2><p>When storing, deleting or modifying data in <code>localStorage</code>, modern browsers emit
-<a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event" target="_blank" rel="noopener"><code>storage</code>  events</a> 
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event" target="_blank" rel="noopener"><code>storage</code>  events</a>. 
 The browser tab which updates <code>localStorage</code> 
-triggers that event which is communicated to all <em>other</em> tabs in the same domain only, 
-meaning the triggering tab does not receive the event it emits itself, nor do tabs showing
-content from different domains. The <code>StorageEvent</code> is well-supported in all modern browsers, 
+triggers the event, which is communicated to all <em>other</em> tabs in the same domain only — 
+meaning the triggering tab itself does not receive the event it emits, nor do tabs showing
+content from different domains. The <code>StorageEvent</code>
+<a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event" target="_blank" rel="noopener">is well-supported in all modern browsers</a>, 
 with the exception Internet Explorer.</p>
 <p>To receive that event, you can request to be notified using an event listener on the
 window object:</p>

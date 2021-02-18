@@ -24,7 +24,6 @@ activate Tab_1
 Tab_1 -> storage: property set?
 activate storage
 storage --> Tab_1: yes
-deactivate storage
 Tab_1 -> Tab_1: Show application state
 deactivate Tab_1
 
@@ -45,6 +44,7 @@ deactivate Tab_1
 activate Tab_3
 storage --> Tab_3: localStorage changed
 Tab_3 -> Tab_3: Load login screen
+deactivate storage
 deactivate Tab_3
 
 @enduml
